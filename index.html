@@ -1,0 +1,1567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cher Service Report</title>
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Cher Services LLC — digital service report with on-screen customer signature.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Cher Reports">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>window.CHER_LOGO_URL = "data:image/png;base64,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";</script>
+<script src="pdf.js?v=9"></script>
+<style>
+:root{
+  --navy:#123a8c; --navy-2:#0c2a68; --red:#d0021b; --ink:#16202e; --muted:#5b6678;
+  --line:#c9d3e6; --field:#fff4ef; --field-b:#f3c9b8; --bg:#eef2f8; --card:#fff;
+  --ok:#1a7f4b; --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+header.top{position:sticky;top:0;z-index:20;background:#fff;color:var(--ink);padding:calc(env(safe-area-inset-top) + 8px) 16px 8px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(18,58,140,.08);flex-wrap:wrap}
+header.top img{height:46px;width:auto}
+header.top .t{flex:1;min-width:0}
+header.top .t b{display:block;font-size:17px;letter-spacing:.3px;color:var(--navy);white-space:nowrap}
+header.top .t span{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:6px}
+.tabs button{background:#eef2f8;border:0;color:var(--navy);padding:9px 14px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+main{max-width:980px;margin:0 auto;padding:16px 16px calc(110px + env(safe-area-inset-bottom))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 12px;color:var(--navy);font-size:15px;letter-spacing:.6px;text-transform:uppercase}
+.brand{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.brand img{height:96px;width:auto}
+.brand .co{flex:1;min-width:220px}
+.brand .co h1{margin:0;color:var(--navy);font-size:24px}
+.brand .co .sub{color:var(--navy);font-weight:700;font-size:14px}
+.brand .co .addr{color:var(--muted);font-size:13px;margin-top:4px}
+.inv{text-align:right}
+.inv.f label{color:var(--red);font-weight:800;font-size:13px;display:block}
+.inv.f input{width:130px;text-align:center;font-weight:700;font-size:20px}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media (max-width:720px){.g2,.g3{grid-template-columns:1fr}}
+.f label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.f input,.f textarea,.f select{width:100%;background:var(--field);border:1.5px solid var(--field-b);border-radius:10px;padding:11px 12px;min-height:46px;outline:none}
+.f textarea{min-height:90px;resize:vertical}
+.f input:focus,.f textarea:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(18,58,140,.12)}
+.rowhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.rowhead h2{margin:0}
+table.time{width:100%;border-collapse:separate;border-spacing:0 8px}
+table.time th{font-size:12px;color:var(--muted);text-align:left;font-weight:600;padding:0 4px}
+table.time td{padding:0 4px}
+table.time input{width:100%;background:var(--field);border:1.5px solid var(--field-b);border-radius:9px;padding:9px 8px;min-height:44px}
+table.time .x{background:none;border:0;color:var(--red);font-size:22px;cursor:pointer;padding:4px 6px}
+@media (max-width:720px){
+  table.time thead{display:none}
+  table.time tr{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#f7f9fd;border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:8px}
+  table.time td::before{content:attr(data-l);display:block;font-size:11px;color:var(--muted);font-weight:600}
+  table.time{border-spacing:0}
+}
+.checks{display:flex;flex-wrap:wrap;gap:10px}
+.chk{display:flex;align-items:center;gap:10px;border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;user-select:none;-webkit-user-select:none;min-height:48px;background:#fff}
+.chk input{width:22px;height:22px;accent-color:var(--navy)}
+.chk.on{border-color:var(--navy);background:#eef3ff}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:10px 18px;min-height:46px;font-weight:700;cursor:pointer}
+.seg button.on.y{background:var(--ok);color:#fff}
+.seg button.on.n{background:var(--red);color:#fff}
+.sigs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:820px){.sigs{grid-template-columns:1fr}}
+.sig{border:1.5px dashed var(--navy);border-radius:12px;padding:10px;background:#fbfcff;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-height:150px}
+.sig .lb{font-size:12px;font-weight:800;letter-spacing:.5px;color:var(--navy)}
+.sig .pv{flex:1;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;border:1px solid var(--line);min-height:90px}
+.sig .pv img{max-width:100%;max-height:100px}
+.sig .pv span{color:var(--muted);font-size:14px}
+.sig .meta{font-size:11px;color:var(--muted)}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{border:0;border-radius:12px;padding:13px 20px;font-weight:700;cursor:pointer;min-height:48px;display:inline-flex;align-items:center;gap:8px}
+.btn.p{background:var(--navy);color:#fff}
+.btn.s{background:#e3e9f5;color:var(--navy)}
+.btn.d{background:#fde8ea;color:var(--red)}
+.btn.g{background:var(--ok);color:#fff}
+.btn:active{transform:scale(.98)}
+.hint{font-size:13px;color:var(--muted)}
+/* history */
+.hist-item{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:12px 0}
+.hist-item:last-child{border-bottom:0}
+.hist-item .no{font-weight:800;color:var(--navy);min-width:62px}
+.hist-item .info{flex:1;min-width:0}
+.hist-item .info b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-item .info small{color:var(--muted)}
+.pill{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:#eef1f6;color:var(--muted)}
+.pill.ok{background:#e3f5ec;color:var(--ok)}
+.hist-item .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.hist-item .acts .btn{padding:9px 12px;min-height:40px;font-size:14px}
+.search{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);margin-bottom:8px}
+.empty{text-align:center;color:var(--muted);padding:30px 10px}
+/* signature modal */
+.modal{position:fixed;inset:0;z-index:50;background:#0b1220;display:none;flex-direction:column;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 10px)}
+.modal.on{display:flex}
+.modal .mh{display:flex;align-items:center;justify-content:space-between;color:#fff;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+.modal .mh b{font-size:18px}
+.modal .mh input{background:#1c2433;border:1px solid #33405a;color:#fff;border-radius:10px;padding:10px 12px;min-width:220px}
+.padwrap{flex:1;max-height:600px;width:100%;margin:auto 0;position:relative;background:#fff;border-radius:14px;overflow:hidden;touch-action:none}
+.padwrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.padwrap .line{position:absolute;left:6%;right:6%;bottom:22%;border-bottom:2px solid #9aa6bd;pointer-events:none}
+.padwrap .x{position:absolute;left:6%;bottom:calc(22% + 6px);font-size:28px;color:#9aa6bd;pointer-events:none}
+.padwrap .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c4ccdb;font-size:22px;pointer-events:none}
+.modal .mf{display:flex;gap:10px;justify-content:space-between;margin-top:10px;flex-wrap:wrap}
+.modal .legal{color:#93a0ba;font-size:12px;margin-top:8px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#16202e;color:#fff;padding:12px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.install{display:none;background:#fff8e6;border:1px solid #f1d38a;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px;align-items:center;gap:10px}
+.install.on{display:flex}
+.install span{flex:1}
+[hidden]{display:none!important}
+.who{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.who button{background:#eef2f8;border:0;color:var(--navy);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.dot{width:9px;height:9px;border-radius:50%;background:#7a8499;display:inline-block}
+.dot.ok{background:#2ecc71}.dot.wait{background:#f5a623}.dot.off{background:#e74c3c}
+.login{position:fixed;inset:0;z-index:70;background:linear-gradient(180deg,#ffffff 0%,#eef2f8 100%);display:flex;justify-content:center;padding:16px;overflow-y:auto}
+.login .lc{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 24px;width:100%;max-width:380px;box-shadow:0 20px 50px rgba(18,58,140,.12);margin:auto}
+.login img{display:block;height:84px;width:auto;max-width:90%;margin:0 auto 10px}
+.login h1{margin:0 0 4px;text-align:center;color:var(--navy);font-size:20px}
+.login p{margin:0 0 14px;text-align:center;color:var(--muted);font-size:14px}
+.login .f{margin-bottom:10px}
+.login .f input{font-size:20px;text-align:center;letter-spacing:2px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 14px}
+.keypad button{border:0;background:#eef2f8;border-radius:12px;font-size:22px;font-weight:700;min-height:50px;cursor:pointer;color:var(--navy)}
+.keypad button:active{background:#d9e2f3}
+.login .err{color:var(--red);text-align:center;font-size:14px;min-height:20px;margin-bottom:8px}
+.login .btn{width:100%;justify-content:center;font-size:17px}
+.login .lgtip{margin:10px 0 0;font-size:12px}
+.login .err:empty{min-height:0;margin:0}
+/* short screens (laptops, phones sideways): smaller pieces so everything fits without scrolling */
+@media (max-height:760px){.login{padding:10px}.login .lc{padding:16px 20px}.login img{height:62px;margin-bottom:6px}.login h1{font-size:18px}.login p{margin-bottom:10px}
+  .keypad{gap:6px;margin:4px 0 10px}.keypad button{min-height:38px;font-size:19px}.login .lgtip{margin-top:6px}.login .btn{min-height:46px}.login .f input{min-height:44px;padding:8px 12px}}
+/* very short screens: hide the on-screen keypad — type the PIN and press Enter */
+@media (max-height:540px){.keypad{display:none}.login img{height:50px}.login p:not(.lgtip){display:none}}
+.inv.f input[readonly],.f input[readonly]{background:#eef1f6;border-color:#d6dce8;color:var(--navy)}
+/* ---- v3 additions ---- */
+.pick{flex-wrap:wrap}
+.ptabs{display:flex;width:100%}.ptabs button{flex:1;padding:12px 10px}
+.pick .qty{flex:none}.pick .qty input{width:56px!important}
+.pick .add{flex:none;border:0;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;min-height:44px;padding:0 14px;cursor:pointer}
+.pick.order .add{background:#a15c00}
+.xform{border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;background:#fbfcff}
+.xform summary{font-weight:800;color:var(--navy);cursor:pointer;min-height:32px;display:flex;align-items:center}
+.src{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;margin-right:4px;vertical-align:middle}
+.src.stock{background:#e3f5ec;color:var(--ok)}.src.order{background:#fff4e0;color:#a15c00}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.lang button{border:0;background:#fff;color:var(--muted);font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer}
+.lang button.on{background:var(--navy);color:#fff}
+.tabs .cnt{display:inline-block;min-width:19px;padding:0 5px;margin-left:5px;border-radius:999px;background:#8a1538;color:#fff;font-size:11px;font-weight:800;line-height:19px;text-align:center;box-shadow:0 0 0 2px #fff}
+/* jobs */
+.daygrp{margin:18px 0 8px;font-size:13px;font-weight:800;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.daygrp.today{color:var(--navy)}
+.job{background:#fff;border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:12px;padding:14px;margin-bottom:10px;display:grid;grid-template-columns:92px 1fr auto;gap:12px;align-items:center}
+.job.done{border-left-color:var(--ok);opacity:.75}
+.job.in_progress{border-left-color:#e09a12}
+.job .tm{font-weight:800;color:var(--navy);font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.job .tm small{display:block;font-size:11px;color:var(--muted);font-weight:600}
+.job b{display:block;font-size:17px}
+.job .eq{color:var(--muted);font-size:14px}
+.job .ins{font-size:14px;margin-top:4px;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.job .acts{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+@media (max-width:640px){.job{grid-template-columns:1fr}.job .acts{flex-direction:row}}
+.pill.warn{background:#fff4e0;color:#a15c00}.pill.bad{background:#fde8ea;color:var(--red)}.pill.info{background:#e8efff;color:var(--navy)}
+/* parts */
+table.parts{width:100%;border-collapse:collapse}
+table.parts th{font-size:12px;color:var(--muted);text-align:left;font-weight:600;padding:6px 6px;border-bottom:1px solid var(--line)}
+table.parts td{padding:8px 6px;border-bottom:1px solid #edf0f6;vertical-align:middle}
+table.parts .nm b{display:block}
+table.parts .nm small{color:var(--muted)}
+table.parts input{width:100%;background:var(--field);border:1.5px solid var(--field-b);border-radius:9px;padding:9px 8px;min-height:44px;text-align:right}
+table.parts input[readonly]{background:#f3f5f9;border-color:#e1e6ef;color:var(--ink)}
+table.parts .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.parts .x{background:none;border:0;color:var(--red);font-size:22px;cursor:pointer;padding:4px 6px}
+.qty{display:flex;align-items:center;gap:4px}
+.qty button{width:40px;height:44px;border:0;border-radius:9px;background:#e3e9f5;color:var(--navy);font-size:20px;font-weight:800;cursor:pointer;flex:none}
+.qty input{width:64px!important;text-align:center!important}
+.ptotal{display:flex;justify-content:flex-end;gap:16px;align-items:baseline;margin-top:12px;font-size:15px}
+.ptotal b{font-size:22px;color:var(--navy);font-variant-numeric:tabular-nums}
+@media (max-width:720px){
+  table.parts thead{display:none}
+  table.parts tr{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+  table.parts td{border:0;padding:0}
+  table.parts td.nm{grid-column:1/-1}
+}
+.histchip{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:700;color:var(--navy);background:#e8efff;border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
+/* sheet (bottom modal) */
+.sheet{position:fixed;inset:0;z-index:55;background:rgba(10,16,30,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet .pn{background:#fff;width:100%;max-width:720px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+@media (min-width:760px){.sheet{align-items:center}.sheet .pn{border-radius:20px}}
+.sheet h3{margin:0 0 4px;font-size:19px;color:var(--navy)}
+.sheet .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.sheet .hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.sheet .hd h3{flex:1}
+.pick{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;min-height:58px}
+.pick:active{background:#f3f6fc}
+.pick .nm{flex:1;min-width:0}
+.pick .nm b{display:block}
+.pick .nm small{color:var(--muted)}
+.pick .pr{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
+.pick[disabled]{opacity:.55}
+.sendrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+.btn.wa{background:#1fa855;color:#fff}
+.btn.em{background:var(--navy);color:#fff}
+.btn.full{width:100%;justify-content:center}
+.office{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted);background:#f6f8fc;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:6px}
+.office.ok{color:var(--ok);background:#ecf8f1;border-color:#bfe5cf}
+.hrow{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.hrow .t1{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hrow .t1 b{color:var(--navy)}
+.hrow ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.hrow .muted{color:var(--muted);font-size:13px}
+.seg2{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg2 button{border:0;background:#fff;padding:8px 14px;font-weight:700;cursor:pointer}
+.seg2 button.on{background:var(--navy);color:#fff}
+/* ---- v5: faults, status, services, parts requests ---- */
+.tabs{flex-wrap:wrap}
+.formtitle{display:inline-block;margin-top:10px;font-size:13px;font-weight:800;letter-spacing:.8px;color:#fff;background:var(--navy);border-radius:999px;padding:5px 14px}
+.formtitle.maint{background:#a15c00}
+textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
+.fault{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px;background:#fbfcff}
+.fault .fh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.fault textarea,.corr textarea{width:100%;background:var(--field);border:1.5px solid var(--field-b);border-radius:10px;padding:10px 12px;outline:none}
+.fault textarea:focus{border-color:var(--navy);background:#fff;box-shadow:0 0 0 3px rgba(18,58,140,.12)}
+.fault .fh b{font-size:13px;color:var(--navy);letter-spacing:.4px;text-transform:uppercase}
+.fault .x,.corr .x{background:none;border:0;color:var(--red);font-size:22px;cursor:pointer;padding:0 6px;line-height:1}
+.addcorr{margin-top:8px;border:0;background:#e3ecff;color:#1149c9;font-weight:800;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:14px}
+.corr{margin:10px 0 0 18px;padding-left:12px;border-left:3px solid #1149c9}
+.corr .ch{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:#1149c9;margin-bottom:4px}
+.stbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.stbtns button{border:1.5px solid var(--line);background:#fff;border-radius:10px;min-height:48px;font-weight:700;cursor:pointer;padding:8px 10px;color:var(--ink)}
+.stbtns button.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.stbtns button.on[data-s=complete]{background:var(--ok);border-color:var(--ok)}
+.stbtns button.on[data-s=awaiting_parts]{background:#a15c00;border-color:#a15c00}
+.sthist{margin-top:12px;font-size:13px;color:var(--muted)}
+.sthist div{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.sthist div b{color:var(--ink);min-width:130px}
+.svlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:12px}
+.sv{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+.sv.on{border-color:var(--navy);background:#eef3ff}
+.sv label{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer;min-height:28px}
+.sv input[type=checkbox]{width:22px;height:22px;accent-color:var(--navy);flex:none}
+.sv input.note{margin-top:8px;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:14px}
+.sv .x{margin-left:auto;background:none;border:0;color:var(--red);font-size:20px;cursor:pointer}
+.req{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff}
+.req .t1{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.req .t1 b{color:var(--navy)}
+.req ul{margin:8px 0 0;padding-left:18px;font-size:14px}
+.req .reply{margin-top:8px;background:#f2f6ff;border-left:3px solid var(--navy);padding:8px 10px;border-radius:6px;font-size:14px}
+.req .acts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.req .acts .btn{min-height:40px;padding:8px 12px;font-size:14px}
+.cart{border:1px solid var(--line);border-radius:12px;padding:6px 12px;margin-bottom:12px;background:#fbfcff}
+.cart .cl{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f6}
+.cart .cl:last-child{border-bottom:0}
+.cart .x{background:none;border:0;color:var(--red);font-size:22px;cursor:pointer}
+.forbox{border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <img data-logo alt="Cher Services LLC">
+  <div class="t"><b data-t="appTitle">Service Report</b><span id="statusLine">Cher Services LLC</span></div>
+  <div class="who">
+    <span class="dot" id="syncDot"></span><span id="whoName"></span>
+    <div class="lang" id="langSw"><button type="button" data-l="en">EN</button><button type="button" data-l="es">ES</button></div>
+    <button id="btnLogout" type="button" data-t="signOut">Sign out</button>
+  </div>
+  <nav class="tabs">
+    <button id="tabJobs" type="button"><span data-t="tabJobs">Jobs</span><span class="cnt" id="jobsCnt" hidden></span></button>
+    <button id="tabForm" class="on" type="button"><span data-t="tabReport">Fill Service Report</span><span class="cnt" id="formCnt" hidden></span></button>
+    <button id="tabMaint" type="button"><span data-t="tabMaint">Equipment Service Report</span><span class="cnt" id="maintCnt" hidden></span></button>
+    <button id="tabReqs" type="button"><span data-t="tabReqs">Parts Requests</span><span class="cnt" id="reqCnt" hidden></span></button>
+    <button id="tabHist" type="button"><span data-t="tabHistory">History</span><span class="cnt" id="histCnt" hidden></span></button>
+  </nav>
+</header>
+
+<main>
+  <div class="install" id="installBox"><span id="installText" data-t="installText">Install this app on your tablet for full-screen, offline use.</span><button class="btn p" id="installBtn" type="button" data-t="install">Install</button><button class="btn s" id="installClose" type="button">✕</button></div>
+
+  <!-- ============ JOBS VIEW ============ -->
+  <section id="viewJobs" hidden>
+    <div class="rowhead"><h2 style="margin:0;color:var(--navy)" data-t="myJobs">My jobs</h2>
+      <div style="display:flex;gap:8px"><button class="btn s" id="jobsRefresh" type="button" data-t="refresh">Refresh</button><button class="btn p" id="jobNew" type="button" data-t="newJob">+ New job</button></div></div>
+    <p class="hint" data-t="jobsHint">Jobs assigned to you by the office. Tap “Start report” to open the service report already filled in.</p>
+    <div id="jobsList"></div>
+  </section>
+
+  <!-- ============ FORM VIEW ============ -->
+  <section id="viewForm">
+    <div class="card">
+      <div class="brand">
+        <img data-logo alt="Cher Services LLC">
+        <div class="co">
+          <h1>CHER SERVICES LLC</h1>
+          <div class="sub">Certified Heavy Equipment &amp; Associates Repairs</div>
+          <div class="addr">4136 NE 9th Street, Homestead, FL 33033<br>786-753-1266 / 876-810-2232 · cherservices21@gmail.com</div>
+        </div>
+        <div class="inv f">
+          <label for="invoiceNo" data-t="invoiceNo">INVOICE NO.</label>
+          <input id="invoiceNo" data-k="invoiceNo" readonly placeholder="AUTO">
+        </div>
+      </div>
+      <span class="formtitle" id="formTitle"></span>
+      <div id="jobBanner" class="office" hidden style="margin-top:12px"></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h2 data-t="customer">Customer</h2>
+        <div class="grid">
+          <div class="f"><label data-t="workOrder">Work order #</label><input data-k="workOrder"></div>
+          <div class="f"><label data-t="customerName">Customer name</label><input data-k="customerName" autocomplete="organization" list="custList"></div>
+          <div class="f"><label data-t="address">Address</label><input data-k="address1" data-tp="street" placeholder="Street"></div>
+          <div class="f"><input data-k="address2" data-tp="cityState" placeholder="City, State / Parish"></div>
+          <div class="f"><input data-k="address3" data-tp="zipCountry" placeholder="ZIP / Country / Phone"></div>
+          <div class="grid g2">
+            <div class="f"><label>WhatsApp</label><input data-k="customerWhatsapp" type="tel" inputmode="tel" placeholder="+1 786 555 0101"></div>
+            <div class="f"><label data-t="email">Email</label><input data-k="customerEmail" type="email" inputmode="email" autocapitalize="off" placeholder="name@company.com"></div>
+          </div>
+        </div>
+        <datalist id="custList"></datalist>
+      </div>
+      <div class="card">
+        <h2 data-t="job">Job</h2>
+        <div class="grid">
+          <div class="f"><label data-t="employeeId">Employee ID #</label><input data-k="employeeId" readonly></div>
+          <div class="f"><label data-t="instructions">Instructions</label><textarea data-k="instructions" rows="6"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-t="serials">Related serial numbers</h2>
+      <div class="grid g3">
+        <div class="f"><label data-t="model">Model</label><input data-k="model"></div>
+        <div class="f"><label data-t="serialNo">Serial No.</label><input data-k="serialNo" autocapitalize="characters"><button type="button" class="histchip" id="histChip" hidden></button></div>
+        <div class="f"><label data-t="make">Make</label><input data-k="make" list="makeList"></div>
+        <div class="f"><label data-t="hour">Hour</label><input data-k="hour" inputmode="decimal"></div>
+        <div class="f"><label data-t="location">Location</label><input data-k="location"></div>
+        <div class="f"><label data-t="deliveryDate">Delivery date</label><input data-k="deliveryDate" type="date"></div>
+      </div>
+      <datalist id="makeList"><option>Caterpillar</option><option>John Deere</option><option>Komatsu</option><option>Volvo</option><option>Case</option><option>Hitachi</option><option>Kubota</option><option>Bobcat</option><option>JCB</option><option>Doosan</option></datalist>
+    </div>
+
+    <div class="card">
+      <div class="rowhead"><h2 data-t="timeRecord">Daily time record</h2><button class="btn s" id="addRow" type="button" data-t="addDay">+ Add day</button></div>
+      <table class="time">
+        <thead><tr><th data-t="date">Date</th><th data-t="leftShop">Left W/Shop</th><th data-t="started">Started job</th><th data-t="completed">Completed</th><th data-t="mileage">Mileage</th><th></th></tr></thead>
+        <tbody id="timeBody"></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="faultsCard">
+      <div class="rowhead"><h2 data-t="faults">Faults</h2><button class="btn s" id="addFault" type="button" data-t="addFault">+ Add</button></div>
+      <div id="faultsList"></div>
+    </div>
+
+    <div class="card" id="servicesCard" hidden>
+      <div class="rowhead"><h2 data-t="servicesDone">Services performed</h2><button class="btn s" id="addService" type="button" data-t="addService">+ Other service</button></div>
+      <p class="hint" style="margin-top:-4px" data-t="servicesHint">Check every service you did. Add a note when needed.</p>
+      <div class="svlist" id="servicesList"></div>
+      <div class="f"><label data-t="techNotes">Technician notes</label><textarea data-k="notes" class="grow" rows="2"></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="rowhead"><h2 data-t="parts">Parts &amp; materials</h2><button class="btn s" id="addPart" type="button" data-t="requestParts">+ Request parts</button></div>
+      <p class="hint" style="margin-top:-4px" data-t="partsReqHint">Ask the office for the parts you need — before, during or after the job. The supervisor checks and approves them.</p>
+      <div id="reqForReport"></div>
+      <div id="legacyParts"></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h2 data-t="status">Status</h2>
+        <div class="stbtns" id="stBtns"></div>
+        <div class="sthist" id="stHist"></div>
+      </div>
+      <div class="card">
+        <h2 data-t="custComment">Customer comment</h2>
+        <div class="f"><textarea data-k="customerComment" rows="5" data-tp="custCommentPh" placeholder="Customer can write comments here before signing"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-t="signatures">Signatures</h2>
+      <p class="hint" style="margin-top:-6px" data-t="sigHint">Tap a box to sign with finger or stylus.</p>
+      <div class="sigs">
+        <div class="sig" data-sig="serviceman"><div class="lb" data-t="sigServiceman">SERVICEMAN'S SIGNATURE</div><div class="pv"><span data-t="tapSign">Tap to sign</span></div><div class="meta"></div></div>
+        <div class="sig" data-sig="supervisor"><div class="lb" data-t="sigSupervisor">SUPERVISOR'S SIGNATURE</div><div class="pv"><span data-t="tapSign">Tap to sign</span></div><div class="meta"></div></div>
+        <div class="sig" data-sig="customer"><div class="lb" data-t="sigCustomer">CUSTOMER'S SIGNATURE</div><div class="pv"><span data-t="tapSign">Tap to sign</span></div><div class="meta"></div></div>
+      </div>
+      <div class="office" id="officeLine"></div>
+    </div>
+  </section>
+
+  <!-- ============ PARTS REQUESTS VIEW ============ -->
+  <section id="viewReqs" hidden>
+    <div class="rowhead"><h2 style="margin:0;color:var(--navy)" data-t="myRequests">My parts requests</h2>
+      <div style="display:flex;gap:8px"><button class="btn s" id="reqRefresh" type="button" data-t="refresh">Refresh</button><button class="btn p" id="reqNew" type="button" data-t="newRequest">+ New request</button></div></div>
+    <p class="hint" data-t="reqsHint">Send the list of parts you need to the supervisor. You will see here when the office quotes, approves or declines them.</p>
+    <div id="reqList"></div>
+  </section>
+
+  <!-- ============ HISTORY VIEW ============ -->
+  <section id="viewHist" hidden>
+    <div class="card">
+      <div class="rowhead"><h2 data-t="myReports">My reports</h2><button class="btn p" id="syncNow" type="button" data-t="syncNow">Sync now</button></div>
+      <input class="search" id="search" data-tp="searchPh" placeholder="Search by invoice, customer, serial, model…">
+      <div id="histList"></div>
+      <div class="hint" style="margin-top:12px" data-t="histHint">Reports are saved on this tablet and sent to the office automatically when there is internet. Invoice numbers are assigned by the office on sync.</div>
+      <div style="margin-top:10px"><button class="btn s" id="pullMine" type="button" data-t="pullMine">Download my reports from the office</button></div>
+    </div>
+  </section>
+</main>
+
+<div class="bar" id="formBar">
+  <button class="btn d" id="btnNew" type="button" data-t="new">New</button>
+  <button class="btn s" id="btnSave" type="button" data-t="save">Save</button>
+  <button class="btn p" id="btnSend" type="button" data-t="sendShare">Send / PDF</button>
+</div>
+
+<!-- signature modal -->
+<div class="modal" id="sigModal" aria-modal="true" role="dialog">
+  <div class="mh">
+    <b id="sigTitle">Signature</b>
+    <input id="sigName" data-tp="printedName" placeholder="Printed name">
+  </div>
+  <div class="padwrap" id="padWrap">
+    <canvas id="pad"></canvas>
+    <div class="line"></div><div class="x">✕</div>
+    <div class="ph" id="padPh" data-t="signHere">Sign here</div>
+  </div>
+  <div class="legal" id="sigLegal"></div>
+  <div class="mf">
+    <button class="btn s" id="sigCancel" type="button" data-t="cancel">Cancel</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn d" id="sigClear" type="button" data-t="clear">Clear</button>
+      <button class="btn g" id="sigOk" type="button" data-t="acceptSig">Accept signature</button>
+    </div>
+  </div>
+</div>
+
+<!-- part picker -->
+<div class="sheet" id="partSheet" hidden>
+  <div class="pn">
+    <div class="hd"><h3 id="reqTitle" data-t="partsRequest">Parts request</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
+    <div class="forbox" id="reqFor">
+      <div class="grid g2"><div class="f"><label data-t="customerName">Customer name</label><input id="rqCust" list="custList"></div>
+        <div class="f"><label data-t="equipmentLbl">Equipment (make, model, serial)</label><input id="rqEq"></div></div>
+      <div class="hint" id="rqLink" style="margin-top:6px"></div>
+    </div>
+    <div class="cart" id="reqCart"></div>
+    <div class="seg2 ptabs" id="partTabs"><button type="button" data-tab="stock" class="on" data-t="tabStock">In stock (shop)</button><button type="button" data-tab="order" data-t="tabOrder">Order from vendor</button></div>
+    <p class="sub" id="partTabHint" style="margin:10px 0"></p>
+    <input class="search" id="partSearch" data-tp="partSearchPh" placeholder="Search part number or name…" autocomplete="off">
+    <div id="partResults"></div>
+    <details class="xform" id="xform">
+      <summary id="xformTitle">+ New part from an outside vendor</summary>
+      <div class="grid g2" style="margin-top:10px">
+        <div class="f" id="xVendorWrap"><label data-t="vendor">Vendor / supplier</label><input id="xVendor" list="vendorList" autocomplete="off"></div>
+        <div class="f"><label data-t="partNoLbl">Part number</label><input id="xPartNo" autocapitalize="characters"></div>
+      </div>
+      <div class="f" style="margin-top:10px"><label data-t="descLbl">Description</label><input id="xName"></div>
+      <div class="grid g2" style="margin-top:10px">
+        <div class="f"><label data-t="qty">Qty</label><input id="xQty" inputmode="decimal" value="1"></div>
+      </div>
+      <button class="btn p full" type="button" id="xAdd" style="margin-top:12px" data-t="addToList">Add to the list</button>
+    </details>
+    <datalist id="vendorList"></datalist>
+    <div class="f" style="margin-top:12px"><label data-t="noteForSup">Note for the supervisor (optional)</label><textarea id="rqNote" class="grow" rows="2"></textarea></div>
+    <button class="btn p full" type="button" id="rqSend" style="margin-top:12px" data-t="sendRequest">Send to supervisor</button>
+  </div>
+</div>
+
+<!-- send sheet -->
+<div class="sheet" id="sendSheet" hidden>
+  <div class="pn">
+    <div class="hd"><h3 data-t="sendTitle">Send report to customer</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
+    <p class="sub" id="sendSub"></p>
+    <div class="f" style="margin-bottom:10px"><label data-t="msgLang">Message language</label>
+      <div class="seg2" id="msgLang"><button type="button" data-l="en">English</button><button type="button" data-l="es">Español</button></div></div>
+    <div class="sendrow"><div class="f"><label data-t="email">Email</label><input id="sendEmail" type="email" inputmode="email" autocapitalize="off" placeholder="name@company.com"></div>
+      <button class="btn em" type="button" id="sendEmailBtn">✉ <span data-t="sendEmail">Send email</span></button></div>
+    <div class="sendrow"><div class="f"><label>WhatsApp</label><input id="sendWa" type="tel" inputmode="tel" placeholder="+1 786 555 0101"></div>
+      <button class="btn wa" type="button" id="sendWaBtn">✆ <span data-t="sendWa">Send WhatsApp</span></button></div>
+    <div class="office" id="waBox" hidden style="display:block"></div>
+    <button class="btn s full" type="button" id="sharePdfBtn" data-t="sharePdf">Share or download the PDF</button>
+    <div class="office" id="officeLine2"></div>
+  </div>
+</div>
+
+<!-- new job sheet -->
+<div class="sheet" id="jobSheet" hidden>
+  <form class="pn" id="jobForm" autocomplete="off">
+    <div class="hd"><h3 data-t="newJob">+ New job</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
+    <p class="sub" data-t="newJobHint">Schedule a visit for yourself (for example a follow-up or a customer who called).</p>
+    <div class="grid">
+      <div class="f"><label data-t="customerName">Customer name</label><input id="jCust" list="custList" required></div>
+      <div class="grid g2">
+        <div class="f"><label data-t="date">Date</label><input id="jDate" type="date" required></div>
+        <div class="f"><label data-t="time">Time</label><input id="jTime" type="time"></div>
+      </div>
+      <div class="grid g3">
+        <div class="f"><label data-t="make">Make</label><input id="jMake" list="makeList"></div>
+        <div class="f"><label data-t="model">Model</label><input id="jModel"></div>
+        <div class="f"><label data-t="serialNo">Serial No.</label><input id="jSerial"></div>
+      </div>
+      <div class="f"><label data-t="instructions">Instructions</label><textarea id="jIns" rows="3"></textarea></div>
+      <button class="btn p full" type="submit" data-t="saveJob">Save job</button>
+    </div>
+  </form>
+</div>
+
+<!-- equipment history sheet -->
+<div class="sheet" id="histSheet" hidden>
+  <div class="pn">
+    <div class="hd"><h3 data-t="equipHistory">Equipment history</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
+    <p class="sub" id="histSub"></p>
+    <div id="histBody"></div>
+  </div>
+</div>
+
+<div class="login" id="login" hidden>
+  <form class="lc" id="loginForm" autocomplete="off">
+    <img data-logo alt="Cher Services LLC">
+    <h1 data-t="appTitle">Service Report</h1>
+    <p data-t="loginHint">Sign in with your Employee ID and PIN</p>
+    <div class="f"><input id="lgCode" data-tp="employeeIdPh" placeholder="Employee ID" autocapitalize="characters" required></div>
+    <div class="f"><input id="lgPin" placeholder="PIN" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" required></div>
+    <div class="keypad" id="keypad"></div>
+    <div class="err" id="lgErr"></div>
+    <button class="btn p" type="submit" id="lgBtn" data-t="signIn">Sign in</button>
+    <p class="lgtip" data-t="enterTip">Tip: press Enter to sign in</p>
+    <div style="text-align:center;margin-top:8px"><div class="lang" id="langSw2"><button type="button" data-l="en">English</button><button type="button" data-l="es">Español</button></div></div>
+  </form>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* =====================================================================
+   CHER SERVICES — Technician app (offline-first PWA)
+   ===================================================================== */
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en: {
+    appTitle: 'Service Report', signOut: 'Sign out', tabJobs: 'Jobs', tabReport: 'Fill Service Report', tabMaint: 'Equipment Service Report', tabReqs: 'Parts Requests', tabHistory: 'History',
+    titleRepair: 'SERVICE REPORT · REPAIRS & FIXES', titleMaint: 'EQUIPMENT SERVICE REPORT', faults: 'Faults', addFault: '+ Add', faultN: 'Fault {n}', faultPh: 'Describe the fault',
+    addCorrection: '+ Add correction', correction: 'Correction', correctionPh: 'How was it corrected?', removeFault: 'Remove this fault?',
+    servicesDone: 'Services performed', addService: '+ Other service', servicesHint: 'Check every service you did. Add a note when needed.', techNotes: 'Technician notes',
+    serviceNotePh: 'Note (optional)', otherServiceName: 'Name of the service:', noServices: 'The service list appears once you are online.',
+    requestParts: '+ Request parts', partsReqHint: 'Ask the office for the parts you need — before, during or after the job. The supervisor checks and approves them.',
+    partsRequest: 'Parts request', equipmentLbl: 'Equipment (make, model, serial)', addToList: 'Add to the list', noteForSup: 'Note for the supervisor (optional)', sendRequest: 'Send to supervisor',
+    myRequests: 'My parts requests', newRequest: '+ New request', reqsHint: 'Send the list of parts you need to the supervisor. You will see here when the office quotes, approves or declines them.',
+    noRequests: 'No parts requests yet.', cartEmpty: 'Your list is empty — pick the parts below.', linkedTo: 'For this report: {r}', notLinked: 'Not linked to a report.',
+    rq_requested: 'Waiting for supervisor', rq_quoted: 'Quoted by the office', rq_approved: 'Approved', rq_declined: 'Declined', rq_invoiced: 'Approved · invoiced', rq_cancelled: 'Cancelled', rq_queued: 'Waiting for internet',
+    reqSent: 'Request sent to the supervisor', reqQueued: 'No internet: the request will be sent automatically', reqNeedParts: 'Add at least one part', edit: 'Edit', cancelReq: 'Cancel request',
+    cancelReqConfirm: 'Cancel this parts request?', reqCancelled: 'Request cancelled', officeNote: 'Office', reqOf: 'Request {n}', pending: 'Pending',
+    st_job_in_progress: 'Job in progress', st_job_awaiting_parts: 'Awaiting parts', st_job_follow_up: 'Follow up repair', st_job_return_client: 'Return to client', st_job_complete: 'Complete',
+    statusHistory: 'Status history', noStatus: 'Tap the current status of the job.', waPressSend: 'WhatsApp opens with the message ready — press Send in WhatsApp. It is not sent automatically.', waOpen: 'Open WhatsApp', copiedMsg: 'Message copied — paste it in WhatsApp', startMaint: 'Equipment service', typeMaint: 'Equipment service',
+    installText: 'Install this app on your tablet for full-screen, offline use.', install: 'Install',
+    installIos: 'Install on iPad/iPhone: tap Share ⬆ then "Add to Home Screen".', installSafari: 'In Safari: tap Share ⬆, then "Add to Home Screen"',
+    myJobs: 'My jobs', refresh: 'Refresh', newJob: '+ New job', jobsHint: 'Jobs assigned to you by the office. Tap “Start report” to open the service report already filled in.',
+    invoiceNo: 'INVOICE NO.', customer: 'Customer', workOrder: 'Work order #', customerName: 'Customer name', address: 'Address', street: 'Street',
+    cityState: 'City, State / Parish', zipCountry: 'ZIP / Country / Phone', email: 'Email', job: 'Job', employeeId: 'Employee ID #', instructions: 'Instructions',
+    serials: 'Related serial numbers', model: 'Model', serialNo: 'Serial No.', make: 'Make', hour: 'Hour', location: 'Location', deliveryDate: 'Delivery date',
+    timeRecord: 'Daily time record', addDay: '+ Add day', date: 'Date', time: 'Time', leftShop: 'Left W/Shop', started: 'Started job', completed: 'Completed', mileage: 'Mileage', removeDay: 'Remove day',
+    fault: 'Fault', howCorrect: 'How did you correct it?',
+    parts: 'Parts & materials', addPart: '+ Add part', part: 'Part', qty: 'Qty', unitPrice: 'Unit price', total: 'Total', noParts: 'No parts added.', partsTotal: 'Parts total',
+    partSearchPh: 'Search part number or name…', otherPart: 'Other part / material (not in inventory)', otherPartHint: 'Type the name and price yourself',
+    tabStock: 'In stock (shop)', tabOrder: 'Order from vendor', tabStockHint: 'Parts we have in the shop. Set the quantity and tap Add.',
+    tabOrderHint: 'Parts that must be ordered from an outside vendor. Pick one from the catalog or add a new one below.',
+    vendor: 'Vendor / supplier', partNoLbl: 'Part number', descLbl: 'Description', addToReport: 'Add to report', add: 'Add',
+    newVendorPart: '+ New part from an outside vendor', newShopItem: '+ Other shop material (not in inventory)', available: '{n} available',
+    noStockItems: 'No in-stock parts match.', noOrderItems: 'No vendor parts in the catalog yet — add one below.', needDesc: 'Write the description',
+    splitConfirm: 'Only {have} in stock. Use {have} from stock and order {rest} from the vendor?', srcStock: 'In stock', srcOrder: 'To order', leadDays: '{n} days',
+    toOrderNote: '{n} part(s) to order from vendors', addedN: 'Added: {n}',
+    otherPartName: 'Part or material name:', otherPartPrice: 'Unit price (USD):', inStock: 'In stock: {n}', lowStock: 'Low stock: {n}', outStock: 'Out of stock',
+    soldOut: 'Sold out', backOrder: 'Back order', backOrderEta: 'Back order · ETA {d}', noInventory: 'The inventory list will appear once you are online.',
+    noMatch: 'No matches.', soldOutConfirm: 'This part is marked SOLD OUT. Add it anyway?', backOrderConfirm: 'This part is on BACK ORDER. Add it anyway?',
+    status: 'Status', initialDis: 'Initial disassembly', followUp: 'Follow up repair', returnCust: 'Return to customer', repairCompleted: 'Repair completed', yes: 'YES', no: 'NO',
+    custComment: 'Customer comment', custCommentPh: 'Customer can write comments here before signing',
+    signatures: 'Signatures', sigHint: 'Tap a box to sign with finger or stylus.', sigServiceman: "SERVICEMAN'S SIGNATURE", sigCustomer: "CUSTOMER'S SIGNATURE", sigSupervisor: "SUPERVISOR'S SIGNATURE",
+    tapSign: 'Tap to sign', signHere: 'Sign here', printedName: 'Printed name', cancel: 'Cancel', clear: 'Clear', acceptSig: 'Accept signature', close: 'Close',
+    sigTitle_serviceman: "Serviceman's signature", sigTitle_customer: "Customer's signature", sigTitle_supervisor: "Supervisor's signature",
+    sigLegal: 'By signing, the customer acknowledges the work described in this service report.', signFirst: 'Please sign first', sigCaptured: 'Signature captured', replaceSig: 'Replace the existing signature?',
+    officeAuto: 'Office copy: sent automatically by email when the customer signs.', officeSent: 'Office copy sent ✓ {d}', officePending: 'Office copy: will be sent when this report syncs.',
+    myReports: 'My reports', syncNow: 'Sync now', searchPh: 'Search by invoice, customer, serial, model…',
+    histHint: 'Reports are saved on this tablet and sent to the office automatically when there is internet. Invoice numbers are assigned by the office on sync.',
+    pullMine: 'Download my reports from the office', new: 'New', save: 'Save', sendShare: 'Send / PDF',
+    sendTitle: 'Send report to customer', msgLang: 'Message language', sendEmail: 'Send email', sendWa: 'Send WhatsApp', sharePdf: 'Share or download the PDF',
+    sendSub: 'Invoice {inv} · {cust}', needOnline: 'You need internet to send. The report is saved and will sync later.', sending: 'Sending…',
+    emailSent: 'Email sent to {to}', badEmail: 'Enter a valid email address', waOpening: 'Opening WhatsApp…', waNoPhone: 'No number entered — WhatsApp will ask you to pick the contact.',
+    waMsg: 'Hello {cust}, here is your service report #{inv} from Cher Services LLC: {link}',
+    noSigConfirm: 'The customer has not signed yet. Continue anyway?', noInvConfirm: 'No internet right now, so the invoice number is still pending. Create the PDF anyway?',
+    newJobHint: 'Schedule a visit for yourself (for example a follow-up or a customer who called).', saveJob: 'Save job', jobSaved: 'Job saved',
+    startReport: 'Start report', openReport: 'Open report', today: 'Today', tomorrow: 'Tomorrow', overdue: 'Overdue', noJobs: 'No jobs assigned. New jobs from the office appear here.',
+    st_scheduled: 'Scheduled', st_in_progress: 'In progress', st_done: 'Done', st_cancelled: 'Cancelled', jobFrom: 'Job for {cust} · {d}', repeats: 'Repeats',
+    equipHistory: 'Equipment history', prevServices: '🛠 {n} previous service(s) — view', noHistory: 'No previous services for this serial number.', histFor: 'Serial {s}',
+    partsUsed: 'Parts', repairDone: 'Repair completed', repairNotDone: 'Not completed',
+    loginHint: 'Sign in with your Employee ID and PIN', employeeIdPh: 'Employee ID', signIn: 'Sign in', enterTip: 'Tip: press Enter to sign in', noNetLogin: 'No internet connection. Connect to sign in.',
+    sessionEnded: 'Your session ended. Please sign in again.', pendingSignOut: '{n} report(s) have not reached the office yet. They stay on this tablet and will sync next time you sign in. Sign out?',
+    saved: 'Saved', newReport: 'New report', newConfirm: 'Start a new report? Unsaved changes in this one will be lost.',
+    invPending: 'Invoice pending', invoice: 'Invoice {n}', stSynced: 'synced with office', stWaiting: 'saved on tablet · waiting to sync', stNotSaved: 'not saved yet',
+    dotOk: 'Synced with office', dotWait: 'Syncing…', dotOff: 'Offline — will sync later',
+    sentOne: 'Sent to office · invoice assigned', sentMany: '{n} reports sent to office', allSynced: 'Everything is synced', noConn: 'No connection — reports will sync automatically',
+    signed: 'Signed', unsigned: 'Unsigned', inOffice: 'In office', pendingSync: 'Pending sync', open: 'Open', copy: 'Copy', remove: 'Remove', noCustomer: '(no customer)',
+    noReportsYet: 'No reports on this tablet yet.', copied: 'Copied into a new report', removeSynced: 'Remove report #{n} from this tablet? The office keeps its copy.',
+    removeUnsynced: 'This report has NOT reached the office yet. Removing it will delete it permanently. Continue?', removed: 'Removed from tablet', downloaded: '{n} reports downloaded', noConnShort: 'No connection',
+    replaceDraft: 'You have a report in progress. Replace it with this job?'
+  },
+  es: {
+    appTitle: 'Reporte de servicio', signOut: 'Salir', tabJobs: 'Trabajos', tabReport: 'Reporte de servicio', tabMaint: 'Servicio a equipo', tabReqs: 'Solicitud de partes', tabHistory: 'Historial',
+    titleRepair: 'REPORTE DE SERVICIO · REPARACIONES', titleMaint: 'REPORTE DE SERVICIO A EQUIPO', faults: 'Fallas', addFault: '+ Agregar', faultN: 'Falla {n}', faultPh: 'Describe la falla',
+    addCorrection: '+ Agregar corrección', correction: 'Corrección', correctionPh: '¿Cómo se corrigió?', removeFault: '¿Quitar esta falla?',
+    servicesDone: 'Servicios realizados', addService: '+ Otro servicio', servicesHint: 'Marca cada servicio que hiciste. Agrega una nota si hace falta.', techNotes: 'Notas del técnico',
+    serviceNotePh: 'Nota (opcional)', otherServiceName: 'Nombre del servicio:', noServices: 'La lista de servicios aparece cuando tengas internet.',
+    requestParts: '+ Pedir partes', partsReqHint: 'Pide a la oficina las partes que necesitas — antes, durante o después del trabajo. El supervisor las revisa y aprueba.',
+    partsRequest: 'Solicitud de partes', equipmentLbl: 'Equipo (marca, modelo, serie)', addToList: 'Agregar a la lista', noteForSup: 'Nota para el supervisor (opcional)', sendRequest: 'Enviar al supervisor',
+    myRequests: 'Mis solicitudes de partes', newRequest: '+ Nueva solicitud', reqsHint: 'Envía al supervisor la lista de partes que necesitas. Aquí verás cuando la oficina la cotice, apruebe o rechace.',
+    noRequests: 'Aún no hay solicitudes de partes.', cartEmpty: 'Tu lista está vacía — elige las partes abajo.', linkedTo: 'Para este reporte: {r}', notLinked: 'Sin reporte vinculado.',
+    rq_requested: 'Esperando al supervisor', rq_quoted: 'Cotizada por la oficina', rq_approved: 'Aprobada', rq_declined: 'Rechazada', rq_invoiced: 'Aprobada · facturada', rq_cancelled: 'Cancelada', rq_queued: 'Esperando internet',
+    reqSent: 'Solicitud enviada al supervisor', reqQueued: 'Sin internet: la solicitud se enviará sola', reqNeedParts: 'Agrega al menos una parte', edit: 'Editar', cancelReq: 'Cancelar solicitud',
+    cancelReqConfirm: '¿Cancelar esta solicitud de partes?', reqCancelled: 'Solicitud cancelada', officeNote: 'Oficina', reqOf: 'Solicitud {n}', pending: 'Pendiente',
+    st_job_in_progress: 'Trabajo en proceso', st_job_awaiting_parts: 'Esperando partes', st_job_follow_up: 'Reparación de seguimiento', st_job_return_client: 'Devolver al cliente', st_job_complete: 'Completado',
+    statusHistory: 'Historial de estatus', noStatus: 'Toca el estatus actual del trabajo.', waPressSend: 'WhatsApp se abre con el mensaje listo — presiona Enviar en WhatsApp. No se envía solo.', waOpen: 'Abrir WhatsApp', copiedMsg: 'Mensaje copiado — pégalo en WhatsApp', startMaint: 'Servicio a equipo', typeMaint: 'Servicio a equipo',
+    installText: 'Instala esta app en la tablet para usarla a pantalla completa y sin internet.', install: 'Instalar',
+    installIos: 'Para instalar en iPad/iPhone: toca Compartir ⬆ y luego "Agregar a inicio".', installSafari: 'En Safari: toca Compartir ⬆ y luego "Agregar a inicio"',
+    myJobs: 'Mis trabajos', refresh: 'Actualizar', newJob: '+ Nuevo trabajo', jobsHint: 'Trabajos que te asignó la oficina. Toca “Iniciar reporte” para abrir el reporte ya lleno.',
+    invoiceNo: 'FACTURA NO.', customer: 'Cliente', workOrder: 'Orden de trabajo #', customerName: 'Nombre del cliente', address: 'Dirección', street: 'Calle',
+    cityState: 'Ciudad, Estado / Parroquia', zipCountry: 'Código postal / País / Teléfono', email: 'Correo', job: 'Trabajo', employeeId: 'ID de empleado #', instructions: 'Instrucciones',
+    serials: 'Números de serie relacionados', model: 'Modelo', serialNo: 'No. de serie', make: 'Marca', hour: 'Horómetro', location: 'Ubicación', deliveryDate: 'Fecha de entrega',
+    timeRecord: 'Registro de tiempo diario', addDay: '+ Agregar día', date: 'Fecha', time: 'Hora', leftShop: 'Salió del taller', started: 'Inició trabajo', completed: 'Terminó', mileage: 'Millaje', removeDay: 'Quitar día',
+    fault: 'Falla', howCorrect: '¿Cómo lo corrigió?',
+    parts: 'Repuestos y materiales', addPart: '+ Agregar repuesto', part: 'Repuesto', qty: 'Cant.', unitPrice: 'Precio unit.', total: 'Total', noParts: 'No hay repuestos agregados.', partsTotal: 'Total repuestos',
+    partSearchPh: 'Buscar número de parte o nombre…', otherPart: 'Otro repuesto / material (fuera del inventario)', otherPartHint: 'Escribe tú el nombre y el precio',
+    tabStock: 'En inventario (casa)', tabOrder: 'Pedir a proveedor', tabStockHint: 'Piezas que tenemos en el taller. Pon la cantidad y toca Agregar.',
+    tabOrderHint: 'Piezas que hay que pedir a un proveedor externo. Elige una del catálogo o agrega una nueva abajo.',
+    vendor: 'Proveedor', partNoLbl: 'No. de parte', descLbl: 'Descripción', addToReport: 'Agregar al reporte', add: 'Agregar',
+    newVendorPart: '+ Pieza nueva de un proveedor externo', newShopItem: '+ Otro material del taller (fuera del inventario)', available: '{n} disponibles',
+    noStockItems: 'No hay piezas en inventario con ese nombre.', noOrderItems: 'Aún no hay piezas de proveedores en el catálogo — agrega una abajo.', needDesc: 'Escribe la descripción',
+    splitConfirm: 'Solo hay {have} en inventario. ¿Usar {have} del inventario y pedir {rest} al proveedor?', srcStock: 'En stock', srcOrder: 'A ordenar', leadDays: '{n} días',
+    toOrderNote: '{n} pieza(s) por pedir a proveedores', addedN: 'Agregado: {n}',
+    otherPartName: 'Nombre del repuesto o material:', otherPartPrice: 'Precio unitario (USD):', inStock: 'En stock: {n}', lowStock: 'Stock bajo: {n}', outStock: 'Sin existencia',
+    soldOut: 'Agotado', backOrder: 'Back order', backOrderEta: 'Back order · llega {d}', noInventory: 'El inventario aparecerá cuando tengas internet.',
+    noMatch: 'Sin resultados.', soldOutConfirm: 'Este repuesto está AGOTADO. ¿Agregarlo de todos modos?', backOrderConfirm: 'Este repuesto está en BACK ORDER. ¿Agregarlo de todos modos?',
+    status: 'Estado', initialDis: 'Desarme inicial', followUp: 'Reparación de seguimiento', returnCust: 'Devolver al cliente', repairCompleted: 'Reparación completada', yes: 'SÍ', no: 'NO',
+    custComment: 'Comentario del cliente', custCommentPh: 'El cliente puede escribir sus comentarios antes de firmar',
+    signatures: 'Firmas', sigHint: 'Toca un recuadro para firmar con el dedo o el lápiz.', sigServiceman: 'FIRMA DEL TÉCNICO', sigCustomer: 'FIRMA DEL CLIENTE', sigSupervisor: 'FIRMA DEL SUPERVISOR',
+    tapSign: 'Toca para firmar', signHere: 'Firme aquí', printedName: 'Nombre', cancel: 'Cancelar', clear: 'Borrar', acceptSig: 'Aceptar firma', close: 'Cerrar',
+    sigTitle_serviceman: 'Firma del técnico', sigTitle_customer: 'Firma del cliente', sigTitle_supervisor: 'Firma del supervisor',
+    sigLegal: 'Al firmar, el cliente reconoce el trabajo descrito en este reporte de servicio.', signFirst: 'Primero firma, por favor', sigCaptured: 'Firma guardada', replaceSig: '¿Reemplazar la firma existente?',
+    officeAuto: 'Copia a la oficina: se envía sola por correo cuando el cliente firma.', officeSent: 'Copia enviada a la oficina ✓ {d}', officePending: 'Copia a la oficina: se enviará cuando el reporte se sincronice.',
+    myReports: 'Mis reportes', syncNow: 'Sincronizar', searchPh: 'Buscar por factura, cliente, serie, modelo…',
+    histHint: 'Los reportes se guardan en la tablet y se envían a la oficina solos cuando hay internet. El número de factura lo asigna la oficina al sincronizar.',
+    pullMine: 'Descargar mis reportes de la oficina', new: 'Nuevo', save: 'Guardar', sendShare: 'Enviar / PDF',
+    sendTitle: 'Enviar reporte al cliente', msgLang: 'Idioma del mensaje', sendEmail: 'Enviar correo', sendWa: 'Enviar WhatsApp', sharePdf: 'Compartir o descargar el PDF',
+    sendSub: 'Factura {inv} · {cust}', needOnline: 'Necesitas internet para enviar. El reporte está guardado y se sincronizará después.', sending: 'Enviando…',
+    emailSent: 'Correo enviado a {to}', badEmail: 'Escribe un correo válido', waOpening: 'Abriendo WhatsApp…', waNoPhone: 'Sin número — WhatsApp te pedirá elegir el contacto.',
+    waMsg: 'Hello {cust}, here is your service report #{inv} from Cher Services LLC: {link}',
+    noSigConfirm: 'El cliente aún no ha firmado. ¿Continuar de todos modos?', noInvConfirm: 'No hay internet ahora y el número de factura está pendiente. ¿Crear el PDF de todos modos?',
+    newJobHint: 'Agenda una visita para ti (por ejemplo, un seguimiento o un cliente que llamó).', saveJob: 'Guardar trabajo', jobSaved: 'Trabajo guardado',
+    startReport: 'Iniciar reporte', openReport: 'Abrir reporte', today: 'Hoy', tomorrow: 'Mañana', overdue: 'Atrasados', noJobs: 'No tienes trabajos asignados. Los trabajos nuevos de la oficina aparecerán aquí.',
+    st_scheduled: 'Programado', st_in_progress: 'En proceso', st_done: 'Terminado', st_cancelled: 'Cancelado', jobFrom: 'Trabajo de {cust} · {d}', repeats: 'Se repite',
+    equipHistory: 'Historial del equipo', prevServices: '🛠 {n} servicio(s) anterior(es) — ver', noHistory: 'No hay servicios anteriores para este número de serie.', histFor: 'Serie {s}',
+    partsUsed: 'Repuestos', repairDone: 'Reparación completada', repairNotDone: 'No completada',
+    loginHint: 'Entra con tu ID de empleado y PIN', employeeIdPh: 'ID de empleado', signIn: 'Entrar', enterTip: 'Consejo: presiona Enter para entrar', noNetLogin: 'Sin internet. Conéctate para entrar.',
+    sessionEnded: 'Tu sesión terminó. Vuelve a entrar.', pendingSignOut: '{n} reporte(s) aún no llegan a la oficina. Se quedan en la tablet y se enviarán cuando vuelvas a entrar. ¿Salir?',
+    saved: 'Guardado', newReport: 'Reporte nuevo', newConfirm: '¿Empezar un reporte nuevo? Se perderán los cambios sin guardar.',
+    invPending: 'Factura pendiente', invoice: 'Factura {n}', stSynced: 'sincronizado con la oficina', stWaiting: 'guardado en la tablet · esperando sincronizar', stNotSaved: 'sin guardar',
+    dotOk: 'Sincronizado con la oficina', dotWait: 'Sincronizando…', dotOff: 'Sin conexión — se sincronizará después',
+    sentOne: 'Enviado a la oficina · factura asignada', sentMany: '{n} reportes enviados a la oficina', allSynced: 'Todo está sincronizado', noConn: 'Sin conexión — los reportes se enviarán solos',
+    signed: 'Firmado', unsigned: 'Sin firma', inOffice: 'En la oficina', pendingSync: 'Por enviar', open: 'Abrir', copy: 'Copiar', remove: 'Quitar', noCustomer: '(sin cliente)',
+    noReportsYet: 'Aún no hay reportes en esta tablet.', copied: 'Copiado a un reporte nuevo', removeSynced: '¿Quitar el reporte #{n} de esta tablet? La oficina conserva su copia.',
+    removeUnsynced: 'Este reporte NO ha llegado a la oficina. Si lo quitas se borra para siempre. ¿Continuar?', removed: 'Quitado de la tablet', downloaded: '{n} reportes descargados', noConnShort: 'Sin conexión',
+    replaceDraft: 'Tienes un reporte en proceso. ¿Reemplazarlo con este trabajo?'
+  }
+};
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+let LANG = LS.get('cher.lang', (navigator.language || 'en').toLowerCase().startsWith('es') ? 'es' : 'en');
+function t(k, v = {}) { let s = (I18N[LANG] && I18N[LANG][k]) ?? I18N.en[k] ?? k; for (const [a, b] of Object.entries(v)) s = s.split('{' + a + '}').join(b); return s; }
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-t]').forEach(el => el.textContent = t(el.dataset.t));
+  document.querySelectorAll('[data-tp]').forEach(el => el.placeholder = t(el.dataset.tp));
+  document.querySelectorAll('#langSw button, #langSw2 button').forEach(b => b.classList.toggle('on', b.dataset.l === LANG));
+  if (window.report) { render(); checkHistory(true); }
+  if (!$('#viewReqs').hidden) renderReqs();
+  if (window.jobsCache && !$('#viewJobs').hidden) renderJobs();
+  if (!$('#viewHist').hidden) renderHist();
+}
+function setLang(l) { LANG = l; LS.set('cher.lang', l); applyLang(); }
+
+/* ---------------- storage (IndexedDB) ---------------- */
+const DB = (() => {
+  let dbp;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open('cher-reports', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('reports', { keyPath: 'id' });
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  }));
+  const tx = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const tr = db.transaction('reports', mode), s = tr.objectStore('reports');
+      const out = fn(s);
+      tr.oncomplete = () => res(out && out.result !== undefined ? out.result : out);
+      tr.onerror = () => rej(tr.error);
+    });
+  };
+  return { put: r => tx('readwrite', s => s.put(r)), del: id => tx('readwrite', s => s.delete(id)), get: id => tx('readonly', s => s.get(id)), all: () => tx('readonly', s => s.getAll()) };
+})();
+
+/* ---------------- state ---------------- */
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtD = d => { if (!d) return ''; const [y, m, dd] = d.split('-'); return `${m}/${dd}/${y}`; };
+const fmtT = tm => { if (!tm) return ''; const [h, m] = tm.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
+const todayISO = () => { const d = new Date(); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+var report;
+
+function blankReport(type) {
+  return {
+    id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), type: type === 'maintenance' ? 'maintenance' : 'repair',
+    createdAt: new Date().toISOString(), updatedAt: null, synced: false,
+    invoiceNo: '', employeeId: '', parts: [], faults: [{ fault: '', correction: null }], services: [], status: '', statusHistory: [],
+    time: [{ date: todayISO(), left: '', started: '', completed: '', mileage: '' }],
+    sigs: {}
+  };
+}
+function normalize(r) {
+  r.sigs = r.sigs || {}; r.time = r.time?.length ? r.time : [{}]; r.parts = Array.isArray(r.parts) ? r.parts : [];
+  r.type = r.type === 'maintenance' ? 'maintenance' : 'repair';
+  if (!Array.isArray(r.faults)) r.faults = faultsOf(r).map(f => ({ fault: f.fault, correction: f.correction || null }));
+  if (!r.faults.length) r.faults.push({ fault: '', correction: null });
+  r.services = Array.isArray(r.services) ? r.services : [];
+  if (!r.status) r.status = jobStatusOf(r);
+  r.statusHistory = Array.isArray(r.statusHistory) ? r.statusHistory : [];
+  return r;
+}
+const draftKey = type => type === 'maintenance' ? 'cher.draft.maint' : 'cher.draft';
+function saveDraft() { LS.set(draftKey(report.type), report); }
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('on'), 2600); }
+
+/* ---------------- form binding ---------------- */
+function render() {
+  $$('[data-k]').forEach(el => {
+    const v = report[el.dataset.k];
+    if (el.type === 'checkbox') { el.checked = !!v; el.closest('.chk')?.classList.toggle('on', !!v); }
+    else el.value = v ?? '';
+  });
+  const maint = report.type === 'maintenance';
+  $('#faultsCard').hidden = maint; $('#servicesCard').hidden = !maint;
+  $('#formTitle').textContent = t(maint ? 'titleMaint' : 'titleRepair'); $('#formTitle').classList.toggle('maint', maint);
+  renderTime(); renderFaults(); renderServices(); renderParts(); renderJobStatus(); renderSigs(); updateStatus(); renderOffice(); renderJobBanner();
+  requestAnimationFrame(() => $$('#viewForm textarea.grow').forEach(grow));
+  histState = { serial: null, list: [] }; $('#histChip').hidden = true; checkHistory();
+}
+let dirty = false, autosaveT;
+function markDirty() {
+  dirty = true; saveDraft();
+  clearTimeout(autosaveT);
+  if (report.updatedAt) autosaveT = setTimeout(() => save(true), 1200);
+}
+document.addEventListener('input', e => {
+  const k = e.target.dataset?.k; if (!k) return;
+  report[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+  if (e.target.type === 'checkbox') e.target.closest('.chk')?.classList.toggle('on', e.target.checked);
+  if (k === 'serialNo') checkHistory();
+  markDirty();
+});
+document.addEventListener('change', e => { if (e.target.type === 'checkbox' && e.target.dataset.k) { report[e.target.dataset.k] = e.target.checked; e.target.closest('.chk')?.classList.toggle('on', e.target.checked); markDirty(); } });
+function grow(el) { el.style.height = 'auto'; el.style.height = Math.max(46, el.scrollHeight + 2) + 'px'; }
+document.addEventListener('input', e => { if (e.target.classList?.contains('grow')) grow(e.target); });
+
+/* ---------------- faults (each one can have its correction) ---------------- */
+function renderFaults() {
+  const box = $('#faultsList'); box.innerHTML = '';
+  report.faults.forEach((f, i) => {
+    const d = document.createElement('div'); d.className = 'fault';
+    d.innerHTML = `<div class="fh"><b>${esc(t('faultN', { n: i + 1 }))}</b>${report.faults.length > 1 ? `<button type="button" class="x" title="×">×</button>` : ''}</div>
+      <textarea class="grow fi" rows="1"></textarea>
+      ${f.correction != null ? `<div class="corr"><div class="ch"><span>${esc(t('correction'))}</span><button type="button" class="x cx">×</button></div><textarea class="grow ci" rows="1"></textarea></div>`
+        : `<button type="button" class="addcorr">${esc(t('addCorrection'))}</button>`}`;
+    const fi = d.querySelector('.fi'); fi.value = f.fault || ''; fi.placeholder = t('faultPh');
+    fi.addEventListener('input', () => { f.fault = fi.value; markDirty(); });
+    const ci = d.querySelector('.ci'); if (ci) { ci.value = f.correction || ''; ci.placeholder = t('correctionPh'); ci.addEventListener('input', () => { f.correction = ci.value; markDirty(); }); }
+    d.querySelector('.addcorr')?.addEventListener('click', () => { f.correction = ''; renderFaults(); markDirty(); const n = $$('#faultsList .fault')[i]?.querySelector('.ci'); if (n) n.focus(); });
+    d.querySelector('.cx')?.addEventListener('click', () => { f.correction = null; renderFaults(); markDirty(); });
+    d.querySelector('.fh .x')?.addEventListener('click', () => { if ((f.fault || f.correction || '').trim() && !confirm(t('removeFault'))) return; report.faults.splice(i, 1); renderFaults(); markDirty(); });
+    box.appendChild(d);
+  });
+  requestAnimationFrame(() => $$('#faultsList textarea').forEach(grow));
+}
+$('#addFault').onclick = () => { report.faults.push({ fault: '', correction: null }); renderFaults(); markDirty(); const all = $$('#faultsList .fi'); all[all.length - 1]?.focus(); };
+
+/* ---------------- equipment services checklist ---------------- */
+let serviceCatalog = LS.get('cher.services', []);
+async function pullServices() { try { serviceCatalog = (await api('service_items')).items; LS.set('cher.services', serviceCatalog); if (report?.type === 'maintenance') renderServices(); } catch {} }
+function renderServices() {
+  if (report.type !== 'maintenance') return;
+  const have = new Set(report.services.map(x => String(x.id)));
+  serviceCatalog.forEach(c => { if (!have.has(String(c.id))) report.services.push({ id: c.id, name: c.name, done: false, note: '' }); });
+  const box = $('#servicesList');
+  if (!report.services.length) { box.innerHTML = `<div class="empty">${esc(t('noServices'))}</div>`; return; }
+  box.innerHTML = '';
+  report.services.forEach((sv, i) => {
+    const d = document.createElement('div'); d.className = 'sv' + (sv.done ? ' on' : '');
+    d.innerHTML = `<label><input type="checkbox"${sv.done ? ' checked' : ''}><span></span>${sv.custom ? '<button type="button" class="x">×</button>' : ''}</label>${sv.done ? '<input class="note">' : ''}`;
+    d.querySelector('span').textContent = sv.name;
+    d.querySelector('input[type=checkbox]').addEventListener('change', e => { sv.done = e.target.checked; renderServices(); markDirty(); if (sv.done) $$('#servicesList .sv')[i]?.querySelector('.note')?.focus(); });
+    const n = d.querySelector('.note'); if (n) { n.value = sv.note || ''; n.placeholder = t('serviceNotePh'); n.addEventListener('input', () => { sv.note = n.value; markDirty(); }); }
+    d.querySelector('.x')?.addEventListener('click', e => { e.preventDefault(); report.services.splice(i, 1); renderServices(); markDirty(); });
+    box.appendChild(d);
+  });
+}
+$('#addService').onclick = () => { const n = (prompt(t('otherServiceName'), '') || '').trim(); if (!n) return; report.services.push({ id: 'x' + uid(), name: n, done: true, note: '', custom: true }); renderServices(); markDirty(); };
+
+/* ---------------- job status with history ---------------- */
+const JOB_KEYS = ['in_progress', 'awaiting_parts', 'follow_up', 'return_client', 'complete'];
+function renderJobStatus() {
+  $('#stBtns').innerHTML = JOB_KEYS.map(k => `<button type="button" data-s="${k}" class="${report.status === k ? 'on' : ''}">${esc(t('st_job_' + k))}</button>`).join('');
+  const h = report.statusHistory.slice().reverse();
+  $('#stHist').innerHTML = h.length ? `<div style="border:0;font-weight:700;color:var(--navy)">${esc(t('statusHistory'))}</div>` + h.map(x => `<div><b>${esc(t('st_job_' + x.status))}</b><span>${esc(new Date(x.at).toLocaleString())}${x.by ? ' · ' + esc(x.by) : ''}</span></div>`).join('')
+    : `<div style="border:0">${esc(t('noStatus'))}</div>`;
+}
+$('#stBtns').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || b.dataset.s === report.status) return;
+  report.status = b.dataset.s; report.statusHistory.push({ status: b.dataset.s, at: new Date().toISOString(), by: session?.user?.name || '' });
+  renderJobStatus(); markDirty();
+});
+
+/* ---------------- time record ---------------- */
+function renderTime() {
+  const cols = [['date', t('date'), 'date'], ['left', t('leftShop'), 'time'], ['started', t('started'), 'time'], ['completed', t('completed'), 'time'], ['mileage', t('mileage'), 'text']];
+  const tb = $('#timeBody'); tb.innerHTML = '';
+  report.time.forEach((row, i) => {
+    const tr = document.createElement('tr');
+    cols.forEach(([k, l, ty]) => {
+      const td = document.createElement('td'); td.dataset.l = l;
+      const inp = document.createElement('input'); inp.type = ty; inp.value = row[k] || '';
+      if (k === 'mileage') inp.inputMode = 'decimal';
+      inp.addEventListener('input', () => { row[k] = inp.value; markDirty(); });
+      td.appendChild(inp); tr.appendChild(td);
+    });
+    const td = document.createElement('td'); td.dataset.l = '';
+    const x = document.createElement('button'); x.className = 'x'; x.type = 'button'; x.textContent = '×'; x.title = t('removeDay');
+    x.onclick = () => { report.time.splice(i, 1); if (!report.time.length) report.time.push({}); renderTime(); markDirty(); };
+    td.appendChild(x); tr.appendChild(td); tb.appendChild(tr);
+  });
+}
+$('#addRow').onclick = () => { report.time.push({ date: todayISO() }); renderTime(); markDirty(); };
+
+/* ---------------- parts & materials ---------------- */
+let inventory = LS.get('cher.inventory', []);
+async function pullInventory() { try { const j = await api('inventory_list'); inventory = j.items; LS.set('cher.inventory', inventory); } catch {} }
+function stockInfo(it) {
+  if (!it) return { txt: '', cls: '' };
+  if (it.status === 'sold_out') return { txt: t('soldOut'), cls: 'bad' };
+  if (it.status === 'back_order') return { txt: it.eta ? t('backOrderEta', { d: fmtD(it.eta) }) : t('backOrder'), cls: 'warn' };
+  if (it.qty <= 0) return { txt: t('outStock'), cls: 'bad' };
+  if (it.minQty && it.qty <= it.minQty) return { txt: t('lowStock', { n: +it.qty }), cls: 'warn' };
+  return { txt: t('inStock', { n: +it.qty }), cls: 'ok' };
+}
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+/* parts on the report = the parts requests linked to it (older reports kept their own list, shown read-only) */
+function renderParts() {
+  const mine = allRequests().filter(q => q.reportId === report.id);
+  $('#reqForReport').innerHTML = ''; mine.forEach(q => $('#reqForReport').appendChild(reqCard(q)));
+  $('#legacyParts').innerHTML = report.parts.length ? `<div class="req"><div class="t1"><b>${esc(t('parts'))}</b></div><ul>${report.parts.map(p => `<li>${esc(+p.qty + ' × ' + p.name)} <span class="src ${p.source === 'order' ? 'order' : 'stock'}">${esc(p.source === 'order' ? t('srcOrder') : t('srcStock'))}</span></li>`).join('')}</ul></div>` : '';
+}
+function renderPartsTotal() {}
+function openSheet(id) { $(id).hidden = false; document.body.style.overflow = 'hidden'; }
+function closeSheet(id) { $(id).hidden = true; document.body.style.overflow = ''; }
+$$('.sheet').forEach(sh => { sh.addEventListener('click', e => { if (e.target === sh || e.target.closest('[data-close]')) closeSheet('#' + sh.id); }); });
+let partTab = 'stock';
+function setPartTab(tab) {
+  partTab = tab;
+  $$('#partTabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#partTabHint').textContent = tab === 'stock' ? t('tabStockHint') : t('tabOrderHint');
+  $('#xformTitle').textContent = tab === 'stock' ? t('newShopItem') : t('newVendorPart');
+  $('#xVendorWrap').hidden = tab === 'stock';
+  $('#xform').open = false;
+  renderPartResults();
+}
+$('#partTabs').onclick = e => { const b = e.target.closest('button'); if (b) setPartTab(b.dataset.tab); };
+$('#addPart').onclick = () => openRequest(null, true);
+$('#rqSend').onclick = sendRequest;
+$('#reqNew').onclick = () => openRequest(null, false);
+$('#reqRefresh').onclick = () => pullRequests().then(() => toast(t('allSynced')));
+/* ---------------- parts requests ---------------- */
+let reqDraft = null;
+let requests = LS.get('cher.requests', []);
+const reqQueue = () => LS.get('cher.reqQueue', []);
+function allRequests() { return reqQueue().map(q => Object.assign({}, q, { status: 'queued', no: '' })).concat(requests); }
+function addLine(line) {
+  const ex = reqDraft.lines.find(p => p.source === line.source && line.itemId && p.itemId === line.itemId && (p.vendor || '') === (line.vendor || ''));
+  if (ex) ex.qty = Math.round((ex.qty + line.qty) * 100) / 100; else reqDraft.lines.push(Object.assign({ key: uid() }, line));
+  renderCart();
+}
+function renderCart() {
+  const c = $('#reqCart');
+  if (!reqDraft.lines.length) { c.innerHTML = `<div class="empty" style="padding:12px">${esc(t('cartEmpty'))}</div>`; return; }
+  c.innerHTML = '';
+  reqDraft.lines.forEach((p, i) => {
+    const d = document.createElement('div'); d.className = 'cl';
+    d.innerHTML = `<div><b></b><div><span class="src ${p.source}">${esc(p.source === 'order' ? t('srcOrder') : t('srcStock'))}</span><small></small></div></div>
+      <div class="qty"><button type="button" data-d="-1">−</button><input inputmode="decimal"><button type="button" data-d="1">+</button></div><button type="button" class="x">×</button>`;
+    d.querySelector('b').textContent = p.name; d.querySelector('small').textContent = [p.partNo, p.vendor].filter(Boolean).join(' · ');
+    const q = d.querySelector('input'); q.value = p.qty;
+    q.oninput = () => { p.qty = Math.max(0, parseFloat(q.value) || 0); };
+    d.querySelectorAll('.qty button').forEach(b => b.onclick = () => { p.qty = Math.max(1, Math.round((p.qty + +b.dataset.d) * 100) / 100); q.value = p.qty; });
+    d.querySelector('.x').onclick = () => { reqDraft.lines.splice(i, 1); renderCart(); };
+    c.appendChild(d);
+  });
+}
+function openRequest(q, fromReport) {
+  const r = report;
+  reqDraft = q ? { id: q.id, key: q.key, reportId: q.reportId, jobId: q.jobId, customer: q.customer, equipment: q.equipment, serialNo: q.serialNo, note: q.note || '', lines: (q.lines || []).map(l => Object.assign({}, l)) }
+    : fromReport ? { reportId: r.id, jobId: r.jobId || null, customer: r.customerName || '', equipment: [r.make, r.model, r.serialNo && 'S/N ' + r.serialNo].filter(Boolean).join(' '), serialNo: r.serialNo || '', note: '', lines: [] }
+    : { reportId: null, customer: '', equipment: '', serialNo: '', note: '', lines: [] };
+  $('#rqCust').value = reqDraft.customer || ''; $('#rqEq').value = reqDraft.equipment || ''; $('#rqNote').value = reqDraft.note || '';
+  $('#rqLink').textContent = reqDraft.reportId ? t('linkedTo', { r: (reqDraft.reportId === r.id ? (r.invoiceNo ? '#' + r.invoiceNo + ' · ' : '') + (r.customerName || '') : reqDraft.reportId) }) : t('notLinked');
+  $('#reqTitle').textContent = q?.no ? t('reqOf', { n: q.no }) : t('partsRequest');
+  $('#partSearch').value = ''; ['#xVendor', '#xPartNo', '#xName'].forEach(x => $(x).value = ''); $('#xQty').value = 1;
+  renderCart(); setPartTab(partTab); openSheet('#partSheet'); pullInventory().then(renderPartResults);
+}
+async function sendRequest() {
+  reqDraft.customer = $('#rqCust').value.trim(); reqDraft.equipment = $('#rqEq').value.trim(); reqDraft.note = $('#rqNote').value.trim();
+  reqDraft.lines = reqDraft.lines.filter(l => l.qty > 0);
+  if (!reqDraft.lines.length) { toast(t('reqNeedParts')); return; }
+  const btn = $('#rqSend'); busy(btn, true);
+  try {
+    await api('preq_save', { request: reqDraft });
+    closeSheet('#partSheet'); toast(t('reqSent')); await pullRequests();
+  } catch (e) {
+    if (e.offline && !reqDraft.id) {   // no internet: keep it on the tablet and send it later
+      const qq = reqQueue(); if (!reqDraft.key) { reqDraft.key = uid(); qq.push(reqDraft); } else { const i = qq.findIndex(x => x.key === reqDraft.key); if (i >= 0) qq[i] = reqDraft; else qq.push(reqDraft); }
+      LS.set('cher.reqQueue', qq); closeSheet('#partSheet'); toast(t('reqQueued')); renderParts(); renderReqs();
+    } else toast(e.message);
+  } finally { busy(btn, false); }
+}
+async function flushReqQueue() {
+  const qq = reqQueue(); if (!qq.length) return;
+  let left = [];
+  for (let i = 0; i < qq.length; i++) {
+    const x = Object.assign({}, qq[i]); delete x.key;
+    try { await api('preq_save', { request: x }); }
+    catch (e) { if (e.offline) { left = qq.slice(i); break; } }   // refused by the server: dropped (the technician sees the error on the next try)
+  }
+  LS.set('cher.reqQueue', left);
+}
+async function pullRequests() {
+  if (!session) return;
+  try { requests = (await api('preq_list')).requests; LS.set('cher.requests', requests); } catch {}
+  if (!$('#viewReqs').hidden) markReqsSeen(); else updateBadges();
+  if (report) renderParts(); if (!$('#viewReqs').hidden) renderReqs();
+}
+/* red counters on the tabs: what is waiting for this technician */
+async function updateBadges() {
+  const setC = (id, n) => { const el = $(id); if (!el) return; el.hidden = !n; el.textContent = n > 99 ? '99+' : n; };
+  const seen = LS.get('cher.reqSeen', {});
+  setC('#reqCnt', requests.filter(q => ['quoted', 'approved', 'declined', 'invoiced'].includes(q.status) && seen[q.id] !== q.updatedAt).length + reqQueue().length);
+  try {
+    const pend = (await DB.all()).filter(r => r.employeeId === me() && !r.synced);
+    setC('#histCnt', pend.length);
+    setC('#formCnt', pend.filter(r => r.type !== 'maintenance').length); setC('#maintCnt', pend.filter(r => r.type === 'maintenance').length);
+  } catch {}
+}
+function markReqsSeen() { const seen = {}; requests.forEach(q => { seen[q.id] = q.updatedAt; }); LS.set('cher.reqSeen', seen); updateBadges(); }
+function reqCard(q) {
+  const d = document.createElement('div'); d.className = 'req';
+  const cls = { approved: 'ok', invoiced: 'ok', declined: 'bad', cancelled: '', quoted: 'info', requested: 'warn', queued: 'warn' }[q.status] || '';
+  d.innerHTML = `<div class="t1"><b>${esc(q.no || t('pending'))}</b><span class="pill ${cls}">${esc(t('rq_' + q.status))}</span><span class="hint">${esc([q.customer, q.equipment].filter(Boolean).join(' · '))}</span>
+      ${q.reportNo ? `<span class="pill">#${esc(q.reportNo)}</span>` : ''}<span class="hint" style="margin-left:auto">${q.updatedAt ? esc(new Date(q.updatedAt).toLocaleString()) : ''}</span></div>
+    <ul>${(q.lines || []).map(l => `<li>${esc(+l.qty + ' ' + (l.unit && l.unit !== 'ea' ? l.unit + ' ' : '') + '× ' + l.name)} <span class="src ${l.source === 'order' ? 'order' : 'stock'}">${esc(l.source === 'order' ? t('srcOrder') : t('srcStock'))}</span></li>`).join('')}</ul>
+    ${q.note ? `<div class="hint" style="margin-top:6px">✎ ${esc(q.note)}</div>` : ''}
+    ${q.reply ? `<div class="reply"><b>${esc(t('officeNote'))}:</b> ${esc(q.reply)}</div>` : ''}
+    ${['requested', 'quoted', 'queued'].includes(q.status) ? `<div class="acts"><button class="btn s" data-a="edit" type="button">${esc(t('edit'))}</button><button class="btn d" data-a="cancel" type="button">${esc(t('cancelReq'))}</button></div>` : ''}`;
+  d.querySelector('.acts')?.addEventListener('click', async e => {
+    const a = e.target.dataset.a; if (!a) return;
+    if (a === 'edit') openRequest(q);
+    if (a === 'cancel' && confirm(t('cancelReqConfirm'))) {
+      if (q.status === 'queued') { LS.set('cher.reqQueue', reqQueue().filter(x => x.key !== q.key)); renderParts(); renderReqs(); toast(t('reqCancelled')); return; }
+      try { await api('preq_cancel', { id: q.id }); toast(t('reqCancelled')); pullRequests(); } catch (err) { toast(err.message); }
+    }
+  });
+  return d;
+}
+function renderReqs() {
+  const box = $('#reqList'), list = allRequests();
+  box.innerHTML = list.length ? '' : `<div class="card empty">${esc(t('noRequests'))}</div>`;
+  list.forEach(q => box.appendChild(reqCard(q)));
+}
+/* the report PDF lists the parts of its requests (no prices — those go on the invoice) */
+function withReqParts(r) {
+  const c = clone(r);
+  c.requestParts = allRequests().filter(q => q.reportId === r.id && !['declined', 'cancelled'].includes(q.status))
+    .flatMap(q => (q.lines || []).map(l => Object.assign({}, l, { pending: !['approved', 'invoiced'].includes(q.status) })));
+  return c;
+}
+function renderPartResults() {
+  const q = $('#partSearch').value.trim().toLowerCase(), box = $('#partResults');
+  const vendors = [...new Set(inventory.map(i => i.vendor).filter(Boolean))];
+  $('#vendorList').innerHTML = vendors.map(v => `<option value="${esc(v)}">`).join('');
+  const pool = inventory.filter(i => (i.kind || 'stock') === partTab);
+  if (!inventory.length) { box.innerHTML = `<div class="empty">${esc(t('noInventory'))}</div>`; return; }
+  const list = pool.filter(i => !q || [i.partNo, i.name, i.description, i.category, i.vendor].join(' ').toLowerCase().includes(q)).slice(0, 80);
+  if (!list.length) { box.innerHTML = `<div class="empty">${esc(partTab === 'stock' ? t('noStockItems') : t('noOrderItems'))}</div>`; return; }
+  box.innerHTML = '';
+  list.forEach(it => {
+    const row = document.createElement('div'); row.className = 'pick' + (partTab === 'order' ? ' order' : '');
+    const si = partTab === 'stock' ? stockInfo(it) : { txt: [it.vendor, it.leadDays ? t('leadDays', { n: it.leadDays }) : ''].filter(Boolean).join(' · '), cls: 'warn' };
+    row.innerHTML = `<div class="nm"><b></b><small></small>${si.txt ? `<div style="margin-top:4px"><span class="pill ${si.cls}">${esc(si.txt)}</span></div>` : ''}</div>
+      <div class="qty"><button type="button" data-d="-1">−</button><input inputmode="decimal" value="1"><button type="button" data-d="1">+</button></div>
+      <button type="button" class="add">${esc(t('add'))}</button>`;
+    row.querySelector('b').textContent = it.name;
+    row.querySelector('small').textContent = [it.partNo, it.description].filter(Boolean).join(' · ');
+    const qi = row.querySelector('.qty input');
+    row.querySelectorAll('.qty button').forEach(b => b.onclick = () => { qi.value = Math.max(1, (parseFloat(qi.value) || 1) + +b.dataset.d); });
+    row.querySelector('.add').onclick = () => {
+      const want = Math.max(0.01, parseFloat(qi.value) || 1);
+      const base = { itemId: it.id, partNo: it.partNo, name: it.name, unit: it.unit };
+      if (partTab === 'order') { addLine(Object.assign({}, base, { qty: want, source: 'order', vendor: it.vendor || '' })); }
+      else {
+        if (it.status === 'sold_out' && !confirm(t('soldOutConfirm'))) return;
+        if (it.status === 'back_order' && !confirm(t('backOrderConfirm'))) return;
+        const already = reqDraft.lines.filter(p => p.itemId === it.id && p.source !== 'order').reduce((s, p) => s + p.qty, 0);
+        const have = Math.max(0, (it.qty || 0) - already);
+        if (want > have && have >= 0 && confirm(t('splitConfirm', { have: +have.toFixed(2), rest: +(want - have).toFixed(2) }))) {
+          if (have > 0) addLine(Object.assign({}, base, { qty: have, source: 'stock' }));
+          addLine(Object.assign({}, base, { qty: +(want - have).toFixed(2), source: 'order', vendor: it.vendor || '' }));
+        } else addLine(Object.assign({}, base, { qty: want, source: 'stock' }));
+      }
+      toast(t('addedN', { n: `${want} × ${it.name}` })); qi.value = 1;
+    };
+    box.appendChild(row);
+  });
+}
+$('#partSearch').addEventListener('input', renderPartResults);
+$('#xAdd').onclick = () => {
+  const name = $('#xName').value.trim(); if (!name) { toast(t('needDesc')); $('#xName').focus(); return; }
+  const line = { itemId: null, partNo: $('#xPartNo').value.trim(), name, unit: 'ea', qty: Math.max(0.01, parseFloat($('#xQty').value) || 1),
+    source: 'order', vendor: partTab === 'order' ? $('#xVendor').value.trim() : '' };
+  reqDraft.lines.push(Object.assign({ key: uid() }, line)); renderCart();
+  ['#xPartNo', '#xName'].forEach(x => $(x).value = ''); $('#xQty').value = 1; $('#xform').open = false;
+  toast(t('addedN', { n: `${line.qty} × ${line.name}` }));
+};
+
+/* ---------------- signatures ---------------- */
+function renderSigs() {
+  $$('.sig').forEach(box => {
+    const s = report.sigs[box.dataset.sig];
+    box.querySelector('.pv').innerHTML = s?.img ? `<img alt="signature" src="${s.img}">` : `<span>${esc(t('tapSign'))}</span>`;
+    box.querySelector('.meta').textContent = s?.img ? `${s.name ? s.name + ' · ' : ''}${new Date(s.at).toLocaleString()}` : '';
+  });
+}
+const pad = (() => {
+  const cv = $('#pad'), wrap = $('#padWrap'), ctx = cv.getContext('2d');
+  let drawing = false, last = null, strokes = 0, key = null;
+  function size() {
+    const r = wrap.getBoundingClientRect(), dpr = Math.max(1, window.devicePixelRatio || 1);
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0a1f5c';
+    clear();
+  }
+  function clear() { ctx.clearRect(0, 0, cv.width, cv.height); strokes = 0; $('#padPh').hidden = false; }
+  const pt = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top, p: e.pressure && e.pointerType === 'pen' ? e.pressure : 0.5, t: performance.now() }; };
+  cv.addEventListener('pointerdown', e => { e.preventDefault(); cv.setPointerCapture(e.pointerId); drawing = true; last = pt(e); $('#padPh').hidden = true; strokes++;
+    ctx.beginPath(); ctx.arc(last.x, last.y, 1.4, 0, Math.PI * 2); ctx.fillStyle = '#0a1f5c'; ctx.fill(); });
+  cv.addEventListener('pointermove', e => {
+    if (!drawing) return; e.preventDefault();
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    for (const ev of evs) {
+      const p = pt(ev), d = Math.hypot(p.x - last.x, p.y - last.y), v = d / Math.max(1, p.t - last.t);
+      ctx.lineWidth = Math.max(1.4, Math.min(4.2, (p.p * 5.2) - v * 0.9));
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p;
+    }
+  });
+  const end = () => { drawing = false; };
+  cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end); cv.addEventListener('pointerleave', end);
+  window.addEventListener('resize', () => { if ($('#sigModal').classList.contains('on')) size(); });
+  function trimmed() {
+    const { width: w, height: h } = cv, d = ctx.getImageData(0, 0, w, h).data;
+    let x0 = w, y0 = h, x1 = 0, y1 = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 10) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 <= x0) return null;
+    const m = 12; x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(w, x1 + m); y1 = Math.min(h, y1 + m);
+    const scale = Math.min(1, 600 / (x1 - x0));   // 600 px is sharp on the PDF and keeps the database small
+    const o = document.createElement('canvas'); o.width = Math.round((x1 - x0) * scale); o.height = Math.round((y1 - y0) * scale);
+    o.getContext('2d').drawImage(cv, x0, y0, x1 - x0, y1 - y0, 0, 0, o.width, o.height);
+    return o.toDataURL('image/png');
+  }
+  return {
+    open(k) {
+      key = k; $('#sigTitle').textContent = t('sigTitle_' + k);
+      $('#sigName').value = report.sigs[k]?.name || (k === 'customer' ? (report.customerName || '') : k === 'serviceman' ? (session?.user?.name || '') : '');
+      $('#sigLegal').textContent = k === 'customer' ? t('sigLegal') : '';
+      $('#sigModal').classList.add('on'); document.body.style.overflow = 'hidden';
+      requestAnimationFrame(size);
+    },
+    close() { $('#sigModal').classList.remove('on'); document.body.style.overflow = ''; },
+    clear, accept() {
+      if (!strokes) { toast(t('signFirst')); return; }
+      const img = trimmed(); if (!img) { toast(t('signFirst')); return; }
+      report.sigs[key] = { img, name: $('#sigName').value.trim(), at: new Date().toISOString() };
+      const wasCustomer = key === 'customer';
+      this.close(); renderSigs(); markDirty(); toast(t('sigCaptured'));
+      if (wasCustomer) save(true);   // customer signed → save & sync right away (office copy goes out automatically)
+    }
+  };
+})();
+$$('.sig').forEach(b => b.addEventListener('click', () => {
+  const k = b.dataset.sig;
+  if (report.sigs[k]?.img && !confirm(t('replaceSig'))) return;
+  pad.open(k);
+}));
+$('#sigCancel').onclick = () => pad.close();
+$('#sigClear').onclick = () => pad.clear();
+$('#sigOk').onclick = () => pad.accept();
+
+/* ---------------- server connection ---------------- */
+const API = 'api/api.php';
+let session = LS.get('cher.session', null);
+const me = () => session?.user?.code || '';
+async function api(action, data = {}) {
+  let res;
+  try {
+    res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(session?.token ? { 'X-Auth-Token': session.token } : {}) }, body: JSON.stringify({ action, ...data }) });
+  } catch { throw Object.assign(new Error(t('noConnShort')), { offline: true }); }
+  let txt = ''; try { txt = await res.text(); } catch {}
+  let j; try { j = JSON.parse(txt); } catch { throw Object.assign(new Error(`Server error (HTTP ${res.status}) ` + txt.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160)), { offline: res.status === 0 || res.status >= 502 }); }
+  if (res.status === 401 && action !== 'login') signOut(true);
+  if (!j.ok) throw Object.assign(new Error(j.error || 'Error'), { status: res.status });
+  return j;
+}
+const clone = o => JSON.parse(JSON.stringify(o));
+let dotState = '';
+function setDot(s) { dotState = s; const d = $('#syncDot'); d.className = 'dot ' + (s || ''); d.title = { ok: t('dotOk'), wait: t('dotWait'), off: t('dotOff') }[s] || ''; }
+function updateStatus() {
+  const inv = report.invoiceNo ? t('invoice', { n: report.invoiceNo }) : t('invPending');
+  const st = report.synced ? t('stSynced') : report.updatedAt ? t('stWaiting') : t('stNotSaved');
+  $('#statusLine').textContent = `${inv} · ${st}`;
+}
+function renderOffice() {
+  const txt = report.officeSentAt ? t('officeSent', { d: new Date(report.officeSentAt).toLocaleString() }) : report.sigs?.customer?.img ? t('officePending') : t('officeAuto');
+  ['#officeLine', '#officeLine2'].forEach(s => { $(s).textContent = txt; $(s).classList.toggle('ok', !!report.officeSentAt); });
+}
+
+/* ---------------- save / sync ---------------- */
+async function save(silent) {
+  report.updatedAt = new Date().toISOString(); report.synced = false; report.employeeId = me();
+  await DB.put(clone(report)); updateBadges();
+  rememberCustomer(); saveDraft(); dirty = false; updateStatus(); renderOffice();
+  if (!silent) toast(t('saved'));
+  return syncAll();
+}
+let syncing = null, again = false;
+async function syncAll(manual) {
+  if (!session) return;
+  if (syncing) { again = true; return syncing; }
+  syncing = (async () => {
+    again = false;
+    try {
+      const mine = (await DB.all()).filter(r => r.employeeId === me());
+      const pend = mine.filter(r => !r.synced);
+      if (pend.length) setDot('wait');
+      let newInv = 0;
+      for (const r of pend) {
+        const sentAt = r.updatedAt, hadInv = !!r.invoiceNo;
+        const j = await api('save_report', { report: r });
+        const latest = normalize((await DB.get(r.id)) || r);
+        latest.invoiceNo = j.invoiceNo; latest.officeSentAt = j.officeSentAt || latest.officeSentAt || null;
+        if (latest.updatedAt === sentAt) latest.synced = true;
+        await DB.put(latest);
+        if (!hadInv) newInv++;
+        if (report.id === r.id) { report.invoiceNo = j.invoiceNo; report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
+      }
+      // office copy: every synced, customer-signed report is emailed to the office once
+      for (const r of (await DB.all()).filter(r => r.employeeId === me() && r.synced && r.sigs?.customer?.img && !r.officeSentAt)) await sendOffice(r);
+      setDot('ok');
+      if (newInv) toast(newInv === 1 ? t('sentOne') : t('sentMany', { n: newInv }));
+      else if (manual) toast(t('allSynced'));
+      if (!$('#viewHist').hidden) renderHist();
+      if (pend.some(r => r.jobId)) pullJobs();
+      await flushReqQueue(); pullRequests(); updateBadges();
+    } catch (e) {
+      setDot('off');
+      if (manual) toast(e.offline ? t('noConn') : e.message);
+    } finally {
+      syncing = null;
+      if (again) setTimeout(syncAll, 300);
+    }
+  })();
+  return syncing;
+}
+const officeTried = {};
+async function sendOffice(r) {
+  if (officeTried[r.id] && Date.now() - officeTried[r.id] < 10 * 60000) return;   // retry at most every 10 min
+  officeTried[r.id] = Date.now();
+  try {
+    const pdf = await pdfBase64(r);
+    await api('send_report', { id: r.id, channel: 'office', pdf });
+    r.officeSentAt = new Date().toISOString(); await DB.put(r);
+    if (report.id === r.id) { report.officeSentAt = r.officeSentAt; saveDraft(); renderOffice(); }
+  } catch (e) { if (e.offline) throw e; console.warn('office copy', e.message); }
+}
+async function pdfBase64(r) { const doc = await buildPdf(withReqParts(r)); return doc.output('datauristring').split(',')[1]; }
+window.addEventListener('online', () => syncAll());
+setInterval(() => { if (navigator.onLine) syncAll(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { syncAll(); pullJobs(); pullRequests(); } });
+
+/* ---------------- customers ---------------- */
+function rememberCustomer() {
+  if (!report.customerName) return;
+  const c = LS.get('cher.customers', {});
+  const prev = c[report.customerName] || {};
+  c[report.customerName] = { address1: report.address1 || prev.address1 || '', address2: report.address2 || prev.address2 || '', address3: report.address3 || prev.address3 || '',
+    whatsapp: report.customerWhatsapp || prev.whatsapp || '', email: report.customerEmail || prev.email || '' };
+  LS.set('cher.customers', c); fillCustomers();
+}
+function fillCustomers() {
+  const c = LS.get('cher.customers', {});
+  $('#custList').innerHTML = Object.keys(c).map(n => `<option value="${esc(n)}">`).join('');
+}
+async function pullCustomers() {
+  try { const j = await api('customers'); LS.set('cher.customers', Object.assign(LS.get('cher.customers', {}), j.customers || {})); fillCustomers(); } catch {}
+}
+$('[data-k="customerName"]').addEventListener('change', e => {
+  const c = LS.get('cher.customers', {})[e.target.value]; if (!c) return;
+  let ch = false;
+  for (const [k, f] of [['address1', 'address1'], ['address2', 'address2'], ['address3', 'address3'], ['customerWhatsapp', 'whatsapp'], ['customerEmail', 'email']])
+    if (!report[k] && c[f]) { report[k] = c[f]; ch = true; }
+  if (ch) { render(); markDirty(); }
+});
+
+/* ---------------- buttons ---------------- */
+$('#btnSave').onclick = () => save();
+function newReport() { report = blankReport(report?.type); report.employeeId = me(); saveDraft(); dirty = false; render(); }
+$('#btnNew').onclick = () => {
+  if (dirty && !confirm(t('newConfirm'))) return;
+  newReport(); scrollTo(0, 0); toast(t('newReport'));
+};
+
+/* ---------------- sending ---------------- */
+let msgLang = LANG;
+function setMsgLang(l) { msgLang = l; $$('#msgLang button').forEach(b => b.classList.toggle('on', b.dataset.l === l)); }
+$('#msgLang').onclick = e => { const b = e.target.closest('button'); if (b) setMsgLang(b.dataset.l); };
+$('#btnSend').onclick = async () => {
+  if (!report.sigs.customer?.img && !confirm(t('noSigConfirm'))) return;
+  await save(true);
+  $('#sendEmail').value = report.customerEmail || ''; $('#sendWa').value = report.customerWhatsapp || '';
+  $('#sendSub').textContent = t('sendSub', { inv: report.invoiceNo || '—', cust: report.customerName || t('noCustomer') });
+  setMsgLang(LANG); renderOffice(); $('#waBox').hidden = true; openSheet('#sendSheet');
+};
+async function ensureOnServer() {
+  if (!report.synced || !report.invoiceNo) await syncAll();
+  if (!report.synced || !report.invoiceNo) throw Object.assign(new Error(t('needOnline')), { offline: true });
+}
+function busy(btn, on) { btn.disabled = on; btn.style.opacity = on ? .6 : 1; }
+$('#sendEmailBtn').onclick = async () => {
+  const to = $('#sendEmail').value.trim(), btn = $('#sendEmailBtn');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { toast(t('badEmail')); return; }
+  if (report.customerEmail !== to) { report.customerEmail = to; markDirty(); }
+  busy(btn, true); toast(t('sending'));
+  try {
+    await ensureOnServer();
+    await api('send_report', { id: report.id, channel: 'email', to, lang: msgLang, pdf: await pdfBase64(report) });
+    toast(t('emailSent', { to }));
+  } catch (e) { toast(e.message); } finally { busy(btn, false); }
+};
+$('#sendWaBtn').onclick = async () => {
+  const phone = $('#sendWa').value.trim(), btn = $('#sendWaBtn');
+  if (phone && report.customerWhatsapp !== phone) { report.customerWhatsapp = phone; markDirty(); }
+  const win = window.open('', '_blank');   // open synchronously so the tablet doesn't block the pop-up
+  busy(btn, true); toast(t('sending'));
+  try {
+    await ensureOnServer();
+    const j = await api('send_report', { id: report.id, channel: 'whatsapp', to: phone, pdf: await pdfBase64(report) });
+    const msg = msgLang === 'es'
+      ? `Hola ${report.customerName || ''}, aquí está su reporte de servicio #${report.invoiceNo} de Cher Services LLC: ${j.link}`
+      : t('waMsg', { cust: report.customerName || '', inv: report.invoiceNo, link: j.link });
+    const url = (j.phone ? `https://wa.me/${j.phone}` : 'https://wa.me/') + '?text=' + encodeURIComponent(msg);
+    if (!j.phone) toast(t('waNoPhone')); else toast(t('waOpening'));
+    if (win) win.location = url;
+    const box = $('#waBox'); box.hidden = false;
+    box.innerHTML = `<b>${esc(t('waPressSend'))}</b><div style="margin:8px 0;word-break:break-all;color:var(--ink)"></div><a class="btn wa" target="_blank" rel="noopener" style="text-decoration:none">✆ ${esc(t('waOpen'))}</a> <button type="button" class="btn s">${esc(t('copy'))}</button>`;
+    box.querySelector('div').textContent = msg; box.querySelector('a').href = url;
+    box.querySelector('button').onclick = async () => { try { await navigator.clipboard.writeText(msg); toast(t('copiedMsg')); } catch { toast(msg); } };
+  } catch (e) { if (win) win.close(); toast(e.message); } finally { busy(btn, false); }
+};
+$('#sharePdfBtn').onclick = async () => {
+  if (!report.invoiceNo) await syncAll();
+  if (!report.invoiceNo && !confirm(t('noInvConfirm'))) return;
+  await sharePdf(withReqParts(report));
+};
+
+/* ---------------- equipment history ---------------- */
+let histState = { serial: null, list: [] }, histT;
+function checkHistory(rerender) {
+  if (rerender) { if (histState.list.length) showHistChip(); return; }
+  clearTimeout(histT);
+  histT = setTimeout(async () => {
+    const s = (report.serialNo || '').replace(/[\s.\-]/g, '').toUpperCase();
+    if (s.length < 4) { $('#histChip').hidden = true; histState = { serial: null, list: [] }; return; }
+    if (s === histState.serial) return;
+    try {
+      const j = await api('equipment_history', { serial: report.serialNo, excludeId: report.id });
+      histState = { serial: s, list: j.history }; showHistChip();
+    } catch { /* offline: no hint */ }
+  }, 700);
+}
+function showHistChip() { const c = $('#histChip'); c.hidden = !histState.list.length; c.textContent = t('prevServices', { n: histState.list.length }); }
+$('#histChip').onclick = () => {
+  $('#histSub').textContent = t('histFor', { s: report.serialNo }) + (report.make || report.model ? ' · ' + [report.make, report.model].filter(Boolean).join(' ') : '');
+  $('#histBody').innerHTML = histState.list.length ? histState.list.map(h => `<div class="hrow">
+    <div class="t1"><b>#${esc(h.invoiceNo)}</b><span>${fmtD(h.date)}</span><span class="pill ${h.status === 'complete' ? 'ok' : h.status ? 'warn' : ''}">${esc(h.status ? t('st_job_' + h.status) : '—')}</span>${h.type === 'maintenance' ? `<span class="pill">${esc(t('typeMaint'))}</span>` : ''}
+      <span class="muted">${esc(h.tech || '')} · ${esc(h.customer || '')}${h.hour ? ' · ' + esc(h.hour) + ' h' : ''}</span></div>
+    ${h.faults.length ? `<ul>${h.faults.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
+    ${h.correction ? `<div style="margin-top:6px;font-size:14px;white-space:pre-wrap">${esc(h.correction)}</div>` : ''}
+    ${(h.services || []).length ? `<div style="margin-top:6px;font-size:14px">✓ ${esc(h.services.join(', '))}</div>` : ''}
+    ${h.parts.length ? `<div class="muted" style="margin-top:6px">${esc(t('partsUsed'))}: ${esc(h.parts.join(', '))}</div>` : ''}
+  </div>`).join('') : `<div class="empty">${esc(t('noHistory'))}</div>`;
+  openSheet('#histSheet');
+};
+
+/* ---------------- jobs ---------------- */
+var jobsCache = LS.get('cher.jobs', []);
+async function pullJobs() {
+  if (!session) return;
+  try { const j = await api('jobs_list'); jobsCache = j.jobs; LS.set('cher.jobs', jobsCache); } catch {}
+  updateJobsCount(); if (!$('#viewJobs').hidden) renderJobs();
+}
+function updateJobsCount() {
+  const n = jobsCache.filter(j => j.status === 'scheduled' && j.date <= todayISO()).length;
+  $('#jobsCnt').hidden = !n; $('#jobsCnt').textContent = n;
+}
+function renderJobs() {
+  const box = $('#jobsList'), today = todayISO(), tom = new Date(Date.now() + 86400000);
+  const tomISO = new Date(tom - tom.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  const list = jobsCache.filter(j => j.status !== 'cancelled');
+  if (!list.length) { box.innerHTML = `<div class="card empty">${esc(t('noJobs'))}</div>`; return; }
+  const groups = {};
+  list.forEach(j => { const g = j.status !== 'done' && j.date < today ? 'overdue' : j.date; (groups[g] = groups[g] || []).push(j); });
+  const keys = Object.keys(groups).sort((a, b) => a === 'overdue' ? -1 : b === 'overdue' ? 1 : a.localeCompare(b));
+  box.innerHTML = '';
+  keys.forEach(k => {
+    const h = document.createElement('div');
+    h.className = 'daygrp' + (k === today ? ' today' : '');
+    h.textContent = k === 'overdue' ? t('overdue') : k === today ? t('today') + ' · ' + fmtD(k) : k === tomISO ? t('tomorrow') + ' · ' + fmtD(k) : new Date(k + 'T12:00').toLocaleDateString(LANG === 'es' ? 'es' : 'en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    box.appendChild(h);
+    groups[k].forEach(j => {
+      const d = document.createElement('div'); d.className = 'job ' + j.status;
+      const local = j.reportId ? true : false;
+      d.innerHTML = `<div class="tm">${j.time ? esc(fmtT(j.time)) : '—'}${k === 'overdue' ? `<small>${fmtD(j.date)}</small>` : ''}</div>
+        <div><b></b><div class="eq"></div><div class="ins"></div>
+          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap"><span class="pill ${j.status === 'done' ? 'ok' : j.status === 'in_progress' ? 'warn' : 'info'}">${esc(t('st_' + j.status))}</span>
+          ${j.repeat ? `<span class="pill">↻ ${esc(t('repeats'))}</span>` : ''}${j.invoiceNo ? `<span class="pill">#${esc(j.invoiceNo)}</span>` : ''}</div></div>
+        <div class="acts"><button class="btn ${j.status === 'done' ? 's' : 'p'}" type="button" data-type="repair">${esc(local ? t('openReport') : t('startReport'))}</button>${local ? '' : `<button class="btn s" type="button" data-type="maintenance">${esc(t('startMaint'))}</button>`}</div>`;
+      d.querySelector('b').textContent = j.customerName;
+      d.querySelector('.eq').textContent = [[j.make, j.model].filter(Boolean).join(' '), j.serialNo && 'S/N ' + j.serialNo, [j.address1, j.address2].filter(Boolean).join(', ')].filter(Boolean).join(' · ');
+      d.querySelector('.ins').textContent = j.instructions || '';
+      d.querySelectorAll('.acts button').forEach(b => b.onclick = () => startJob(j, b.dataset.type));
+      box.appendChild(d);
+    });
+  });
+}
+async function startJob(j, type) {
+  if (j.reportId) {
+    let r = await DB.get(j.reportId);
+    if (!r) { try { const m = await api('my_reports'); for (const x of m.reports) { const loc = await DB.get(x.id); if (!loc) { x.synced = true; await DB.put(x); } } r = await DB.get(j.reportId); } catch {} }
+    if (r) { report = normalize(r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); return; }
+  }
+  const view = type === 'maintenance' ? 'maint' : 'form';
+  const cur = LS.get(draftKey(type), null);
+  if (cur && cur.jobId === j.id && cur.employeeId === me()) { report = normalize(cur); render(); show(view); return; }
+  if (cur && cur.employeeId === me() && cur.updatedAt === null && JSON.stringify(cur).length > 900 && !confirm(t('replaceDraft'))) return;
+  const r = blankReport(type); r.employeeId = me(); r.jobId = j.id;
+  Object.assign(r, { customerName: j.customerName, address1: j.address1, address2: j.address2, address3: j.address3, customerWhatsapp: j.whatsapp, customerEmail: j.email,
+    workOrder: j.workOrder, make: j.make, model: j.model, serialNo: j.serialNo, location: j.location, instructions: j.instructions });
+  if (j.date) r.time[0].date = j.date <= todayISO() ? todayISO() : j.date;
+  report = r; saveDraft(); dirty = true; render(); show(view); scrollTo(0, 0);
+}
+function renderJobBanner() {
+  const b = $('#jobBanner'), j = report.jobId ? jobsCache.find(x => x.id === report.jobId) : null;
+  b.hidden = !report.jobId;
+  if (report.jobId) b.textContent = '📋 ' + t('jobFrom', { cust: j?.customerName || report.customerName || '', d: j ? fmtD(j.date) + (j.time ? ' ' + fmtT(j.time) : '') : '' });
+}
+$('#jobsRefresh').onclick = () => pullJobs().then(() => toast(t('allSynced')));
+$('#jobNew').onclick = () => { $('#jobForm').reset(); $('#jDate').value = todayISO(); openSheet('#jobSheet'); };
+$('#jobForm').onsubmit = async e => {
+  e.preventDefault();
+  const c = LS.get('cher.customers', {})[$('#jCust').value] || {};
+  try {
+    await api('job_save', { customerName: $('#jCust').value, date: $('#jDate').value, time: $('#jTime').value, make: $('#jMake').value, model: $('#jModel').value,
+      serialNo: $('#jSerial').value, instructions: $('#jIns').value, address1: c.address1, address2: c.address2, address3: c.address3, whatsapp: c.whatsapp, email: c.email });
+    closeSheet('#jobSheet'); toast(t('jobSaved')); pullJobs();
+  } catch (err) { toast(err.message); }
+};
+
+/* ---------------- history ---------------- */
+async function renderHist() {
+  const q = $('#search').value.trim().toLowerCase();
+  const all = (await DB.all()).filter(r => r.employeeId === me() || !r.employeeId).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  const list = all.filter(r => !q || [r.invoiceNo, r.customerName, r.serialNo, r.model, r.make, r.workOrder].join(' ').toLowerCase().includes(q));
+  const box = $('#histList');
+  if (!list.length) { box.innerHTML = `<div class="empty">${esc(all.length ? t('noMatch') : t('noReportsYet'))}</div>`; return; }
+  box.innerHTML = '';
+  list.forEach(r => {
+    const d = document.createElement('div'); d.className = 'hist-item';
+    const signed = r.sigs?.customer?.img;
+    d.innerHTML = `<div class="no">#${esc(r.invoiceNo || '····')}</div>
+      <div class="info"><b></b><small></small></div>
+      ${r.type === 'maintenance' ? `<span class="pill warn">${esc(t('typeMaint'))}</span>` : ''}<span class="pill ${signed ? 'ok' : ''}">${esc(signed ? t('signed') : t('unsigned'))}</span>
+      <span class="pill ${r.synced ? 'ok' : ''}">${esc(r.synced ? t('inOffice') : t('pendingSync'))}</span>
+      <div class="acts"><button class="btn s" data-a="open">${esc(t('open'))}</button><button class="btn p" data-a="pdf">PDF</button><button class="btn s" data-a="dup">${esc(t('copy'))}</button><button class="btn d" data-a="del">${esc(t('remove'))}</button></div>`;
+    d.querySelector('b').textContent = r.customerName || t('noCustomer');
+    d.querySelector('small').textContent = [r.make, r.model, r.serialNo && 'S/N ' + r.serialNo].filter(Boolean).join(' · ') + ' — ' + new Date(r.updatedAt || r.createdAt).toLocaleDateString();
+    d.querySelector('.acts').onclick = async e => {
+      const a = e.target.dataset.a; if (!a) return;
+      if (a === 'open') { report = normalize(r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); }
+      if (a === 'pdf') sharePdf(withReqParts(r));
+      if (a === 'dup') { const n = blankReport(r.type); n.employeeId = me(); ['customerName', 'address1', 'address2', 'address3', 'customerWhatsapp', 'customerEmail', 'model', 'serialNo', 'make', 'location'].forEach(k => n[k] = r[k]); report = n; dirty = true; saveDraft(); render(); show(n.type === 'maintenance' ? 'maint' : 'form'); toast(t('copied')); }
+      if (a === 'del') {
+        const msg = r.synced ? t('removeSynced', { n: r.invoiceNo }) : t('removeUnsynced');
+        if (confirm(msg)) { await DB.del(r.id); renderHist(); toast(t('removed')); }
+      }
+    };
+    box.appendChild(d);
+  });
+}
+$('#search').addEventListener('input', renderHist);
+$('#syncNow').onclick = () => syncAll(true);
+$('#pullMine').onclick = async () => {
+  try {
+    const j = await api('my_reports'); let n = 0;
+    for (const r of j.reports) { const loc = await DB.get(r.id); if (!loc || loc.synced) { r.synced = true; await DB.put(r); n++; } }
+    toast(t('downloaded', { n })); renderHist();
+  } catch (e) { toast(e.offline ? t('noConnShort') : e.message); }
+};
+
+/* ---------------- views ---------------- */
+function useType(type) {
+  if (report && report.type === type) return;
+  if (report) saveDraft();
+  const d = LS.get(draftKey(type), null);
+  if (d && d.employeeId === me()) report = normalize(d); else { report = blankReport(type); report.employeeId = me(); }
+  dirty = false; render();
+}
+function show(v) {
+  const isForm = v === 'form' || v === 'maint';
+  if (isForm) useType(v === 'maint' ? 'maintenance' : 'repair');
+  $('#viewJobs').hidden = v !== 'jobs'; $('#viewForm').hidden = !isForm; $('#viewHist').hidden = v !== 'hist'; $('#viewReqs').hidden = v !== 'reqs'; $('#formBar').hidden = !isForm;
+  $('#tabJobs').classList.toggle('on', v === 'jobs'); $('#tabForm').classList.toggle('on', v === 'form'); $('#tabMaint').classList.toggle('on', v === 'maint');
+  $('#tabReqs').classList.toggle('on', v === 'reqs'); $('#tabHist').classList.toggle('on', v === 'hist');
+  if (v === 'hist') renderHist();
+  if (v === 'reqs') { renderReqs(); pullRequests().then(markReqsSeen); }
+  if (v === 'jobs') { renderJobs(); pullJobs(); }
+  LS.set('cher.view', v); scrollTo(0, 0);
+}
+$('#tabJobs').onclick = () => show('jobs');
+$('#tabForm').onclick = () => show('form');
+$('#tabMaint').onclick = () => show('maint');
+$('#tabReqs').onclick = () => show('reqs');
+$('#tabHist').onclick = () => show('hist');
+['#langSw', '#langSw2'].forEach(s => $(s).onclick = e => { const b = e.target.closest('button'); if (b) setLang(b.dataset.l); });
+
+/* ---------------- login ---------------- */
+const kp = $('#keypad');
+['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].forEach(k => {
+  const b = document.createElement('button'); b.type = 'button'; b.textContent = k;
+  b.onclick = () => { const p = $('#lgPin'); p.value = k === 'C' ? '' : k === '⌫' ? p.value.slice(0, -1) : (p.value + k).slice(0, 8); };
+  kp.appendChild(b);
+});
+/* Enter: in the ID field jumps to the PIN (or signs in if the PIN is filled); in the PIN field signs in.
+   With a physical keyboard, digits typed anywhere on the login screen go into the PIN. */
+function loginSubmit() { const f = $('#loginForm'); if (f.requestSubmit) f.requestSubmit($('#lgBtn')); else $('#lgBtn').click(); }
+$('#lgCode').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.defaultPrevented) return; e.preventDefault();
+  if ($('#lgPin').value) loginSubmit(); else $('#lgPin').focus();
+});
+$('#lgPin').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.defaultPrevented) { e.preventDefault(); loginSubmit(); } });
+document.addEventListener('keydown', e => {
+  if ($('#login').hidden || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+  const p = $('#lgPin');
+  if (/^\d$/.test(e.key)) { p.value = (p.value + e.key).slice(0, 8); e.preventDefault(); }
+  else if (e.key === 'Backspace') { p.value = p.value.slice(0, -1); e.preventDefault(); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (!$('#lgCode').value) $('#lgCode').focus(); else if (!p.value) p.focus(); else loginSubmit(); }
+});
+$('#loginForm').onsubmit = async e => {
+  e.preventDefault(); $('#lgErr').textContent = ''; $('#lgBtn').disabled = true;
+  try {
+    const j = await api('login', { code: $('#lgCode').value, pin: $('#lgPin').value });
+    session = { token: j.token, user: j.user }; LS.set('cher.session', session); LS.set('cher.lastCode', j.user.code);
+    $('#lgPin').value = ''; startSession();
+  } catch (err) { $('#lgErr').textContent = err.offline ? t('noNetLogin') : err.message; }
+  finally { $('#lgBtn').disabled = false; }
+};
+async function signOut(expired) {
+  if (!expired) {
+    const pend = (await DB.all()).filter(r => !r.synced && r.employeeId === me()).length;
+    if (pend && !confirm(t('pendingSignOut', { n: pend }))) return;
+    if (dirty) await save(true);
+    try { await api('logout'); } catch {}
+  }
+  session = null; LS.set('cher.session', null);
+  $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false;
+  if (expired) $('#lgErr').textContent = t('sessionEnded');
+}
+$('#btnLogout').onclick = () => signOut(false);
+function startSession() {
+  $('#login').hidden = true;
+  $('#whoName').textContent = `${session.user.name} (${session.user.code})`;
+  const hasJobs = jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled');
+  const v0 = LS.get('cher.view', hasJobs ? 'jobs' : 'form');
+  const d = LS.get(draftKey(v0 === 'maint' ? 'maintenance' : 'repair'), null);
+  if (d && d.employeeId === me()) { report = normalize(d); render(); } else { report = null; useType(v0 === 'maint' ? 'maintenance' : 'repair'); }
+  show(v0);
+  pullCustomers(); pullInventory(); pullServices(); pullRequests();
+  pullJobs().then(() => { if (!LS.get('cher.view', null) && jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled')) show('jobs'); });
+  syncAll();
+  api('me').catch(() => {});
+}
+
+/* ---------------- install prompt ---------------- */
+let deferred;
+const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; if (!LS.get('cher.installDismissed', false)) $('#installBox').classList.add('on'); });
+$('#installBtn').onclick = async () => {
+  if (deferred) { deferred.prompt(); await deferred.userChoice; deferred = null; $('#installBox').classList.remove('on'); }
+  else toast(t('installSafari'));
+};
+$('#installClose').onclick = () => { $('#installBox').classList.remove('on'); LS.set('cher.installDismissed', true); };
+if (!standalone && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document && !LS.get('cher.installDismissed', false)) {
+  $('#installText').dataset.t = 'installIos'; $('#installText').textContent = t('installIos');
+  $('#installBtn').hidden = true; $('#installBox').classList.add('on');
+}
+if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+
+/* ---------------- boot ---------------- */
+window.toast = toast;
+document.querySelectorAll('img[data-logo]').forEach(i => { i.src = window.CHER_LOGO_URL; });
+report = blankReport(); render(); applyLang();
+if (session?.token) startSession();
+else { $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false; }
+window.addEventListener('pagehide', () => { if (dirty) saveDraft(); });
+</script>
+</body>
+</html>
