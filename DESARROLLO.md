@@ -38,6 +38,20 @@ empleados y registro de actividad. (Sin las imágenes de las firmas; el respaldo
 También está siempre en **Settings → Security & backup → Export all data (Excel)** con el PIN de supervisor,
 aunque las herramientas estén apagadas.
 
+### Tutorials (crear tutoriales de uso)
+Graba un tutorial mientras usas la app, también durante una prueba de carga:
+1. Developer tools → **Tutorials** → título (p. ej. "Cómo llenar un reporte") → opcional **Record my voice**.
+2. **● Start recording**. El navegador pregunta qué compartir: **esta pestaña** para un tutorial del panel, o
+   **Pantalla completa / Ventana** si también vas a usar la app del técnico (botón *Open the technician app in a
+   new tab*; entra con un técnico de prueba).
+3. Usa la app normalmente. La barra naranja muestra **● REC**, el tiempo y los pasos anotados.
+4. **■ Stop** → revisa la lista de pasos (cada uno con su captura), corrige el texto o borra los que sobren.
+5. **Download the guide** (HTML con logo, pasos numerados y capturas; se abre en cualquier navegador y se
+   imprime a PDF) y **Download the video**.
+
+Los pasos se escriben solos: "Toca «Customers»", "Escribe «ACME» en «Customer name»", "Marca «Frequent»"…
+Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets no permiten grabar la pantalla).
+
 ## 3. ¿Qué pasa si se llena la base de datos?
 
 Hostinger pone un tope de unos **3 GB por base de datos**. **Settings** muestra ahora el tamaño actual

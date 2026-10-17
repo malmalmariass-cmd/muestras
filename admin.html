@@ -230,7 +230,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <button data-v="reports" class="on">Reports &amp; Jobs<span class="tc" data-c="reports" hidden></span><span class="nb" data-b="jobs" hidden></span></button>
     <button data-v="invoices">Invoices<span class="tc" data-c="invoices" hidden></span><span class="nb" data-b="invoices" hidden></span></button>
     <button data-v="requests">Parts &amp; Orders<span class="tc" data-c="requests" hidden></span><span class="nb" data-b="parts" hidden></span><span id="rqCnt" hidden></span></button>
-    <button data-v="customers">Customers<span class="tc" data-c="customers" hidden></span></button>
+    <button data-v="customers">Customers<span class="tc" data-c="customers" hidden></span><span class="nb" data-b="customers" hidden></span></button>
     <button data-v="inventory">Inventory<span class="tc" data-c="inventory" hidden></span><span class="nb" data-b="stock" hidden></span></button>
     <button data-v="equipment">Equipment<span class="tc" data-c="equipment" hidden></span></button>
     <button data-v="stats">Statistics</button>
@@ -240,7 +240,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
   </nav>
 </header>
 <div id="devBar" class="devbar" hidden><b>🛠 Developer mode is ON</b><span class="sub" style="margin:0">Testing tools are active. Turn them off when testing is over.</span>
-  <span style="flex:1"></span><button type="button" class="btn s" data-dev="load">Load test</button><button type="button" class="btn s" data-dev="reset">Reset data</button><button type="button" class="btn s" data-dev="export">Export data</button><button type="button" class="btn d" data-dev="off">Turn off</button></div>
+  <span style="flex:1"></span><button type="button" class="btn s" data-dev="load">Load test</button><button type="button" class="btn s" data-dev="reset">Reset data</button><button type="button" class="btn s" data-dev="export">Export data</button><button type="button" class="btn s" data-dev="tutorial">Tutorials</button><span id="tutRec" hidden style="font-weight:700;color:var(--red)">● REC <span id="tutClock">0:00</span> · <span id="tutN">0</span> steps <button type="button" class="btn d" id="tutStopBar">■ Stop</button></span><button type="button" class="btn d" data-dev="off">Turn off</button></div>
 
 <main>
   <!-- REPORTS -->
@@ -344,7 +344,10 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <div class="filters">
       <div class="f grow"><label>Search</label><input id="cQ" placeholder="Name, email, WhatsApp…"></div>
       <label class="chk" style="display:flex;gap:8px;align-items:center;font-weight:600;min-height:40px"><input type="checkbox" id="cFreq"> Frequent only</label>
+      <label class="chk" style="display:flex;gap:8px;align-items:center;font-weight:600;min-height:40px"><input type="checkbox" id="cNew"> New from technicians</label>
     </div>
+    <div class="fbox" id="custNewBox" hidden style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-bottom:12px;border-color:var(--warn);background:var(--warn-50)">
+      <b id="custNewTxt"></b><span style="flex:1"></span><button type="button" class="btn s" id="custNewShow">Show them</button><button type="button" class="btn p" id="custNewAll">Mark all as reviewed</button></div>
     <div class="card" style="padding:0"><div class="tablewrap">
       <table class="t"><thead><tr><th>Customer</th><th>Contact</th><th class="hide-sm">Address</th><th class="num">Reports</th><th class="hide-sm">Last service</th></tr></thead><tbody id="custBody"></tbody></table>
     </div></div>
@@ -675,7 +678,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <div id="devBody" hidden>
       <div class="acts" style="justify-content:flex-start;align-items:center;margin:0 0 12px"><span>Developer tools are <b id="devOnOff">—</b></span><button type="button" class="btn s" id="devToggle"></button></div>
       <div id="devTools">
-      <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button><button type="button" data-d="export">Export data</button></div>
+      <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button><button type="button" data-d="export">Export data</button><button type="button" data-d="tutorial">Tutorials</button></div>
       <div id="devLoad" class="form">
         <div class="sub" style="margin:0">Simulates technicians using the tablet app at the same time, from this browser: sign in, download customers / inventory / jobs, sync every ~30 s and send service reports (with signatures, like the real app). Test technicians <b>TEST01, TEST02…</b> are created (or re-activated) automatically. No emails are sent.</div>
         <div class="row3"><div><label>Technicians</label><input id="ltN" type="number" min="1" max="100" value="50"></div><div><label>Duration (minutes)</label><input id="ltMin" type="number" min="1" max="60" value="5"></div><div><label>A report every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div></div>
@@ -697,6 +700,14 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
         <div class="row"><div><label>Next invoice number after the reset</label><input id="rsNext" type="number" min="1" placeholder="leave as is"></div><div><label>Type RESET to confirm</label><input id="rsConfirm" autocomplete="off" autocapitalize="characters"></div></div>
         <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="rsBackup">⬇ Download backup first</button><button type="button" class="btn d" id="rsGo">Reset now</button></div>
         <div id="rsLog" style="font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:30vh;overflow:auto;background:#f6f8fc;border-radius:8px;padding:8px 10px" hidden></div>
+      </div>
+      <div id="devTut" class="form" hidden>
+        <div class="sub" style="margin:0">Record a how-to while you use the app — it also works while a load test is running. It records the screen (and your voice if you want) and writes each step with a picture of the screen at that moment. Steps in the technician app are recorded too when it is open in another tab of this browser.</div>
+        <div class="row"><div><label>Tutorial title</label><input id="tutTitle" placeholder="e.g. How to fill a service report"></div>
+          <div style="align-self:end"><label class="chk"><input type="checkbox" id="tutMic"> Record my voice (microphone)</label></div></div>
+        <div class="sub" style="margin:0">When the browser asks what to share: choose <b>this tab</b> for a tutorial of the panel, or <b>Entire screen / Window</b> if you will also use the technician app in another tab.</div>
+        <div class="acts" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn p" id="tutStart">● Start recording</button><a class="btn s" href="index.html#tech" target="_blank" rel="noopener" style="text-decoration:none">Open the technician app in a new tab</a></div>
+        <div id="tutOut"></div>
       </div>
       <div id="devExport" class="form" hidden>
         <div class="sub" style="margin:0">One Excel file with a sheet for each part of the app: customers, service reports, report parts, invoices, invoice lines, payments, parts requests, vendor orders, inventory, stock movements, jobs, employees and the activity log. Signature images are left out (the .sql backup keeps them).</div>
@@ -846,7 +857,8 @@ let emps = [];
 async function enter(user) {
   $('#gate').hidden = true; $('#app').hidden = false;
   $('#whoami').textContent = `${user.name} · ${user.code}`;
-  await loadEmps(); view('reports'); updateOrdCount(); updateRqCount(); setInterval(updateRqCount, 60000); setTimeout(loadCounts, 1500);
+  await loadEmps(); view('reports'); updateOrdCount(); updateRqCount(); setInterval(updateRqCount, 60000); setInterval(loadBadges, 60000); setTimeout(loadCounts, 1500);
+  try { if ('Notification' in window && Notification.permission === 'default') document.addEventListener('click', () => Notification.requestPermission().catch(() => {}), { once: true }); } catch {}
   const must = sessionStorage.getItem('cher.mustChangePin');   // set by the start page when the server asks for a new PIN
   if (must) { sessionStorage.removeItem('cher.mustChangePin'); pinModal('', must === 'master' ? 'You signed in with the master account and its default PIN. Choose a new PIN now so nobody else can use it (at least 6 digits).' : 'Supervisor PINs now need at least 6 digits. Choose a new PIN.'); }
 }
@@ -1218,17 +1230,26 @@ $('#jbDel').onclick = async () => {
 /* ---------------- customers ---------------- */
 async function loadCustomers() {
   try {
-    const j = await api('customers_list', { q: $('#cQ').value, frequentOnly: $('#cFreq').checked }); custCache = $('#cQ').value || $('#cFreq').checked ? custCache : j.customers;
-    window._custRows = j.customers; if (!$('#cQ').value && !$('#cFreq').checked) setCount('customers', j.customers.length);
+    const filtered = $('#cQ').value || $('#cFreq').checked || $('#cNew').checked;
+    const j = await api('customers_list', { q: $('#cQ').value, frequentOnly: $('#cFreq').checked, newOnly: $('#cNew').checked }); custCache = filtered ? custCache : j.customers;
+    window._custRows = j.customers; if (!filtered) { setCount('customers', j.customers.length); custNewBanner(j.customers.filter(c => c.reviewed === 0).length); }
     $('#custBody').innerHTML = j.customers.length ? j.customers.map(c => `<tr data-id="${c.id}">
-      <td><b>${c.frequent ? '<span class="star">★</span> ' : ''}${esc(c.name)}</b>${c.notes ? `<div class="eq">${esc(c.notes.slice(0, 60))}</div>` : ''}</td>
+      <td><b>${c.frequent ? '<span class="star">★</span> ' : ''}${esc(c.name)}</b>${c.reviewed === 0 ? ` <span class="tag warn">🆕 New${c.addedBy ? ' · by ' + esc(c.addedBy) : ''}</span> <button type="button" class="linkbtn" data-rev="${c.id}">Mark reviewed</button>` : ''}${c.notes ? `<div class="eq">${esc(c.notes.slice(0, 60))}</div>` : ''}</td>
       <td class="eq">${[c.whatsapp && '✆ ' + esc(c.whatsapp), c.email && '✉ ' + esc(c.email), c.phone && '☎ ' + esc(c.phone)].filter(Boolean).join('<br>') || '—'}</td>
       <td class="hide-sm eq">${esc([c.address1, c.address2, c.address3].filter(Boolean).join(', ') || '—')}</td>
       <td class="num">${fmtN(c.reports)}</td><td class="hide-sm">${c.lastService ? fmtD(c.lastService) : '—'}</td></tr>`).join('')
       : '<tr><td colspan="5" class="empty">No customers found.</td></tr>';
   } catch (e) { toast(e.message); }
 }
-let cT; $('#cQ').addEventListener('input', () => { clearTimeout(cT); cT = setTimeout(loadCustomers, 250); }); $('#cFreq').onchange = loadCustomers;
+let cT; $('#cQ').addEventListener('input', () => { clearTimeout(cT); cT = setTimeout(loadCustomers, 250); }); $('#cFreq').onchange = loadCustomers; $('#cNew').onchange = loadCustomers;
+/* customers registered by technicians from a report: the panel notifies and the supervisor marks them reviewed */
+function custNewBanner(n) { $('#custNewBox').hidden = !n; $('#custNewTxt').textContent = `🆕 ${n} new customer${n === 1 ? '' : 's'} added by technicians — check the details.`; }
+$('#custNewShow').onclick = () => { $('#cNew').checked = true; loadCustomers(); };
+$('#custNewAll').onclick = async () => { try { await api('customer_reviewed', { all: true }); $('#cNew').checked = false; loadCustomers(); loadBadges(); toast('Marked as reviewed'); } catch (e) { toast(e.message); } };
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-rev]'); if (!b) return; e.stopPropagation();
+  try { await api('customer_reviewed', { id: +b.dataset.rev }); loadCustomers(); loadBadges(); } catch (err) { toast(err.message); }
+}, true);
 let custEdit = null;
 function custModal(c) {
   custEdit = c || null;
@@ -1609,12 +1630,21 @@ const RQ = { requested: ['Sent by technician', 'warn'], quoted: ['Quoted', 'info
 const rqTag = s => `<span class="tag ${(RQ[s] || ['', 'off'])[1]}">${(RQ[s] || [s])[0]}</span>`;
 let rqRows = [], openRq = null, rqLines = [];
 async function updateRqCount() { return loadBadges(); }
+let lastNewCust = null;
+function notifyNewCustomer(n) {
+  const msg = n === 1 ? 'A technician added a new customer' : `Technicians added ${n} new customers`;
+  toast('🆕 ' + msg + ' — see Customers');
+  try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: msg, icon: 'icons/icon-192.png' }); } catch {}
+}
 async function loadBadges() {
   try {
     const b = await api('badges');
     const set = (k, n) => $$(`.nb[data-b="${k}"]`).forEach(el => { el.hidden = !n; el.textContent = n > 99 ? '99+' : n; el.title = n ? n + ' pending' : ''; });
     set('jobs', b.jobsOverdue + b.jobsUnassigned); set('invoices', b.invoicesOverdue); set('parts', b.requests + b.orders);
     set('requests', b.requests); set('orders', b.orders); set('stock', b.lowStock);
+    set('customers', b.newCustomers || 0);
+    if (b.newCustomers > (lastNewCust ?? b.newCustomers)) notifyNewCustomer(b.newCustomers - lastNewCust);
+    lastNewCust = b.newCustomers || 0;
     if ('devTools' in b) { devOn = !!b.devTools; $('#devBar').hidden = !devOn; $('#devState').textContent = devOn ? 'ON' : 'OFF'; }
   } catch {}
 }
@@ -1977,13 +2007,13 @@ function devRender() {
   $('#devToggle').textContent = devOn ? 'Turn off' : 'Turn on'; $('#devToggle').className = 'btn ' + (devOn ? 'd' : 'p');
   $('#devTools').hidden = !devOn; $('#devBar').hidden = !devOn; $('#devState').textContent = devOn ? 'ON' : 'OFF';
 }
-function devTab(d) { $$('#devTabs button').forEach(x => x.classList.toggle('on', x.dataset.d === d)); $('#devLoad').hidden = d !== 'load'; $('#devReset').hidden = d !== 'reset'; $('#devExport').hidden = d !== 'export'; }
+function devTab(d) { $$('#devTabs button').forEach(x => x.classList.toggle('on', x.dataset.d === d)); $('#devLoad').hidden = d !== 'load'; $('#devReset').hidden = d !== 'reset'; $('#devExport').hidden = d !== 'export'; $('#devTut').hidden = d !== 'tutorial'; }
 function openDev(tab) {
   $('#devLock').hidden = !!devPin; $('#devBody').hidden = !devPin; $('#devPin').value = ''; $('#devErr').textContent = '';
   if (tab) devTab(tab); devRender(); openModal('#devModal'); if (!devPin) $('#devPin').focus();
 }
 $('#devBtn').onclick = () => openDev();
-$('#devBar').onclick = e => { const b = e.target.closest('[data-dev]'); if (!b) return; if (b.dataset.dev === 'off') { openDev(); if (devPin) $('#devToggle').click(); } else openDev(b.dataset.dev); };
+$('#devBar').onclick = e => { if (e.target.closest('#tutRec')) return; const b = e.target.closest('[data-dev]'); if (!b) return; if (b.dataset.dev === 'off') { openDev(); if (devPin) $('#devToggle').click(); } else openDev(b.dataset.dev); };
 $('#devUnlock').onclick = async () => {
   $('#devErr').textContent = '';
   try { const j = await api('dev_check', { pin: $('#devPin').value.trim() }); devPin = $('#devPin').value.trim(); devOn = !!j.enabled; $('#devLock').hidden = true; $('#devBody').hidden = false; devRender(); }
@@ -2085,6 +2115,136 @@ $('#ltStart').onclick = async () => {
   loadEmps(); loadCounts();
 };
 $('#ltStop').onclick = () => { if (LT) LT.stop = true; };
+
+/* ---- tutorials: screen recording + an automatic step-by-step guide with a picture per step ---- */
+const TUT = { rec: null, stream: null, mic: null, chunks: [], steps: [], video: null, t0: 0, timer: null, blob: null, last: '' };
+const tutChan = 'BroadcastChannel' in window ? new BroadcastChannel('cher-tutorial') : null;   // the technician app (other tab) reports its steps here
+const tTxt = s => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 70);
+function tutLabel(el) {   // what the person touched, in the words shown on screen
+  const c = el.closest('button, a, [role=button], summary, label, input, select, textarea, tr[data-id], .sig, .pick, .job, .hist-item, nav button');
+  if (!c) return null;
+  if (/^(INPUT|SELECT|TEXTAREA)$/.test(c.tagName)) {
+    const lab = c.labels?.[0] || c.closest('div')?.querySelector('label');
+    return { kind: 'field', name: tTxt(c.getAttribute('aria-label') || lab?.textContent || c.placeholder || c.id), secret: c.type === 'password' || /pin/i.test(c.id) };
+  }
+  if (c.matches('tr[data-id]')) return { kind: 'row', name: tTxt(c.cells?.[0]?.textContent) };
+  const k = c.cloneNode(true); k.querySelectorAll('.tc, .nb, .star').forEach(n => n.remove());   // tab names without their counters
+  return { kind: 'button', name: tTxt(c.getAttribute('aria-label') || k.textContent || c.title) };
+}
+function tutStepText(st) {
+  if (st.kind === 'button') return `Toca «${st.name}»`;
+  if (st.kind === 'row') return `Abre «${st.name}»`;
+  if (st.kind === 'check') return `${st.on ? 'Marca' : 'Desmarca'} «${st.name}»`;
+  if (st.kind === 'select') return `Elige «${st.value}» en «${st.name}»`;
+  if (st.kind === 'file') return `Elige el archivo en «${st.name}»`;
+  return st.secret ? `Escribe tu PIN en «${st.name}»` : `Escribe «${st.value}» en «${st.name}»`;
+}
+function tutFrame(st) {   // picture of the screen at that moment, with a red circle where the tap was (when the capture is this tab)
+  const v = TUT.video; if (!v || !v.videoWidth || TUT.steps.indexOf(st) >= 120) return '';
+  const k = Math.min(1, 1100 / v.videoWidth), c = document.createElement('canvas'); c.width = Math.round(v.videoWidth * k); c.height = Math.round(v.videoHeight * k);
+  const x = c.getContext('2d'); x.drawImage(v, 0, 0, c.width, c.height);
+  const surf = TUT.stream?.getVideoTracks()[0]?.getSettings().displaySurface;
+  if (st.x != null && st.page === 'panel' && surf === 'browser' && Math.abs(v.videoWidth / v.videoHeight - st.w / st.h) < 0.03) {
+    x.strokeStyle = '#d0021b'; x.lineWidth = 4; x.beginPath(); x.arc(st.x / st.w * c.width, st.y / st.h * c.height, 22, 0, Math.PI * 2); x.stroke();
+  }
+  return c.toDataURL('image/jpeg', 0.72);
+}
+function tutAdd(st) {
+  if (!TUT.rec) return;
+  st.text = tutStepText(st); const key = st.page + st.text;
+  if (key === TUT.last) return; TUT.last = key;
+  st.at = Math.round((Date.now() - TUT.t0) / 1000);
+  TUT.steps.push(st); $('#tutN').textContent = TUT.steps.length;   // keep the order; the picture is taken a moment later
+  setTimeout(() => { st.img = tutFrame(st); }, st.kind === 'button' || st.kind === 'row' ? 0 : 250);
+}
+const tutIgnore = el => el.closest('#devModal, #tutRec, #delModal');
+document.addEventListener('click', e => {
+  if (!TUT.rec || tutIgnore(e.target)) return;
+  const l = tutLabel(e.target); if (!l || l.kind === 'field' || e.target.closest('label')) return;
+  tutAdd(Object.assign(l, { page: 'panel', x: e.clientX, y: e.clientY, w: innerWidth, h: innerHeight }));
+}, true);
+document.addEventListener('change', e => {
+  if (!TUT.rec || tutIgnore(e.target)) return;
+  const el = e.target, l = tutLabel(el); if (!l || l.kind !== 'field') return;
+  const st = { page: 'panel', name: l.name, secret: l.secret };
+  if (el.type === 'checkbox' || el.type === 'radio') Object.assign(st, { kind: 'check', on: el.checked });
+  else if (el.tagName === 'SELECT') Object.assign(st, { kind: 'select', value: tTxt(el.selectedOptions[0]?.textContent) });
+  else if (el.type === 'file') st.kind = 'file';
+  else Object.assign(st, { kind: 'text', value: l.secret ? '' : tTxt(el.value).slice(0, 40) });   // PINs are never written down
+  tutAdd(st);
+}, true);
+if (tutChan) tutChan.onmessage = e => {
+  const m = e.data || {};
+  if (m.type === 'hello') tutChan.postMessage({ type: 'rec', on: !!TUT.rec });
+  if (m.type === 'step' && TUT.rec) tutAdd(Object.assign({}, m.step, { page: 'tech' }));
+};
+async function tutStart() {
+  if (TUT.rec) return;
+  if (!navigator.mediaDevices?.getDisplayMedia) { toast('This browser cannot record the screen. Use Chrome or Edge on a computer.'); return; }
+  try {
+    TUT.stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 15 }, audio: false, preferCurrentTab: false, selfBrowserSurface: 'include' });
+    TUT.mic = $('#tutMic').checked ? await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => { toast('Microphone not allowed — recording without voice'); return null; }) : null;
+  } catch { toast('Recording cancelled'); return; }
+  const tracks = [...TUT.stream.getVideoTracks(), ...(TUT.mic ? TUT.mic.getAudioTracks() : [])];
+  const type = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'].find(t => window.MediaRecorder?.isTypeSupported?.(t)) || '';
+  TUT.chunks = []; TUT.steps = []; TUT.last = ''; TUT.blob = null;
+  TUT.rec = new MediaRecorder(new MediaStream(tracks), type ? { mimeType: type, videoBitsPerSecond: 1500000 } : {});
+  TUT.rec.ondataavailable = e => { if (e.data.size) TUT.chunks.push(e.data); };
+  TUT.rec.onstop = tutFinish;
+  TUT.stream.getVideoTracks()[0].onended = tutStop;   // "Stop sharing" in the browser bar
+  TUT.video = Object.assign(document.createElement('video'), { muted: true, playsInline: true, srcObject: TUT.stream }); TUT.video.play().catch(() => {});
+  TUT.rec.start(1000); TUT.t0 = Date.now();
+  tutChan?.postMessage({ type: 'rec', on: true });
+  $('#tutRec').hidden = false; $('#tutN').textContent = '0';
+  TUT.timer = setInterval(() => { const s = Math.round((Date.now() - TUT.t0) / 1000); $('#tutClock').textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }, 1000);
+  closeModal('#devModal'); toast('Recording — use the app normally. Stop it from the orange bar.');
+}
+function tutStop() { if (TUT.rec && TUT.rec.state !== 'inactive') TUT.rec.stop(); }
+function tutFinish() {
+  clearInterval(TUT.timer); tutChan?.postMessage({ type: 'rec', on: false });
+  [TUT.stream, TUT.mic].forEach(st => st?.getTracks().forEach(t => t.stop()));
+  TUT.blob = new Blob(TUT.chunks, { type: TUT.rec.mimeType || 'video/webm' }); TUT.rec = null; TUT.video = null;
+  $('#tutRec').hidden = true;
+  setTimeout(() => { openDev('tutorial'); tutRender(); }, 300);   // last pictures are taken a moment after the last step
+}
+function tutRender() {
+  const box = $('#tutOut');
+  if (!TUT.blob) { box.innerHTML = ''; return; }
+  box.innerHTML = `<p style="font-weight:700;color:var(--navy);margin:8px 0">Recorded: ${fmtN(TUT.steps.length)} steps · video ${(TUT.blob.size / 1048576).toFixed(1)} MB. Edit the text of each step, remove the ones you don't want, then download.</p>
+    <div class="acts" style="justify-content:flex-start;flex-wrap:wrap;margin-bottom:8px"><button type="button" class="btn p" id="tutGuide">⬇ Download the guide (HTML, opens in any browser and prints to PDF)</button><button type="button" class="btn s" id="tutVideo">⬇ Download the video</button><button type="button" class="btn d" id="tutDiscard">Discard</button></div>
+    <div style="max-height:46vh;overflow:auto;display:grid;gap:8px" id="tutList"></div>`;
+  const list = $('#tutList');
+  TUT.steps.forEach((st, i) => {
+    const d = document.createElement('div'); d.style.cssText = 'display:grid;grid-template-columns:160px 1fr auto;gap:10px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:8px';
+    d.innerHTML = `<div>${st.img ? '<img alt="" style="width:160px;border-radius:6px;border:1px solid var(--line)">' : '<div class="eq">(no picture)</div>'}</div>
+      <div><div class="eq">Step ${i + 1} · ${st.page === 'tech' ? 'Technician app' : 'Panel'} · ${Math.floor(st.at / 60)}:${String(st.at % 60).padStart(2, '0')}</div><textarea rows="2" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit"></textarea></div>
+      <button type="button" class="btn d" title="Remove step">×</button>`;
+    if (st.img) d.querySelector('img').src = st.img;
+    const ta = d.querySelector('textarea'); ta.value = st.text; ta.oninput = () => { st.text = ta.value; };
+    d.querySelector('button').onclick = () => { TUT.steps.splice(i, 1); tutRender(); };
+    list.appendChild(d);
+  });
+  const name = (($('#tutTitle').value || 'tutorial').trim().toLowerCase().replace(/[^a-z0-9áéíóúñ]+/gi, '-').replace(/^-|-$/g, '')) || 'tutorial';
+  const save = (blob, file) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 10000); };
+  $('#tutVideo').onclick = () => save(TUT.blob, `${name}.${/mp4/.test(TUT.blob.type) ? 'mp4' : 'webm'}`);
+  $('#tutDiscard').onclick = () => { TUT.blob = null; TUT.steps = []; tutRender(); };
+  $('#tutGuide').onclick = () => {
+    const title = esc($('#tutTitle').value.trim() || 'Tutorial'), logo = esc(window.CHER_LOGO_URL || '');
+    const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>
+<style>body{margin:0;background:#f3f5fa;color:#16202e;font:16px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif}main{max-width:900px;margin:0 auto;padding:24px 16px}
+header{display:flex;gap:16px;align-items:center;border-bottom:3px solid #123a8c;padding-bottom:12px;margin-bottom:20px}header img{height:56px}h1{margin:0;color:#123a8c;font-size:26px}
+.meta{color:#5b6678;font-size:14px}.step{background:#fff;border:1px solid #dde3ee;border-radius:14px;padding:16px;margin-bottom:16px;break-inside:avoid}
+.n{display:inline-block;min-width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%;background:#123a8c;color:#fff;font-weight:700;margin-right:10px}
+.t{font-size:18px;font-weight:600}.where{color:#5b6678;font-size:13px;margin:4px 0 10px 40px}.step img{width:100%;border:1px solid #dde3ee;border-radius:8px}
+@media print{body{background:#fff}.step{border:0;padding:0}}</style></head><body><main>
+<header>${logo ? `<img src="${logo}" alt="Cher Services LLC">` : ''}<div><h1>${title}</h1><div class="meta">Cher Services LLC · ${new Date().toLocaleDateString()} · ${TUT.steps.length} pasos</div></div></header>
+${TUT.steps.map((st, i) => `<section class="step"><div class="t"><span class="n">${i + 1}</span>${esc(st.text)}</div><div class="where">${st.page === 'tech' ? 'App del técnico' : 'Panel del supervisor'}</div>${st.img ? `<img src="${st.img}" alt="Paso ${i + 1}">` : ''}</section>`).join('')}
+</main></body></html>`;
+    save(new Blob([html], { type: 'text/html' }), `${name}.html`);
+  };
+}
+$('#tutStart').onclick = tutStart;
+$('#tutStopBar').onclick = tutStop;
 
 /* ---- reset (one step on the server) ---- */
 const rsLog = m => { const b = $('#rsLog'); b.hidden = false; b.insertAdjacentHTML('beforeend', `<div>${esc(new Date().toLocaleTimeString())} · ${esc(m)}</div>`); b.scrollTop = b.scrollHeight; };

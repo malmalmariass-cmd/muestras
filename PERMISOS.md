@@ -4,7 +4,7 @@
 |--------|:------:|:------:|
 | Entrar al panel del supervisor (`admin.html`) | ✗ (el servidor lo rechaza) | ✓ |
 | Importar clientes o partes en masa (Excel / CSV / Word) | ✗ (solo existe en el panel) | ✓ |
-| Registrar un cliente **nuevo** llenando el reporte | ✓ queda registrado al guardar | ✓ |
+| Registrar un cliente **nuevo** llenando el reporte | ✓ queda registrado al guardar y **se avisa al supervisor** | ✓ |
 | Modificar datos de un cliente ya registrado | ✗ — el cambio viaja en el reporte y el supervisor lo **aprueba** desde el reporte | ✓ |
 | Borrar clientes | ✗ | ✓ (desde el panel) |
 | Ver precios / costos de partes | ✗ | ✓ |
@@ -32,7 +32,9 @@
 Revisado con el `api.php` real:
 - **Precios:** el servidor ya los quita de todo lo que recibe un técnico (inventario, reportes, solicitudes,
   pedidos, historial de equipos) y conserva los precios de la oficina cuando un técnico guarda.
-- **Clientes:** un cliente nuevo escrito en un reporte se registra solo. Si ya existe, el servidor **solo rellena
+- **Clientes:** un cliente nuevo escrito en un reporte (o en "+ Nuevo trabajo") se registra solo y queda marcado
+  como *nuevo de técnico*: el panel muestra un contador rojo en **Customers**, un aviso emergente y un
+  recuadro con **Mark reviewed** / **Mark all as reviewed**. Si ya existe, el servidor **solo rellena
   campos vacíos**, nunca sobrescribe. Los cambios que propone el técnico van en el reporte
   (`customerChanges`) y el supervisor los aplica con **Approve and update the customer**.
 - **Borrar clientes, inventario, facturas, empleados:** solo supervisores (`need_sup`).

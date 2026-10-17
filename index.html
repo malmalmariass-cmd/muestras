@@ -626,7 +626,7 @@ const I18N = {
     removeUnsynced: 'This report has NOT reached the office yet. Removing it will delete it permanently. Continue?', removed: 'Removed from tablet', downloaded: '{n} reports downloaded', noConnShort: 'No connection',
     replaceDraft: 'You have a report in progress. Replace it with this job?',
     roleTech: 'Technician', roleSup: 'Supervisor', openPanel: 'Open supervisor panel', notSupervisor: 'This account is not a supervisor. Choose “Technician”.',
-    custNew: 'New customer: it is registered when you save this report.',
+    custNew: 'New customer: it is registered when you save this report, and the supervisor is notified.',
     custChanged: 'This customer is already registered. Only the supervisor can change its data: your change goes with this report so the supervisor can approve it.',
       },
   es: {
@@ -695,7 +695,7 @@ const I18N = {
     removeUnsynced: 'Este reporte NO ha llegado a la oficina. Si lo quitas se borra para siempre. ¿Continuar?', removed: 'Quitado de la tablet', downloaded: '{n} reportes descargados', noConnShort: 'Sin conexión',
     replaceDraft: 'Tienes un reporte en proceso. ¿Reemplazarlo con este trabajo?',
     roleTech: 'Técnico', roleSup: 'Supervisor', openPanel: 'Entrar al panel del supervisor', notSupervisor: 'Esta cuenta no es de supervisor. Elige “Técnico”.',
-    custNew: 'Cliente nuevo: queda registrado al guardar este reporte.',
+    custNew: 'Cliente nuevo: queda registrado al guardar este reporte y se avisa al supervisor.',
     custChanged: 'Este cliente ya está registrado. Solo el supervisor puede cambiar sus datos: tu cambio va con este reporte para que el supervisor lo apruebe.',
       }
 };
@@ -1662,6 +1662,40 @@ if (!standalone && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && 'on
 }
 if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
 if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
+
+/* ---------------- tutorial recording ----------------
+   When the supervisor panel (another tab of this browser) records a tutorial, this app reports what is tapped
+   here so the guide includes the technician's steps. Nothing is sent anywhere else; PINs are never reported. */
+(() => {
+  if (!('BroadcastChannel' in window)) return;
+  const ch = new BroadcastChannel('cher-tutorial'); let on = false;
+  ch.onmessage = e => { if (e.data?.type === 'rec') on = !!e.data.on; };
+  ch.postMessage({ type: 'hello' });
+  const txt = v => String(v || '').replace(/\s+/g, ' ').trim().slice(0, 70);
+  const label = el => {
+    const c = el.closest('button, a, summary, label, input, select, textarea, .sig, .pick, .job, .hist-item');
+    if (!c) return null;
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(c.tagName)) {
+      const lab = c.labels?.[0] || c.closest('div')?.querySelector('label') || c.closest('td');
+      return { kind: 'field', name: txt(c.getAttribute('aria-label') || lab?.dataset?.l || lab?.textContent || c.placeholder || c.id), secret: c.type === 'password' || /pin/i.test(c.id) };
+    }
+    if (c.matches('.sig')) return { kind: 'button', name: txt(c.querySelector('.lb')?.textContent) };
+    const k = c.cloneNode(true); k.querySelectorAll('.cnt, .tot').forEach(n => n.remove());   // tab names without their counters
+    return { kind: 'button', name: txt(c.getAttribute('aria-label') || k.textContent || c.title) };
+  };
+  document.addEventListener('click', e => {
+    if (!on) return; const l = label(e.target); if (!l || l.kind === 'field' || e.target.closest('label')) return;
+    ch.postMessage({ type: 'step', step: Object.assign(l, { x: e.clientX, y: e.clientY, w: innerWidth, h: innerHeight }) });
+  }, true);
+  document.addEventListener('change', e => {
+    if (!on) return; const el = e.target, l = label(el); if (!l || l.kind !== 'field') return;
+    const st = { name: l.name, secret: l.secret };
+    if (el.type === 'checkbox' || el.type === 'radio') Object.assign(st, { kind: 'check', on: el.checked });
+    else if (el.tagName === 'SELECT') Object.assign(st, { kind: 'select', value: txt(el.selectedOptions[0]?.textContent) });
+    else Object.assign(st, { kind: 'text', value: l.secret ? '' : txt(el.value).slice(0, 40) });
+    ch.postMessage({ type: 'step', step: st });
+  }, true);
+})();
 
 /* ---------------- boot ---------------- */
 window.toast = toast;
