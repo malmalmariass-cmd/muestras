@@ -2,13 +2,17 @@
 
 ## 1. Activar las herramientas (una vez)
 
-En hPanel → Administrador de archivos → `api/config.php`, añade una línea al final:
+En hPanel → Administrador de archivos → abre `api/api.php`. Arriba del todo (línea 12) está:
 
 ```php
-define('DEV_PIN', 'TU-PIN-DE-DESARROLLADORA');
+const DEV_PIN_AQUI = '';
 ```
 
-- El PIN **solo** vive en `config.php`, en el servidor. No aparece en el panel, en la app ni en GitHub.
+Escribe tu PIN entre las dos comillas (sin borrar las comillas ni el `;`) y guarda.
+
+- El PIN solo vive en el servidor. No aparece en el panel, en la app ni en GitHub (`api.php` no se sube al repositorio).
+- También sirve `define('DEV_PIN', '…');` en `config.php`; si hay PIN en los dos sitios, manda el de `api.php`.
+- Al subir un `api.php` nuevo, vuelve a escribir el PIN en esa línea.
 - El servidor lo comprueba en cada acción. 5 intentos fallidos bloquean las herramientas 1 hora.
 - Aprovecha y revisa en el mismo archivo que diga `define('DB_HOST', 'localhost');`.
 
@@ -103,7 +107,7 @@ Prueba la restauración una vez, con calma, en una base de datos de prueba. Así
 
 ## 5. Plan para la prueba de carga
 
-1. `api/config.php`: `DB_HOST` = `localhost` y la línea `DEV_PIN`.
+1. `api/config.php`: `DB_HOST` = `localhost`. `api/api.php`: tu PIN en `DEV_PIN_AQUI`.
 2. Sube los archivos del paquete.
 3. Settings → **Download full backup (.sql)**.
 4. Developer tools → PIN → **Turn on** → **Load test**: primero 10 técnicos / 3 minutos, luego 50 / 10.
