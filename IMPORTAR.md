@@ -18,8 +18,9 @@ rápida y no expone las funciones de supervisor). Para el usuario es una sola p�
 
 ## Importación masiva (solo en el panel del supervisor)
 
-Botón **⇪ Import Excel / Word** en **Customers** y en **Inventory**. Lee Excel (.xlsx/.xls), CSV y tablas de
-Word (.docx). `.doc` antiguo: guardarlo como .docx. Muestra una vista previa antes de importar.
+Botón **⇪ Import Excel / Word** en **Customers** y en **Inventory**. Lee Excel (.xlsx/.xls), CSV, tablas de
+Word (.docx) y **fotos o capturas de pantalla** de una tabla (el texto se reconoce solo y se puede corregir
+antes de importar). `.doc` antiguo: guardarlo como .docx. Muestra una vista previa antes de importar.
 
 Usa las acciones que el servidor **ya tiene** (`customer_save`, `inventory_save`, `inventory_adjust`), así que
 funciona sin tocar `api/api.php`.
@@ -39,4 +40,5 @@ funciona sin tocar `api/api.php`.
 
 ## Archivos a subir al servidor
 
-`index.html`, `admin.html` y la carpeta `vendor/` (lector de Excel; si falta se usa el CDN verificado con SRI).
+`index.html`, `admin.html` y la carpeta `vendor/` completa: el lector de Excel y `vendor/ocr/` (lector de
+imágenes, ~11 MB, solo se descarga la primera vez que se importa una foto).

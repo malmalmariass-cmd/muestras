@@ -161,6 +161,8 @@ table.time .x{background:none;border:0;color:var(--red);font-size:22px;cursor:po
 .lang{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
 .lang button{border:0;background:#fff;color:var(--muted);font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer}
 .lang button.on{background:var(--navy);color:#fff}
+.tabs .tot{display:inline-block;min-width:19px;padding:0 6px;margin-left:6px;border-radius:999px;background:#dfe5f1;color:var(--navy);font-size:11px;font-weight:800;line-height:19px;text-align:center}
+.tabs button.on .tot{background:rgba(255,255,255,.25);color:#fff}
 .tabs .cnt{display:inline-block;min-width:19px;padding:0 5px;margin-left:5px;border-radius:999px;background:#8a1538;color:#fff;font-size:11px;font-weight:800;line-height:19px;text-align:center;box-shadow:0 0 0 2px #fff}
 /* jobs */
 .daygrp{margin:18px 0 8px;font-size:13px;font-weight:800;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
@@ -280,11 +282,11 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
     <button id="btnLogout" type="button" data-t="signOut">Sign out</button>
   </div>
   <nav class="tabs">
-    <button id="tabJobs" type="button"><span data-t="tabJobs">Jobs</span><span class="cnt" id="jobsCnt" hidden></span></button>
+    <button id="tabJobs" type="button"><span data-t="tabJobs">Jobs</span><span class="tot" id="jobsTot" hidden></span><span class="cnt" id="jobsCnt" hidden></span></button>
     <button id="tabForm" class="on" type="button"><span data-t="tabReport">Fill Service Report</span><span class="cnt" id="formCnt" hidden></span></button>
     <button id="tabMaint" type="button"><span data-t="tabMaint">Equipment Service Report</span><span class="cnt" id="maintCnt" hidden></span></button>
-    <button id="tabReqs" type="button"><span data-t="tabReqs">Parts Requests</span><span class="cnt" id="reqCnt" hidden></span></button>
-    <button id="tabHist" type="button"><span data-t="tabHistory">History</span><span class="cnt" id="histCnt" hidden></span></button>
+    <button id="tabReqs" type="button"><span data-t="tabReqs">Parts Requests</span><span class="tot" id="reqTot" hidden></span><span class="cnt" id="reqCnt" hidden></span></button>
+    <button id="tabHist" type="button"><span data-t="tabHistory">History</span><span class="tot" id="histTot" hidden></span><span class="cnt" id="histCnt" hidden></span></button>
   </nav>
 </header>
 
@@ -1002,11 +1004,13 @@ const pullRequests = once(async () => {
 /* red counters on the tabs: what is waiting for this technician */
 async function updateBadges() {
   const setC = (id, n) => { const el = $(id); if (!el) return; el.hidden = !n; el.textContent = n > 99 ? '99+' : n; };
+  const setT = (id, n) => { const el = $(id); if (!el) return; el.hidden = !n; el.textContent = n > 999 ? '999+' : n; el.title = n + ' total'; };
+  setT('#reqTot', allRequests().length);
   const seen = LS.get('cher.reqSeen', {});
   setC('#reqCnt', requests.filter(q => ['quoted', 'approved', 'declined', 'invoiced'].includes(q.status) && seen[q.id] !== q.updatedAt).length + reqQueue().length);
   try {
-    const pend = (await DB.all()).filter(r => r.employeeId === me() && !r.synced);
-    setC('#histCnt', pend.length);
+    const mine = (await DB.all()).filter(r => r.employeeId === me()), pend = mine.filter(r => !r.synced);
+    setT('#histTot', mine.length); setC('#histCnt', pend.length);
     setC('#formCnt', pend.filter(r => r.type !== 'maintenance').length); setC('#maintCnt', pend.filter(r => r.type === 'maintenance').length);
   } catch {}
 }
@@ -1428,8 +1432,9 @@ const pullJobs = once(async () => {
   updateJobsCount(); if (!$('#viewJobs').hidden) renderJobs();
 });
 function updateJobsCount() {
-  const n = jobsCache.filter(j => j.status === 'scheduled' && j.date <= todayISO()).length;
+  const n = jobsCache.filter(j => j.status === 'scheduled' && j.date <= todayISO()).length, tot = jobsCache.filter(j => j.status !== 'cancelled').length;
   $('#jobsCnt').hidden = !n; $('#jobsCnt').textContent = n;
+  $('#jobsTot').hidden = !tot; $('#jobsTot').textContent = tot; $('#jobsTot').title = tot + ' total';
 }
 function renderJobs() {
   const box = $('#jobsList'), today = todayISO(), tom = new Date(Date.now() + 86400000);

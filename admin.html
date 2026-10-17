@@ -8,7 +8,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>window.CHER_LOGO_URL = "data:image/png;base64,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";</script>
@@ -136,6 +136,8 @@ table.t .num{text-align:right;font-variant-numeric:tabular-nums}
 .presets button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
 /* invoices */
 .modal .mc.xl{max-width:1020px}
+nav button .tc{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;background:#e6ebf5;color:var(--ink-2);font-size:11px;font-weight:700;line-height:18px;vertical-align:1px}
+nav button.on .tc{background:rgba(255,255,255,.25);color:#fff}
 .impwrap{max-height:40vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
 .impwrap table{width:100%;border-collapse:collapse;font-size:13px}
 .impwrap th{position:sticky;top:0;background:#f3f6fc;text-align:left;padding:6px 8px;color:var(--muted)}
@@ -223,14 +225,14 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
   <img data-logo alt="Cher Services LLC">
   <div class="ttl">Supervisor Panel<small id="whoami"></small></div>
   <nav>
-    <button data-v="reports" class="on">Reports &amp; Jobs<span class="nb" data-b="jobs" hidden></span></button>
-    <button data-v="invoices">Invoices<span class="nb" data-b="invoices" hidden></span></button>
-    <button data-v="requests">Parts &amp; Orders<span class="nb" data-b="parts" hidden></span><span id="rqCnt" hidden></span></button>
-    <button data-v="customers">Customers</button>
-    <button data-v="inventory">Inventory<span class="nb" data-b="stock" hidden></span></button>
-    <button data-v="equipment">Equipment</button>
+    <button data-v="reports" class="on">Reports &amp; Jobs<span class="tc" data-c="reports" hidden></span><span class="nb" data-b="jobs" hidden></span></button>
+    <button data-v="invoices">Invoices<span class="tc" data-c="invoices" hidden></span><span class="nb" data-b="invoices" hidden></span></button>
+    <button data-v="requests">Parts &amp; Orders<span class="tc" data-c="requests" hidden></span><span class="nb" data-b="parts" hidden></span><span id="rqCnt" hidden></span></button>
+    <button data-v="customers">Customers<span class="tc" data-c="customers" hidden></span></button>
+    <button data-v="inventory">Inventory<span class="tc" data-c="inventory" hidden></span><span class="nb" data-b="stock" hidden></span></button>
+    <button data-v="equipment">Equipment<span class="tc" data-c="equipment" hidden></span></button>
     <button data-v="stats">Statistics</button>
-    <button data-v="emps">Employees</button>
+    <button data-v="emps">Employees<span class="tc" data-c="emps" hidden></span></button>
     <button data-v="settings">Settings</button>
     <button id="logout">Sign out</button>
   </nav>
@@ -445,6 +447,11 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
       <div class="sub" style="margin:0 0 10px">The data lives in the MySQL database on Hostinger. Download a full copy from time to time and keep it somewhere safe (it includes customers, reports, invoices, inventory and employees).</div>
       <div class="acts" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn p" id="bkBtn">⬇ Download full backup (.sql)</button><button type="button" class="btn s" id="myPinBtn">Change my PIN</button></div>
     </div>
+    <h2 style="font-size:17px;margin:24px 0 8px">Developer</h2>
+    <div class="card" style="max-width:640px">
+      <div class="sub" style="margin:0 0 10px">Load test (simulate many technicians at once) and reset of test data. Locked with the developer PIN.</div>
+      <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="devBtn">🛠 Developer tools</button></div>
+    </div>
     <h2 style="font-size:17px;margin:24px 0 8px">Activity log</h2>
     <div class="card" style="padding:0"><div class="tablewrap"><table class="t"><thead><tr><th>When</th><th>Who</th><th>What</th><th>Reason</th><th></th></tr></thead><tbody id="logRows"></tbody></table></div></div>
     <h2 style="font-size:17px;margin:24px 0 8px">Equipment service checklist</h2>
@@ -652,14 +659,55 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
   </form>
 </div>
 
+<!-- developer tools -->
+<div class="modal" id="devModal" hidden>
+  <div class="mc xl">
+    <h2>🛠 Developer tools</h2>
+    <div id="devLock" class="form">
+      <div class="sub" style="margin:0">Only for the developer.</div>
+      <div class="row"><div><label>Developer PIN</label><input id="devPin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div><div style="align-self:end"><button type="button" class="btn p" id="devUnlock">Unlock</button></div></div>
+      <div class="err" id="devErr"></div>
+    </div>
+    <div id="devBody" hidden>
+      <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button></div>
+      <div id="devLoad" class="form">
+        <div class="sub" style="margin:0">Simulates technicians using the tablet app at the same time, from this browser: sign in, download customers / inventory / jobs, sync every ~30 s and send service reports (with signatures, like the real app). Test technicians <b>TEST01, TEST02…</b> are created (or re-activated) automatically. No emails are sent.</div>
+        <div class="row3"><div><label>Technicians</label><input id="ltN" type="number" min="1" max="100" value="50"></div><div><label>Duration (minutes)</label><input id="ltMin" type="number" min="1" max="60" value="5"></div><div><label>A report every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div></div>
+        <div class="acts" style="justify-content:flex-start"><button type="button" class="btn p" id="ltStart">▶ Start test</button><button type="button" class="btn d" id="ltStop" hidden>■ Stop</button><span id="ltState" style="align-self:center;color:var(--ink-2);font-size:13px"></span></div>
+        <div id="ltOut"></div>
+      </div>
+      <div id="devReset" class="form" hidden>
+        <div class="sub" style="margin:0">Deletes test data in one go. <b>Download a backup first.</b> Deleted reports and invoices keep a copy in the Activity log.</div>
+        <div class="row3">
+          <label class="chk"><input type="checkbox" data-w="reports" checked> Service reports</label>
+          <label class="chk"><input type="checkbox" data-w="invoices" checked> Invoices</label>
+          <label class="chk"><input type="checkbox" data-w="jobs" checked> Jobs &amp; appointments</label>
+          <label class="chk"><input type="checkbox" data-w="customers"> Customers</label>
+          <label class="chk"><input type="checkbox" data-w="inventory"> Inventory (archive all parts)</label>
+          <label class="chk"><input type="checkbox" data-w="testTechs" checked> Test technicians (TEST…)</label>
+          <label class="chk"><input type="checkbox" data-w="allTechs"> All other technicians (deactivate)</label>
+        </div>
+        <div class="row3"><div><label>Next invoice number after the reset</label><input id="rsNext" type="number" min="1" placeholder="leave as is"></div><div><label>Your supervisor PIN</label><input id="rsSupPin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div><div><label>Type RESET to confirm</label><input id="rsConfirm" autocomplete="off" autocapitalize="characters"></div></div>
+        <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="rsBackup">⬇ Download backup first</button><button type="button" class="btn d" id="rsGo">Reset now</button></div>
+        <div id="rsLog" style="font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:30vh;overflow:auto;background:#f6f8fc;border-radius:8px;padding:8px 10px" hidden></div>
+      </div>
+    </div>
+    <div class="acts"><button type="button" class="btn s" data-cancel>Close</button></div>
+  </div>
+</div>
+
 <!-- bulk import modal (customers / parts) -->
 <div class="modal" id="impModal" hidden>
   <div class="mc wide">
     <h2 id="impTitle">Import</h2>
     <p class="sub" id="impHint" style="margin-top:-4px"></p>
     <div class="form">
-      <div class="row"><label class="btn p" for="impFile" style="justify-content:center">⇪ Choose file (.xlsx, .xls, .csv, .docx)</label><button type="button" class="btn s" id="impTpl">Download template</button></div>
-      <input type="file" id="impFile" accept=".xlsx,.xls,.csv,.docx" hidden>
+      <div class="row"><label class="btn p" for="impFile" style="justify-content:center">⇪ Choose file or photo</label><button type="button" class="btn s" id="impTpl">Download template</button></div>
+      <input type="file" id="impFile" accept=".xlsx,.xls,.csv,.docx,image/*" hidden>
+      <details id="impOcrBox" hidden><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Text read from the image — check it and correct it if needed</summary>
+        <textarea id="impOcrText" rows="8" style="width:100%;margin-top:8px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:8px;padding:8px"></textarea>
+        <div class="sub" style="margin:4px 0 8px">One row per line, columns separated by “ | ”. The first line with column names is the header.</div>
+        <button type="button" class="btn s" id="impOcrApply">Read this text again</button></details>
       <div class="row3" id="impPartOpts" hidden>
         <div><label>These parts are…</label><select id="impKind"><option value="stock">Received — add to in-house stock</option><option value="order">Vendor catalog — to order (no stock)</option></select></div>
         <div><label>Vendor / supplier</label><input id="impVendor" list="vendDl"></div>
@@ -786,9 +834,27 @@ let emps = [];
 async function enter(user) {
   $('#gate').hidden = true; $('#app').hidden = false;
   $('#whoami').textContent = `${user.name} · ${user.code}`;
-  await loadEmps(); view('reports'); updateOrdCount(); updateRqCount(); setInterval(updateRqCount, 60000);
+  await loadEmps(); view('reports'); updateOrdCount(); updateRqCount(); setInterval(updateRqCount, 60000); setTimeout(loadCounts, 1500);
   const must = sessionStorage.getItem('cher.mustChangePin');   // set by the start page when the server asks for a new PIN
   if (must) { sessionStorage.removeItem('cher.mustChangePin'); pinModal('', must === 'master' ? 'You signed in with the master account and its default PIN. Choose a new PIN now so nobody else can use it (at least 6 digits).' : 'Supervisor PINs now need at least 6 digits. Choose a new PIN.'); }
+}
+
+/* ---------------- totals on the tabs ---------------- */
+function setCount(k, n) { $$(`.tc[data-c="${k}"]`).forEach(el => { el.hidden = n == null; el.textContent = n > 9999 ? '9999+' : fmtN(n); el.title = `${fmtN(n)} registered`; }); }
+let countsBusy = false;
+async function loadCounts() {
+  if (countsBusy) return; countsBusy = true;   // one request after another: shared hosting limits database connections
+  const steps = [
+    ['reports', async () => (await api('reports_list', { limit: 1, offset: 0 })).total],
+    ['invoices', async () => (await api('invoices_list', {})).rows.length],
+    ['requests', async () => (await api('preq_list', { status: '' })).requests.length],
+    ['customers', async () => (await api('customers_list', {})).customers.length],
+    ['inventory', async () => (await api('inventory_list', { includeArchived: true })).items.filter(i => i.active).length],
+    ['equipment', async () => (await api('equipment_list', { q: '' })).equipment.length],
+    ['emps', async () => emps.filter(e => e.active).length]
+  ];
+  for (const [k, fn] of steps) { try { setCount(k, await fn()); } catch {} }
+  countsBusy = false;
 }
 
 /* ---------------- views ---------------- */
@@ -907,7 +973,7 @@ $('#dDel').onclick = () => {
 /* ---------------- employees ---------------- */
 async function loadEmps() {
   try {
-    const j = await api('employees_list'); emps = j.employees;
+    const j = await api('employees_list'); emps = j.employees; setCount('emps', emps.filter(e => e.active).length);
     const opts = '<option value="">All</option>' + emps.filter(e => e.role === 'tech' || e.reports).map(e => `<option value="${e.id}">${esc(e.name)}</option>`).join('');
     ['#fTech', '#sTech'].forEach(s => { const v = $(s).value; $(s).innerHTML = opts; $(s).value = v; });
     $('#empBody').innerHTML = emps.length ? emps.map(e => `<tr data-id="${e.id}">
@@ -1111,7 +1177,7 @@ $('#jbDel').onclick = async () => {
 async function loadCustomers() {
   try {
     const j = await api('customers_list', { q: $('#cQ').value, frequentOnly: $('#cFreq').checked }); custCache = $('#cQ').value || $('#cFreq').checked ? custCache : j.customers;
-    window._custRows = j.customers;
+    window._custRows = j.customers; if (!$('#cQ').value && !$('#cFreq').checked) setCount('customers', j.customers.length);
     $('#custBody').innerHTML = j.customers.length ? j.customers.map(c => `<tr data-id="${c.id}">
       <td><b>${c.frequent ? '<span class="star">★</span> ' : ''}${esc(c.name)}</b>${c.notes ? `<div class="eq">${esc(c.notes.slice(0, 60))}</div>` : ''}</td>
       <td class="eq">${[c.whatsapp && '✆ ' + esc(c.whatsapp), c.email && '✉ ' + esc(c.email), c.phone && '☎ ' + esc(c.phone)].filter(Boolean).join('<br>') || '—'}</td>
@@ -1160,7 +1226,7 @@ function stockTag(i) {
 const qtyCls = i => i.qty < 0 ? 'neg' : i.qty === 0 ? 'zero' : (i.minQty && i.qty <= i.minQty ? 'low' : '');
 async function loadInventory() {
   try {
-    invItems = (await api('inventory_list', { includeArchived: true })).items;
+    invItems = (await api('inventory_list', { includeArchived: true })).items; setCount('inventory', invItems.filter(i => i.active).length);
     const act = invItems.filter(i => i.active && i.kind !== 'order');
     $('#vendDl').innerHTML = [...new Set(invItems.map(i => i.vendor).filter(Boolean))].map(v => `<option value="${esc(v)}">`).join('');
     const value = act.reduce((s, i) => s + Math.max(0, i.qty) * i.price, 0);
@@ -1306,7 +1372,7 @@ $('#ordCsv').onclick = () => {
 let eqRows = [];
 async function loadEquipment() {
   try {
-    eqRows = (await api('equipment_list', { q: $('#eqQ').value })).equipment;
+    eqRows = (await api('equipment_list', { q: $('#eqQ').value })).equipment; if (!$('#eqQ').value) setCount('equipment', eqRows.length);
     $('#eqBody').innerHTML = eqRows.length ? eqRows.map((x, i) => `<tr data-i="${i}">
       <td><b>${esc(x.serial_no)}</b></td><td>${esc([x.make, x.model].filter(Boolean).join(' ') || '—')}</td><td>${esc(x.customer || '—')}</td>
       <td class="num">${fmtN(x.services)}</td><td>${fmtD(x.last_date)}</td>
@@ -1512,7 +1578,7 @@ async function loadBadges() {
 async function loadRequests() {
   try {
     const j = await api('preq_list', { status: $('#rqStatus').value }); rqRows = j.requests; loadBadges();
-    const all = (await api('preq_list', { status: '' })).requests;
+    const all = (await api('preq_list', { status: '' })).requests; setCount('requests', all.length);
     const cnt = s => all.filter(x => x.status === s).length;
     $('#rqKpis').innerHTML = [['Waiting for you', fmtN(cnt('requested')), 'sent by technicians'], ['Quoted', fmtN(cnt('quoted')), 'waiting for approval'], ['Approved', fmtN(cnt('approved')), 'parts released, not invoiced'],
       ['To invoice', money(all.filter(x => x.status === 'approved').reduce((s, x) => s + x.total, 0)), 'value of approved requests']].map(kpi).join('');
@@ -1859,6 +1925,159 @@ async function invoiceFromReport(r) {
 }
 $('#cuInv').onclick = () => { const c = custEdit; closeModal('#custModal'); invoiceModal(null, { customer: c }); };
 
+/* ---------------- developer tools (developer PIN) ---------------- */
+/* The PIN is checked by the server when api.php has the "dev_check" action (see DESARROLLO.md); until then by this hash.
+   These tools only do in bulk what a supervisor can already do one by one (delete, archive, deactivate). */
+const DEV_HASH = '474adc458b753ed2c44ecebecf32e19e9a3b4243a63ebef4b655d04432895fde';
+let devPin = '';
+async function sha256(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+async function devCheck(pin) {
+  try { const j = await api('dev_check', { pin }); if (j.dev === true) return true; if (j.dev === false) return false; }
+  catch (e) { if (/wrong|incorrect|locked/i.test(e.message)) throw e; }   // the server has the check and said no
+  return await sha256('cher-dev-v1:' + pin) === DEV_HASH;
+}
+$('#devBtn').onclick = () => { $('#devLock').hidden = !!devPin; $('#devBody').hidden = !devPin; $('#devPin').value = ''; $('#devErr').textContent = ''; openModal('#devModal'); if (!devPin) $('#devPin').focus(); };
+$('#devUnlock').onclick = async () => {
+  const lock = +localStorage.getItem('cher.devLock') || 0;
+  if (Date.now() < lock) { $('#devErr').textContent = `Too many wrong PINs. Try again at ${new Date(lock).toLocaleTimeString()}.`; return; }
+  const pin = $('#devPin').value.trim(); $('#devErr').textContent = '';
+  let ok = false; try { ok = await devCheck(pin); } catch (e) { $('#devErr').textContent = e.message; return; }
+  if (!ok) {
+    const n = (+sessionStorage.getItem('cher.devFails') || 0) + 1; sessionStorage.setItem('cher.devFails', n);
+    if (n >= 5) { localStorage.setItem('cher.devLock', Date.now() + 15 * 60000); sessionStorage.removeItem('cher.devFails'); }
+    $('#devErr').textContent = 'Wrong developer PIN.'; return;
+  }
+  sessionStorage.removeItem('cher.devFails'); devPin = pin; $('#devLock').hidden = true; $('#devBody').hidden = false;
+};
+$('#devPin').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#devUnlock').click(); } });
+$('#devTabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; $$('#devTabs button').forEach(x => x.classList.toggle('on', x === b)); $('#devLoad').hidden = b.dataset.d !== 'load'; $('#devReset').hidden = b.dataset.d !== 'reset'; };
+
+/* ---- load test: N virtual technicians doing what the tablet app does ---- */
+let LT = null;
+const sleepUntil = async (ms, stop) => { const end = Date.now() + ms; while (Date.now() < end && !stop()) await sleep(Math.min(500, end - Date.now())); };
+function ltRecord(a, ms, ok, err) {
+  const s = LT.stats[a] = LT.stats[a] || { n: 0, err: 0, t: [] };
+  s.n++; s.t.push(ms); if (!ok) { s.err++; LT.errors[err] = (LT.errors[err] || 0) + 1; }
+}
+async function ltCall(tech, action, data = {}) {
+  const t0 = performance.now(), ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000); let ok = false, err = '';
+  try {
+    const res = await fetch(API, { method: 'POST', cache: 'no-store', signal: ctl.signal, headers: { 'Content-Type': 'application/json', ...(tech.token ? { 'X-Auth-Token': tech.token } : {}) }, body: JSON.stringify({ action, ...data }) });
+    let j = null; try { j = JSON.parse(await res.text()); } catch {}
+    ok = !!(res.ok && j && j.ok); if (!ok) err = `${action}: ${(j && j.error) || 'HTTP ' + res.status}`;
+    return ok ? j : null;
+  } catch (e) { err = `${action}: ${e.name === 'AbortError' ? 'no answer in 30 s' : 'network error'}`; return null; }
+  finally { clearTimeout(tm); ltRecord(action, performance.now() - t0, ok, err); }
+}
+let ltSig = '';
+function fakeSignature() {   // a real-looking signature image, so each report weighs what a real one does
+  if (ltSig) return ltSig;
+  const c = document.createElement('canvas'); c.width = 600; c.height = 160; const x = c.getContext('2d');
+  x.strokeStyle = '#0a1f5c'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(20, 100);
+  for (let i = 1; i < 60; i++) x.lineTo(20 + i * 9.5, 80 + Math.sin(i * 0.9) * 45 + Math.cos(i * 2.3) * 15);
+  x.stroke(); return ltSig = c.toDataURL('image/png');
+}
+function fakeReport(tech) {
+  const now = new Date().toISOString(), d = now.slice(0, 10);
+  return { id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), type: Math.random() < 0.3 ? 'maintenance' : 'repair', createdAt: now, updatedAt: now, synced: false,
+    invoiceNo: '', employeeId: tech.code, customerName: 'LOAD TEST CUSTOMER ' + (1 + Math.floor(Math.random() * 5)), address1: '1 Test Street', address2: 'Homestead, FL', address3: '33033',
+    customerEmail: '', customerWhatsapp: '', workOrder: 'LT-' + Math.floor(Math.random() * 9999), make: 'Caterpillar', model: '320D', serialNo: 'LT' + (1000 + Math.floor(Math.random() * 50)), hour: '1234',
+    instructions: 'Load test — delete me', parts: [], services: [], faults: [{ fault: 'Hydraulic leak (load test)', correction: 'Replaced hose and tested' }], status: 'complete', statusHistory: [{ status: 'complete', at: now, by: tech.code }],
+    time: [{ date: d, left: '07:30', started: '08:15', completed: '11:40', mileage: '22' }], notes: '', customerComment: 'Load test',
+    sigs: { serviceman: { img: fakeSignature(), name: tech.code, at: now }, customer: { img: fakeSignature(), name: 'Test Customer', at: now } } };
+}
+async function ltTech(i) {
+  const tech = { code: 'TEST' + String(i).padStart(2, '0'), token: null }, stop = () => LT.stop || Date.now() >= LT.end;
+  await sleepUntil(Math.random() * Math.min(30000, LT.durMs / 4), stop);   // technicians arrive over the first ~30 s
+  if (stop()) return;
+  const j = await ltCall(tech, 'login', { code: tech.code, pin: LT.pin }); if (!j) return;
+  tech.token = j.token; LT.active++;
+  for (const a of ['me', 'customers', 'inventory_list', 'service_items', 'jobs_list', 'preq_list']) { if (stop()) break; await ltCall(tech, a); }
+  let nextRep = Date.now() + Math.random() * LT.repMs;
+  while (!stop()) {
+    await sleepUntil(24000 + Math.random() * 12000, stop); if (stop()) break;   // the app syncs every 24–36 s
+    if (Date.now() >= nextRep) { const r = await ltCall(tech, 'save_report', { report: fakeReport(tech) }); if (r) LT.reports++; nextRep += LT.repMs; }
+    await ltCall(tech, 'preq_list');
+    if (Math.random() < 0.35) await ltCall(tech, 'jobs_list');
+  }
+  await ltCall(tech, 'logout'); LT.active--;
+}
+const pct = (a, p) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
+function ltRender(final) {
+  if (!LT) return;
+  const all = Object.values(LT.stats), n = all.reduce((s, x) => s + x.n, 0), e = all.reduce((s, x) => s + x.err, 0), times = all.flatMap(x => x.t);
+  const secs = Math.max(1, (Math.min(Date.now(), LT.end) - LT.start) / 1000), p95 = pct(times, 0.95);
+  const verdict = !n ? '' : e / n > 0.01 ? ['bad', `✗ ${fmtN(e)} errors (${(e / n * 100).toFixed(1)}%) — the server is not keeping up. See the errors below.`]
+    : p95 > 3000 ? ['warn', `⚠ No errors, but slow: 95% of requests answered in under ${(p95 / 1000).toFixed(1)} s (target: under 3 s).`]
+    : ['ok', `✓ Fine: ${fmtN(n)} requests, ${e ? fmtN(e) + ' errors' : 'no errors'}, 95% answered in under ${(p95 / 1000).toFixed(2)} s.`];
+  $('#ltOut').innerHTML = `<div class="kpis k4">${[['Technicians online', `${fmtN(LT.active)} / ${fmtN(LT.n)}`, LT.stop || Date.now() >= LT.end ? 'test finished' : 'signed in now'],
+      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), n ? (e / n * 100).toFixed(1) + '% of requests' : ''], ['Reports saved', fmtN(LT.reports), 'with 2 signatures each']].map(kpi).join('')}</div>
+    ${verdict && (final || n > 50) ? `<p style="font-weight:700;color:var(--${verdict[0] === 'ok' ? 'ok' : verdict[0] === 'warn' ? 'warn' : 'red'})">${esc(verdict[1])}</p>` : ''}
+    <div class="tablewrap"><table class="t"><thead><tr><th>Action</th><th class="num">Requests</th><th class="num">Errors</th><th class="num">Average</th><th class="num">95% under</th><th class="num">Slowest</th></tr></thead><tbody>
+    ${Object.entries(LT.stats).map(([a, x]) => `<tr><td>${esc(a)}</td><td class="num">${fmtN(x.n)}</td><td class="num" style="${x.err ? 'color:var(--red);font-weight:700' : ''}">${fmtN(x.err)}</td>
+      <td class="num">${fmtN(x.t.reduce((s, v) => s + v, 0) / x.t.length)} ms</td><td class="num">${fmtN(pct(x.t, 0.95))} ms</td><td class="num">${fmtN(Math.max(...x.t))} ms</td></tr>`).join('')}</tbody></table></div>
+    ${Object.keys(LT.errors).length ? `<h3 style="font-size:14px;margin:12px 0 4px">Errors</h3><ul style="margin:0;padding-left:18px;font-size:13px">${Object.entries(LT.errors).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([m, c]) => `<li>${fmtN(c)} × ${esc(m)}</li>`).join('')}</ul>` : ''}`;
+}
+$('#ltStart').onclick = async () => {
+  if (LT && !LT.done) return;
+  const n = Math.min(100, Math.max(1, +$('#ltN').value || 50)), min = Math.min(60, Math.max(1, +$('#ltMin').value || 5)), rep = Math.max(1, +$('#ltRep').value || 3);
+  if (!confirm(`Simulate ${n} technicians for ${min} minutes? It creates real reports on the server (delete them afterwards with “Reset data”).`)) return;
+  LT = { n, stop: false, done: false, active: 0, reports: 0, stats: {}, errors: {}, pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
+  $('#ltStart').hidden = true; $('#ltStop').hidden = false; $('#ltOut').innerHTML = '';
+  try {
+    await loadEmps();
+    for (let i = 1; i <= n && !LT.stop; i++) {   // create / re-activate TEST01…TESTnn with a fresh PIN for this run
+      const code = 'TEST' + String(i).padStart(2, '0'), ex = emps.find(e => String(e.code).toUpperCase() === code);
+      $('#ltState').textContent = `Preparing test technicians… ${i} / ${n}`;
+      await withRetry(() => api('employee_save', { id: ex?.id || 0, name: 'Test Tech ' + String(i).padStart(2, '0'), code, role: 'tech', pin: LT.pin, active: true }));
+    }
+  } catch (e) { $('#ltState').textContent = 'Could not create the test technicians: ' + e.message; $('#ltStart').hidden = false; $('#ltStop').hidden = true; LT.done = true; return; }
+  LT.start = Date.now(); LT.end = LT.start + LT.durMs;
+  const tick = setInterval(() => { ltRender(false); const left = Math.max(0, LT.end - Date.now()); $('#ltState').textContent = LT.stop ? 'Stopping…' : `Running · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')} left`; }, 1000);
+  await Promise.all(Array.from({ length: n }, (_, i) => ltTech(i + 1)));
+  clearInterval(tick); LT.done = true; ltRender(true);
+  $('#ltState').textContent = `Finished at ${new Date().toLocaleTimeString()}. Delete the test data with “Reset data”.`; $('#ltStart').hidden = false; $('#ltStop').hidden = true;
+  loadEmps(); loadCounts();
+};
+$('#ltStop').onclick = () => { if (LT) LT.stop = true; };
+
+/* ---- reset: the server does it in one step when api.php has "dev_reset"; otherwise this page deletes item by item ---- */
+const rsLog = m => { const b = $('#rsLog'); b.hidden = false; b.insertAdjacentHTML('beforeend', `<div>${esc(new Date().toLocaleTimeString())} · ${esc(m)}</div>`); b.scrollTop = b.scrollHeight; };
+$('#rsBackup').onclick = () => $('#bkBtn').click();
+$('#rsGo').onclick = async () => {
+  const w = {}; $$('#devReset [data-w]').forEach(c => { w[c.dataset.w] = c.checked; });
+  const supPin = $('#rsSupPin').value.trim(), next = +$('#rsNext').value || 0;
+  if ($('#rsConfirm').value.trim().toUpperCase() !== 'RESET') { toast('Type RESET to confirm'); return; }
+  if ((w.reports || w.invoices) && !supPin) { toast('Your supervisor PIN is needed to delete reports and invoices'); return; }
+  if (!Object.values(w).some(Boolean) && !next) { toast('Nothing selected'); return; }
+  const btn = $('#rsGo'); btn.disabled = true; $('#rsLog').innerHTML = '';
+  try {
+    try { const j = await api('dev_reset', { pin: devPin, supervisorPin: supPin, wipe: w, nextInvoice: next || null }); if (j.dev === true) { rsLog('Done on the server: ' + JSON.stringify(j.deleted || {})); return; } } catch (e) { if (/pin|forbidden|locked/i.test(e.message)) throw e; }
+    rsLog('Deleting from this page, one item at a time…');
+    const reason = 'Developer reset (test data)', each = async (label, list, fn) => {
+      let ok = 0, bad = 0;
+      for (const x of list) { try { await withRetry(() => fn(x)); ok++; } catch (e) { bad++; if (bad <= 3) rsLog(`${label}: ${e.message}`); } if ((ok + bad) % 10 === 0) rsLog(`${label}: ${ok + bad} / ${list.length}`); }
+      rsLog(`${label}: ${ok} done${bad ? `, ${bad} failed` : ''}`); return bad;
+    };
+    if (w.reports) for (let round = 0; round < 50; round++) {
+      const rows = (await withRetry(() => api('reports_list', { limit: 100, offset: 0 }))).rows || []; if (!rows.length) break;
+      if (await each('Service reports', rows, r => api('report_delete', { id: r.id, pin: supPin, reason })) === rows.length) break;
+    }
+    if (w.invoices) { const rows = (await withRetry(() => api('invoices_list', {}))).rows || []; await each('Invoices', rows, v => api('invoice_delete', { id: v.id, pin: supPin, reason })); }
+    if (w.jobs) { const rows = (await withRetry(() => api('jobs_list', { from: '2000-01-01', to: '2100-12-31', status: '', employeeId: '', unassigned: false }))).jobs || []; await each('Jobs', rows, x => api('job_delete', { id: x.id })); }
+    if (w.customers) { const rows = (await withRetry(() => api('customers_list', {}))).customers || []; await each('Customers', rows, c => api('customer_delete', { id: c.id })); }
+    if (w.inventory) { const rows = ((await withRetry(() => api('inventory_list', { includeArchived: true }))).items || []).filter(i => i.active); await each('Inventory (archived)', rows, i => api('inventory_archive', { id: i.id, active: false })); }
+    if (w.testTechs || w.allTechs) {
+      await loadEmps();
+      const me = session?.user?.code, rows = emps.filter(e => e.active && e.role === 'tech' && e.code !== me && (w.allTechs || /^TEST\d+$/i.test(e.code)));
+      await each('Technicians (deactivated)', rows, e => api('employee_save', { id: e.id, name: e.name, code: e.code, role: e.role, pin: '', active: false }));
+    }
+    if (next) { await withRetry(() => api('settings_save', { nextInvoice: next })); rsLog('Next invoice number: ' + next); }
+    rsLog('Finished. Parts requests and vendor orders cannot be deleted from the panel — the server reset (DESARROLLO.md) clears them too.');
+  } catch (e) { rsLog('Stopped: ' + e.message); }
+  finally { btn.disabled = false; $('#rsConfirm').value = ''; loadEmps(); loadCounts(); view(current); }
+};
+
 /* ---------------- bulk import (Excel / CSV / Word) ---------------- */
 /* Supervisor only (this panel). Uses the same customer_save / inventory_save / inventory_adjust the forms use.
    The Excel reader (~900 KB) is downloaded only when an import is opened: local copy first, CDN as fallback. */
@@ -1886,9 +2105,75 @@ const IMP_TPL = { customers: ['Company Name', 'Contact Person', 'Address', 'Emai
 const impNum = v => { const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g, '')); return isFinite(n) ? n : 0; };
 const cellTxt = v => String(v ?? '').replace(/\s+/g, ' ').trim();
 let impKind = 'customers', impData = null, impFileName = '';
+/* photos / screenshots: text recognition (OCR) runs in this browser with Tesseract, hosted in vendor/ocr (~11 MB, downloaded only the first time) */
+let ocrP;
+function loadOCR() {
+  return ocrP || (ocrP = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = 'vendor/ocr/tesseract.min.js';
+    s.onload = () => window.Tesseract ? res(window.Tesseract) : rej(new Error('Image reader not available.'));
+    s.onerror = () => { ocrP = null; s.remove(); rej(new Error('The image reader (folder vendor/ocr) is not on the server.')); };
+    document.head.appendChild(s);
+  }));
+}
+async function ocrImage(file) {
+  const T = await loadOCR(), abs = u => new URL(u, location.href).href;
+  // small screenshots read much better enlarged
+  const bmp = await createImageBitmap(file), k = Math.min(3, Math.max(1, 2200 / bmp.width));
+  const cv = document.createElement('canvas'); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+  const cx = cv.getContext('2d', { willReadFrequently: true }); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.imageSmoothingQuality = 'high'; cx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  cleanForOcr(cx, cv.width, cv.height);
+  const w = await T.createWorker('eng', 1, { workerPath: abs('vendor/ocr/worker.min.js'), corePath: abs('vendor/ocr/'), langPath: abs('vendor/ocr/'), gzip: true,
+    logger: m => { if (m.status === 'recognizing text') $('#impProg').textContent = `Reading the image… ${Math.round(m.progress * 100)}%`; } });
+  try {
+    await w.setParameters({ tessedit_pageseg_mode: '6', preserve_interword_spaces: '1' });
+    $('#impProg').textContent = 'Reading the image…';
+    return (await w.recognize(cv, {}, { blocks: true, text: true })).data;
+  } finally { w.terminate(); $('#impProg').textContent = ''; }
+}
+/* black & white, and erase table borders: long straight runs of ink are lines, never letters */
+function cleanForOcr(cx, w, h) {
+  const img = cx.getImageData(0, 0, w, h), d = img.data, ink = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) ink[i] = (d[i * 4] * 0.299 + d[i * 4 + 1] * 0.587 + d[i * 4 + 2] * 0.114) < 165 ? 1 : 0;
+  const minH = Math.max(40, w * 0.08), minV = Math.max(40, h * 0.06), erase = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) for (let x = 0, run = 0; x <= w; x++) {
+    if (x < w && ink[y * w + x]) run++; else { if (run >= minH) for (let k = x - run; k < x; k++) erase[y * w + k] = 1; run = 0; }
+  }
+  for (let x = 0; x < w; x++) for (let y = 0, run = 0; y <= h; y++) {
+    if (y < h && ink[y * w + x]) run++; else { if (run >= minV) for (let k = y - run; k < y; k++) erase[k * w + x] = 1; run = 0; }
+  }
+  for (let i = 0; i < w * h; i++) { const v = ink[i] && !erase[i] ? 0 : 255; d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255; }
+  cx.putImageData(img, 0, 0);
+}
+/* rebuild the table from the word positions: same height = same row; words close together = one cell;
+   each cell goes to the column of the nearest header */
+function ocrRows(data) {
+  const words = (data.blocks || []).flatMap(b => b.paragraphs || []).flatMap(p => p.lines || []).flatMap(l => l.words || []).concat(data.blocks ? [] : data.words || [])
+    .map(w => ({ t: w.text.trim().replace(/^[|\[\]!]+|[|\[\]!]+$/g, ''), x0: w.bbox.x0, x1: w.bbox.x1, y: (w.bbox.y0 + w.bbox.y1) / 2, h: w.bbox.y1 - w.bbox.y0 })).filter(w => w.t);
+  const hs = words.map(w => w.h).sort((a, b) => a - b), mh = hs[hs.length >> 1] || 20;
+  const lines = [];
+  words.sort((a, b) => a.y - b.y).forEach(w => { const l = lines[lines.length - 1]; if (l && Math.abs(w.y - l.y) < mh * 0.6) { l.ws.push(w); l.y = (l.y * (l.ws.length - 1) + w.y) / l.ws.length; } else lines.push({ y: w.y, ws: [w] }); });
+  lines.forEach(l => l.ws.sort((a, b) => a.x0 - b.x0));
+  const rows = lines.map(l => l.ws).map(ws => ws.reduce((cs, w) => { const c = cs[cs.length - 1]; if (c && w.x0 - c.x1 < mh * 0.9) { c.t += ' ' + w.t; c.x1 = w.x1; } else cs.push(Object.assign({}, w)); return cs; }, []));
+  const hi = rows.findIndex(r => impHeader([r.map(c => c.t)], impKind));
+  if (hi < 0) return rows.map(r => r.map(c => c.t));
+  const cols = rows[hi].map(c => (c.x0 + c.x1) / 2);
+  return rows.map((r, i) => {
+    if (i <= hi) return r.map(c => c.t);
+    const out = cols.map(() => '');
+    r.forEach(c => { const m = (c.x0 + c.x1) / 2; let k = 0; cols.forEach((x, j) => { if (Math.abs(x - m) < Math.abs(cols[k] - m)) k = j; }); out[k] = out[k] ? out[k] + ' ' + c.t : c.t; });
+    return out;
+  });
+}
+const textRows = txt => txt.split(/\r?\n/).map(l => l.split(/\t|\s+\|\s+|\s{2,}/).map(x => x.trim())).filter(r => r.some(Boolean));
 async function impFileRows(file) {
-  if (file.size > 5 * 1024 * 1024) throw new Error('File too large (max 5 MB).');
   const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (/^image\//.test(file.type) || /^(png|jpe?g|webp|gif|bmp)$/.test(ext)) {
+    if (file.size > 15 * 1024 * 1024) throw new Error('Image too large (max 15 MB).');
+    const rows = ocrRows(await ocrImage(file));
+    $('#impOcrText').value = rows.map(r => r.join(' | ')).join('\n'); $('#impOcrBox').hidden = false; $('#impOcrBox').open = false;
+    return [rows];
+  }
+  if (file.size > 5 * 1024 * 1024) throw new Error('File too large (max 5 MB).');
   if (ext === 'doc') throw new Error('Old Word format (.doc). Open it in Word and save it as .docx, or use Excel.');
   const X = await loadXLSX(), buf = new Uint8Array(await file.arrayBuffer());
   if (ext === 'docx') {   // Word: read the tables of word/document.xml
@@ -1929,7 +2214,7 @@ function impCustomers(rows, h, known) {
     let name = g('company'); const contact = g('contact');
     if (!name) return;
     if (/^cash customer$/i.test(name) && contact) name = 'Cash customer - ' + contact;   // walk-ins: keep them apart
-    let email = g('email').toLowerCase();
+    let email = g('email').toLowerCase().replace(/\s+/g, '');   // an email never has spaces (photos sometimes add them)
     if (email && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email)) { notes.push(`Row ${row}: invalid email left empty (${email})`); email = ''; }
     let phone = e164(g('phone'));
     if (phone === null) { notes.push(`Row ${row}: phone format not recognised (${g('phone')})`); phone = g('phone'); }
@@ -1995,9 +2280,9 @@ function openImport(kind) {
   impKind = kind; impData = null; impFileName = '';
   $('#impTitle').textContent = kind === 'customers' ? 'Import customers' : 'Import parts / inventory';
   $('#impHint').textContent = kind === 'customers'
-    ? 'Excel, CSV or a Word table with columns like Company, Contact, Address, Email, Phone. Duplicates are merged, phones converted to WhatsApp format. Registered customers are never overwritten — only their empty fields are filled.'
-    : 'Excel, CSV or a Word table (a vendor quote works as is) with Part number, Description, Qty, Unit, Unit price. Total rows are skipped and a Freight row is spread over the parts as landed cost.';
-  $('#impPartOpts').hidden = kind !== 'parts'; $('#impFile').value = ''; $('#impErr').textContent = ''; $('#impProg').textContent = ''; $('#impMarkup').value = '';
+    ? 'Excel, CSV, a Word table or a photo / screenshot of a table, with columns like Company, Contact, Address, Email, Phone. Duplicates are merged, phones converted to WhatsApp format. Registered customers are never overwritten — only their empty fields are filled.'
+    : 'Excel, CSV, a Word table or a photo / screenshot (a vendor quote works as is) with Part number, Description, Qty, Unit, Unit price. Total rows are skipped and a Freight row is spread over the parts as landed cost.';
+  $('#impPartOpts').hidden = kind !== 'parts'; $('#impFile').value = ''; $('#impOcrBox').hidden = true; $('#impErr').textContent = ''; $('#impProg').textContent = ''; $('#impMarkup').value = '';
   renderImp(); openModal('#impModal'); loadXLSX().catch(() => {});
 }
 $('#impCust').onclick = () => openImport('customers');
@@ -2007,11 +2292,16 @@ $('#impTpl').onclick = () => {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + IMP_TPL[impKind].join(',') + '\r\n'], { type: 'text/csv' }));
   a.download = impKind === 'customers' ? 'cher-customers-template.csv' : 'cher-parts-template.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
-$('#impFile').onchange = async e => {
+$('#impFile').onchange = e => {
   const file = e.target.files[0]; if (!file) return;
-  impData = null; impFileName = file.name; $('#impErr').textContent = ''; $('#impPreview').innerHTML = '<p class="sub">Reading file…</p>'; $('#impGo').hidden = true;
+  impFileName = file.name; $('#impOcrBox').hidden = true;
+  impLoad(() => impFileRows(file));
+};
+$('#impOcrApply').onclick = () => impLoad(async () => [textRows($('#impOcrText').value)]);
+async function impLoad(getSheets) {
+  impData = null; $('#impErr').textContent = ''; $('#impPreview').innerHTML = '<p class="sub">Reading…</p>'; $('#impGo').hidden = true;
   try {
-    const sheets = await impFileRows(file);
+    const sheets = await getSheets();
     let h = null, rows = null;
     for (const r of sheets) { h = impHeader(r, impKind); if (h) { rows = r; break; } }
     if (!h) throw new Error('No column headers found (e.g. "Company" or "Part Number"). Use the template.');
@@ -2021,17 +2311,26 @@ $('#impFile').onchange = async e => {
     impData = impKind === 'customers' ? impCustomers(rows, h, known) : impParts(rows, h, known);
     if (!impData.items.length) throw new Error('The file has no rows to import.');
     renderImp();
-  } catch (err) { impData = null; renderImp(); $('#impErr').textContent = err.message; }
-};
-async function impPool(list, n, fn) { let i = 0; await Promise.all(Array.from({ length: Math.min(n, list.length) }, async () => { while (i < list.length) { const k = i++; await fn(list[k]); } })); }
+  } catch (err) { impData = null; renderImp(); $('#impErr').textContent = err.message; if (!$('#impOcrBox').hidden) $('#impOcrBox').open = true; }
+}
+/* one request at a time with retries: shared hosting limits database connections, and a burst made rows fail */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const transient = e => /database|connect|server error|timeout|busy|too many|HTTP 5|429/i.test(e.message);
+async function withRetry(fn) {
+  for (let a = 0; ; a++) {
+    try { return await fn(); }
+    catch (e) { if (a >= 3 || !transient(e)) throw e; await sleep(1500 * (a + 1) ** 2); }   // 1.5 s, 6 s, 13.5 s
+  }
+}
 $('#impGo').onclick = async () => {
   const d = impData; if (!d) return;
   const list = d.items.filter(it => impAction(it)[1] !== 'off'), kind = $('#impKind').value, vendor = $('#impVendor').value.trim();
   if (impKind === 'parts' && list.some(it => !it.ex) && !(parseFloat($('#impMarkup').value) > 0) && !confirm('No markup set: new parts will be sold at their landed cost. Continue?')) return;
-  const btn = $('#impGo'), fails = []; let done = 0;
+  const btn = $('#impGo'), fails = [], failed = []; let done = 0, streak = 0, stopped = false;
   btn.disabled = true; $('#impErr').textContent = '';
-  await impPool(list, 4, async it => {   // 4 at a time: fast, without flooding the server
-    try {
+  for (const it of list) {
+    if (stopped) { failed.push(it); continue; }
+    try { await withRetry(async () => {
       if (impKind === 'customers') {
         const ex = it.ex || {}, f = it.fill || {};
         await api('customer_save', { id: ex.id || 0, name: it.name, address1: ex.address1 || f.address1 || it.address || '', address2: ex.address2 || '', address3: ex.address3 || '',
@@ -2042,13 +2341,20 @@ $('#impGo').onclick = async () => {
         await api('inventory_save', { id: 0, kind, vendor: it.vendor || vendor, leadDays: '', partNo: it.partNo, name: it.name, description: '', category: '', unit: it.unit,
           price: impSale(it), minQty: '', qty: kind === 'stock' ? it.qty : '', status: 'available', eta: '' });
       }
-    } catch (e) { fails.push(`${it.partNo || it.name}: ${e.message}`); }
+      }); streak = 0; }
+    catch (e) {
+      fails.push(`${it.partNo || it.name}: ${e.message}`); failed.push(it);
+      if (++streak >= 3 && transient(e)) stopped = true;   // the server is down: stop instead of burning connections
+    }
     $('#impProg').textContent = `Importing… ${++done} / ${list.length}`;
-  });
+  }
   btn.disabled = false;
-  $('#impProg').textContent = `Imported ${list.length - fails.length} of ${list.length}.`;
-  if (fails.length) $('#impErr').textContent = 'Not imported — ' + fails.join(' · ');
-  else { closeModal('#impModal'); toast(`Imported ${list.length}`); }
+  $('#impProg').textContent = `Imported ${list.length - failed.length} of ${list.length}.`;
+  if (failed.length) {
+    $('#impErr').textContent = (stopped ? 'The server stopped answering, so the import was paused. ' : '') + `${failed.length} not imported — press “Import ${failed.length}” to retry them. ` + [...new Set(fails.map(f => f.replace(/^[^:]*: /, '')))].slice(0, 2).join(' · ');
+    impData.items = failed; renderImp();
+  } else { closeModal('#impModal'); toast(`Imported ${list.length}`); }
+  loadCounts();
   if (impKind === 'customers') { custCache = []; if (current === 'customers') loadCustomers(); } else if (current === 'inventory') loadInventory();
 };
 
