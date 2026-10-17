@@ -52,6 +52,14 @@ Graba un tutorial mientras usas la app, también durante una prueba de carga:
 Los pasos se escriben solos: "Toca «Customers»", "Escribe «ACME» en «Customer name»", "Marca «Frequent»"…
 Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets no permiten grabar la pantalla).
 
+## Cierre de sesión por inactividad
+- La sesión (técnico y supervisor) se cierra sola tras **2 horas sin usar la app** (sin tocar la pantalla,
+  hacer clic ni escribir). Las sincronizaciones automáticas no cuentan como uso.
+- El servidor también lo comprueba: una sesión abandonada deja de servir aunque alguien copie su token.
+- Los reportes que no se enviaron se quedan en la tablet y se envían al volver a entrar.
+- Para cambiar el tiempo: en `api/config.php`, `define('SESSION_IDLE_MINUTES', 120);`.
+- No se cierra en medio de una prueba de carga ni mientras grabas un tutorial.
+
 ## 3. ¿Qué pasa si se llena la base de datos?
 
 Hostinger pone un tope de unos **3 GB por base de datos**. **Settings** muestra ahora el tamaño actual

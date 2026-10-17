@@ -793,12 +793,22 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const API = 'api/api.php';
 const LSK = 'cher.adminSession';
 let session = (() => { try { return JSON.parse(localStorage.getItem(LSK)); } catch { return null; } })();
+/* inactivity: only real use (touch, click, typing) counts — background syncs do not. Shared by the app and the panel. */
+const IDLE_KEY = 'cher.lastActive';
+let lastAct = +(localStorage.getItem(IDLE_KEY) || 0) || Date.now(), idleMin = 120;
+const idleSecs = () => Math.max(0, Math.round((Date.now() - lastAct) / 1000));
+['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, () => {
+  const n = Date.now(); if (n - lastAct < 15000) return;
+  lastAct = n; try { localStorage.setItem(IDLE_KEY, String(n)); } catch {}
+}, { passive: true, capture: true }));
+const idleOver = () => { try { lastAct = Math.max(lastAct, +(localStorage.getItem(IDLE_KEY) || 0)); } catch {} return Date.now() - lastAct > idleMin * 60000; };
+
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2400); }
 window.toast = toast;
 async function api(action, data = {}) {
   let res;
-  try { res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(session?.token ? { 'X-Auth-Token': session.token } : {}) }, body: JSON.stringify({ action, ...data }) }); }
+  try { res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Idle-Seconds': String(idleSecs()), ...(session?.token ? { 'X-Auth-Token': session.token } : {}) }, body: JSON.stringify({ action, ...data }) }); }
   catch { throw new Error('No connection to the server'); }
   let txt = ''; try { txt = await res.text(); } catch {}
   let j; try { j = JSON.parse(txt); } catch {
@@ -821,7 +831,8 @@ let setupMode = false;
 /* sign-in is on the start page (index.html, "Supervisor"); this gate is only used for the first-time setup */
 const toStart = () => location.replace('index.html#supervisor');
 async function boot() {
-  if (session?.token) { try { const j = await api('me'); if (j.user.role === 'supervisor') return enter(j.user); } catch {} }
+  if (session?.token && idleOver()) { sessionStorage.setItem('cher.idleOut', '1'); try { await api('logout'); } catch {} }
+  else if (session?.token) { try { const j = await api('me'); if (j.idleMinutes) idleMin = j.idleMinutes; if (j.user.role === 'supervisor') return enter(j.user); } catch {} }
   session = null; localStorage.removeItem(LSK);   // invalid or not a supervisor: drop it so the start page does not send us back here
   try { if ((await api('status')).needsSetup) return showGate(); } catch {}
   toStart();
@@ -847,6 +858,8 @@ $('#gateForm').onsubmit = async e => {
   } catch (err) { $('#gErr').textContent = err.message; }
   finally { $('#gBtn').disabled = false; }
 };
+/* 2 hours without use: back to the start page */
+setInterval(() => { if (session && idleOver() && !(typeof LT !== 'undefined' && LT && !LT.done) && !(typeof TUT !== 'undefined' && TUT.rec)) { sessionStorage.setItem('cher.idleOut', '1'); logout(false); } }, 60000);
 async function logout(expired) {
   if (!expired) { try { await api('logout'); } catch {} }
   session = null; localStorage.removeItem(LSK); toStart();

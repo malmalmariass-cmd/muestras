@@ -616,7 +616,7 @@ const I18N = {
     equipHistory: 'Equipment history', prevServices: '🛠 {n} previous service(s) — view', noHistory: 'No previous services for this serial number.', histFor: 'Serial {s}',
     partsUsed: 'Parts', repairDone: 'Repair completed', repairNotDone: 'Not completed',
     loginHint: 'Sign in with your Employee ID and PIN', employeeIdPh: 'Employee ID', signIn: 'Sign in', enterTip: 'Tip: press Enter to sign in', noNetLogin: 'No internet connection. Connect to sign in.',
-    sessionEnded: 'Your session ended. Please sign in again.', pendingSignOut: '{n} report(s) have not reached the office yet. They stay on this tablet and will sync next time you sign in. Sign out?',
+    sessionEnded: 'Your session ended. Please sign in again.', sessionIdle: 'Your session was closed after 2 hours without use. Sign in again.', pendingSignOut: '{n} report(s) have not reached the office yet. They stay on this tablet and will sync next time you sign in. Sign out?',
     saved: 'Saved', newReport: 'New report', newConfirm: 'Start a new report? Unsaved changes in this one will be lost.',
     invPending: 'Invoice pending', invoice: 'Invoice {n}', stSynced: 'synced with office', stWaiting: 'saved on tablet · waiting to sync', stNotSaved: 'not saved yet',
     dotOk: 'Synced with office', dotWait: 'Syncing…', dotOff: 'Offline — will sync later',
@@ -685,7 +685,7 @@ const I18N = {
     equipHistory: 'Historial del equipo', prevServices: '🛠 {n} servicio(s) anterior(es) — ver', noHistory: 'No hay servicios anteriores para este número de serie.', histFor: 'Serie {s}',
     partsUsed: 'Repuestos', repairDone: 'Reparación completada', repairNotDone: 'No completada',
     loginHint: 'Entra con tu ID de empleado y PIN', employeeIdPh: 'ID de empleado', signIn: 'Entrar', enterTip: 'Consejo: presiona Enter para entrar', noNetLogin: 'Sin internet. Conéctate para entrar.',
-    sessionEnded: 'Tu sesión terminó. Vuelve a entrar.', pendingSignOut: '{n} reporte(s) aún no llegan a la oficina. Se quedan en la tablet y se enviarán cuando vuelvas a entrar. ¿Salir?',
+    sessionEnded: 'Tu sesión terminó. Vuelve a entrar.', sessionIdle: 'Tu sesión se cerró tras 2 horas sin uso. Vuelve a entrar.', pendingSignOut: '{n} reporte(s) aún no llegan a la oficina. Se quedan en la tablet y se enviarán cuando vuelvas a entrar. ¿Salir?',
     saved: 'Guardado', newReport: 'Reporte nuevo', newConfirm: '¿Empezar un reporte nuevo? Se perderán los cambios sin guardar.',
     invPending: 'Factura pendiente', invoice: 'Factura {n}', stSynced: 'sincronizado con la oficina', stWaiting: 'guardado en la tablet · esperando sincronizar', stNotSaved: 'sin guardar',
     dotOk: 'Sincronizado con la oficina', dotWait: 'Sincronizando…', dotOff: 'Sin conexión — se sincronizará después',
@@ -1170,13 +1170,23 @@ $('#sigOk').onclick = () => pad.accept();
 /* ---------------- server connection ---------------- */
 const API = 'api/api.php';
 var session = LS.get('cher.session', null);
+/* inactivity: only real use (touch, click, typing) counts — background syncs do not. Shared by the app and the panel. */
+const IDLE_KEY = 'cher.lastActive';
+let lastAct = +(localStorage.getItem(IDLE_KEY) || 0) || Date.now(), idleMin = 120;
+const idleSecs = () => Math.max(0, Math.round((Date.now() - lastAct) / 1000));
+['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(ev => addEventListener(ev, () => {
+  const n = Date.now(); if (n - lastAct < 15000) return;
+  lastAct = n; try { localStorage.setItem(IDLE_KEY, String(n)); } catch {}
+}, { passive: true, capture: true }));
+const idleOver = () => { try { lastAct = Math.max(lastAct, +(localStorage.getItem(IDLE_KEY) || 0)); } catch {} return Date.now() - lastAct > idleMin * 60000; };
+
 const me = () => session?.user?.code || '';
 async function api(action, data = {}) {
   let res;
   // a hung request must not block the sync loop: 20 s for normal calls, 90 s when a PDF is uploaded
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), data.pdf ? 90000 : 20000);
   try {
-    res = await fetch(API, { method: 'POST', credentials: 'same-origin', cache: 'no-store', signal: ctl.signal, headers: { 'Content-Type': 'application/json', ...(session?.token ? { 'X-Auth-Token': session.token } : {}) }, body: JSON.stringify({ action, ...data }) });
+    res = await fetch(API, { method: 'POST', credentials: 'same-origin', cache: 'no-store', signal: ctl.signal, headers: { 'Content-Type': 'application/json', 'X-Idle-Seconds': String(idleSecs()), ...(session?.token ? { 'X-Auth-Token': session.token } : {}) }, body: JSON.stringify({ action, ...data }) });
   } catch { throw Object.assign(new Error(t('noConnShort')), { offline: true }); }
   finally { clearTimeout(tm); }
   let txt = ''; try { txt = await res.text(); } catch {}
@@ -1605,7 +1615,7 @@ async function supervisorLogin() {
   localStorage.setItem(ADMIN_LSK, JSON.stringify({ token: j.token, user: j.user }));
   // the panel asks for a new PIN when the server requires it (the PIN itself is never stored)
   if (j.mustChangePin) sessionStorage.setItem('cher.mustChangePin', j.user.code === 'ADMI26' ? 'master' : 'short');
-  $('#lgPin').value = ''; location.href = 'admin.html';
+  $('#lgPin').value = ''; lastAct = Date.now(); try { localStorage.setItem(IDLE_KEY, String(lastAct)); } catch {} location.href = 'admin.html';
 }
 $('#loginForm').onsubmit = async e => {
   e.preventDefault(); $('#lgErr').textContent = ''; $('#lgBtn').disabled = true;
@@ -1613,6 +1623,7 @@ $('#loginForm').onsubmit = async e => {
     if (loginRole === 'sup') { await supervisorLogin(); return; }
     const j = await api('login', { code: $('#lgCode').value, pin: $('#lgPin').value }); LS.set('cher.lastRole', 'tech');
     session = { token: j.token, user: j.user }; LS.set('cher.session', session); LS.set('cher.lastCode', j.user.code);
+    if (j.idleMinutes) idleMin = j.idleMinutes; lastAct = Date.now(); try { localStorage.setItem(IDLE_KEY, String(lastAct)); } catch {}
     $('#lgPin').value = ''; startSession();
   } catch (err) { $('#lgErr').textContent = err.offline ? t('noNetLogin') : err.message; }
   finally { $('#lgBtn').disabled = false; }
@@ -1630,7 +1641,7 @@ async function signOut(expired) {
   ['cher.jobs', 'cher.requests', 'cher.reqSeen'].forEach(k => { try { localStorage.removeItem(k); } catch {} });
   jobsCache = []; requests = [];
   $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false;
-  if (expired) $('#lgErr').textContent = t('sessionEnded');
+  if (expired) $('#lgErr').textContent = t(expired === 'idle' ? 'sessionIdle' : 'sessionEnded');
 }
 $('#btnLogout').onclick = () => signOut(false);
 function startSession() {
@@ -1644,7 +1655,7 @@ function startSession() {
   pullCustomers(); pullInventory(); pullServices(); pullRequests();
   pullJobs().then(() => { if (!LS.get('cher.view', null) && jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled')) show('jobs'); });
   syncAll();
-  api('me').catch(() => {});
+  api('me').then(j => { if (j.idleMinutes) idleMin = j.idleMinutes; }).catch(() => {});
 }
 
 /* ---------------- install prompt ---------------- */
@@ -1701,6 +1712,11 @@ if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 window.toast = toast;
 document.querySelectorAll('img[data-logo]').forEach(i => { i.src = window.CHER_LOGO_URL; });
 report = blankReport(); render(); applyLang();
+/* 2 hours without use: close the session (unsent reports stay on the tablet and sync at the next sign-in) */
+async function idleSignOut() { try { await api('logout'); } catch {} signOut('idle'); }
+setInterval(() => { if (session && idleOver()) idleSignOut(); }, 60000);
+if (session?.token && idleOver()) { session = null; LS.set('cher.session', null); setTimeout(() => { $('#lgErr').textContent = t('sessionIdle'); }, 0); }
+if (sessionStorage.getItem('cher.idleOut')) { sessionStorage.removeItem('cher.idleOut'); setTimeout(() => { $('#lgErr').textContent = t('sessionIdle'); }, 0); }
 if (session?.token) startSession();
 else if (loginRole === 'sup' && localStorage.getItem(ADMIN_LSK)) location.replace('admin.html');   // supervisor already signed in
 else { $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false; }
