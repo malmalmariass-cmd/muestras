@@ -1,6 +1,6 @@
 # Importar clientes y partes (Excel / CSV / Word)
 
-La app tiene ahora un botón **⇪ Importar** arriba, junto a "Salir".
+La app tiene ahora un botón **⇪ Importar** arriba, junto a "Salir". **Solo lo ve el supervisor** (o admin); el técnico no lo tiene. Ver `PERMISOS.md`.
 
 - **Clientes**: Excel (.xlsx/.xls), CSV o tabla de Word (.docx). Reconoce columnas como
   *Company Name / Empresa, Contact / Contacto, Address / Dirección, Email / Correo, Phone / Teléfono*,
@@ -24,11 +24,11 @@ La app envía dos acciones nuevas a `api/api.php`. Mientras el servidor no las t
 - **Partes**: no se cambia nada y se avisa.
 
 Plantilla para `api/api.php` (adaptar nombres de tablas/columnas a la base real; usa PDO con
-sentencias preparadas y **solo permite administradores**):
+sentencias preparadas y **solo permite supervisor o admin**):
 
 ```php
 case 'customers_import':
-    require_role($user, 'admin');                       // técnicos no pueden importar
+    require_role($user, 'supervisor');                  // solo supervisor (o admin): técnicos no pueden importar
     $list = array_slice($in['customers'] ?? [], 0, 2000); // límite por envío
     $st = $pdo->prepare('INSERT INTO customers (name, contact, address1, email, whatsapp)
         VALUES (:name, :contact, :address1, :email, :whatsapp)
@@ -51,7 +51,7 @@ case 'customers_import':
     out(['ok' => true, 'imported' => $n]);
 
 case 'inventory_import':
-    require_role($user, 'admin');
+    require_role($user, 'supervisor');
     $items = array_slice($in['items'] ?? [], 0, 2000);
     $st = $pdo->prepare('INSERT INTO inventory (part_no, name, qty, unit, unit_price, landed_cost, vendor, kind)
         VALUES (:p, :n, :q, :u, :pr, :lc, :v, "stock")
