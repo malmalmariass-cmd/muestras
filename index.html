@@ -268,14 +268,6 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
 .cart .cl:last-child{border-bottom:0}
 .cart .x{background:none;border:0;color:var(--red);font-size:22px;cursor:pointer}
 .forbox{border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
-/* import */
-.impwrap{max-height:42vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
-table.imp{width:100%;border-collapse:collapse;font-size:13px}
-table.imp th{position:sticky;top:0;background:#f3f6fc;text-align:left;padding:6px 8px;color:var(--muted);font-weight:700}
-table.imp td{padding:6px 8px;border-top:1px solid #edf0f6;vertical-align:top}
-table.imp .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.impnotes{margin:0 0 10px;padding-left:18px;font-size:13px;color:#a15c00}
-.impsum{font-weight:700;color:var(--navy);margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -285,7 +277,6 @@ table.imp .num{text-align:right;font-variant-numeric:tabular-nums;white-space:no
   <div class="who">
     <span class="dot" id="syncDot"></span><span id="whoName"></span>
     <div class="lang" id="langSw"><button type="button" data-l="en">EN</button><button type="button" data-l="es">ES</button></div>
-    <button id="btnImport" type="button" hidden>⇪ <span data-t="import">Import</span></button>
     <button id="btnLogout" type="button" data-t="signOut">Sign out</button>
   </div>
   <nav class="tabs">
@@ -544,28 +535,12 @@ table.imp .num{text-align:right;font-variant-numeric:tabular-nums;white-space:no
   </div>
 </div>
 
-<!-- import sheet (Excel / CSV / Word) -->
-<div class="sheet" id="impSheet" hidden>
-  <div class="pn">
-    <div class="hd"><h3 data-t="importTitle">Import from Excel / Word</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
-    <div class="seg2 ptabs" id="impTabs"><button type="button" data-kind="customers" class="on" data-t="impCustomers">Customers</button><button type="button" data-kind="parts" data-t="impParts">Parts / inventory</button></div>
-    <p class="sub" id="impHint" style="margin:10px 0"></p>
-    <div class="grid g2">
-      <label class="btn p full" for="impFile">⇪ <span data-t="impPick">Choose file</span></label>
-      <button class="btn s full" type="button" id="impTpl" data-t="impTemplate">Download template</button>
-    </div>
-    <input type="file" id="impFile" accept=".xlsx,.xls,.csv,.docx" hidden>
-    <div class="f" id="impVendorWrap" style="margin-top:10px" hidden><label data-t="vendor">Vendor / supplier</label><input id="impVendor" list="vendorList" autocomplete="off"></div>
-    <div id="impPreview" style="margin-top:12px"></div>
-    <button class="btn g full" type="button" id="impGo" style="margin-top:12px" hidden></button>
-  </div>
-</div>
-
 <div class="login" id="login" hidden>
   <form class="lc" id="loginForm" autocomplete="off">
     <img data-logo alt="Cher Services LLC">
     <h1 data-t="appTitle">Service Report</h1>
     <p data-t="loginHint">Sign in with your Employee ID and PIN</p>
+    <div class="seg2 ptabs" id="lgRole" style="margin-bottom:12px"><button type="button" data-r="tech" class="on" data-t="roleTech">Technician</button><button type="button" data-r="sup" data-t="roleSup">Supervisor</button></div>
     <div class="f"><input id="lgCode" data-tp="employeeIdPh" placeholder="Employee ID" autocapitalize="characters" required></div>
     <div class="f"><input id="lgPin" placeholder="PIN" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" required></div>
     <div class="keypad" id="keypad"></div>
@@ -648,20 +623,10 @@ const I18N = {
     noReportsYet: 'No reports on this tablet yet.', copied: 'Copied into a new report', removeSynced: 'Remove report #{n} from this tablet? The office keeps its copy.',
     removeUnsynced: 'This report has NOT reached the office yet. Removing it will delete it permanently. Continue?', removed: 'Removed from tablet', downloaded: '{n} reports downloaded', noConnShort: 'No connection',
     replaceDraft: 'You have a report in progress. Replace it with this job?',
+    roleTech: 'Technician', roleSup: 'Supervisor', openPanel: 'Open supervisor panel', notSupervisor: 'This account is not a supervisor. Choose “Technician”.',
     custNew: 'New customer: it will be registered with this report and stays pending until the supervisor approves it.',
     custChanged: 'This customer is already registered. The contact data you changed is sent to the supervisor for approval; the customer record is not changed until then.',
-    import: 'Import', impContact: 'Contact', importTitle: 'Import from Excel / Word', impCustomers: 'Customers', impParts: 'Parts / inventory',
-    impHintC: 'Excel (.xlsx, .xls), CSV or a Word (.docx) table with columns like Company, Contact, Address, Email, Phone. Duplicates are merged and phones converted to WhatsApp format.',
-    impHintP: 'Excel, CSV or a Word table (a vendor quote works) with Part number, Description, Qty, Unit, Unit price. A "Freight" row is spread over the parts as landed cost.',
-    impPick: 'Choose file', impTemplate: 'Download template', impReading: 'Reading file…', impNoHeader: 'No column headers found (e.g. "Company" or "Part Number"). Use the template.',
-    impNoRows: 'The file has no rows to import.', impDocOld: 'Old Word format (.doc). Open it in Word and save as .docx, or use Excel.', impDocNoTable: 'The Word file has no table.',
-    impTooBig: 'File too large (max 5 MB).', impLibFail: 'Could not load the Excel reader. Check the internet connection.',
-    impReady: '{n} ready to import', impNew: 'new', impUpd: 'update', impGo: 'Import {n}', impDone: 'Imported: {n}',
-    impDup: 'Merged duplicate: row {a} = row {b}', impNoContact: 'No email, phone or address: {n}', impBadEmail: 'Invalid email, left empty: {e}', impBadPhone: 'Phone format not recognized: {p}',
-    impFreight: 'Freight {f} spread over the parts (+{p}% on cost)', impLanded: 'Landed', impSub: 'Parts subtotal {s} · total {t}',
-    impLocalOnly: 'The server did not accept the import ({e}). The customers were saved on this tablet only, for autocomplete. The office must enable importing on the server.',
-    impServerFail: 'The server did not accept the import ({e}). Nothing was changed. The office must enable importing on the server.'
-  },
+      },
   es: {
     appTitle: 'Reporte de servicio', signOut: 'Salir', tabJobs: 'Trabajos', tabReport: 'Reporte de servicio', tabMaint: 'Servicio a equipo', tabReqs: 'Solicitud de partes', tabHistory: 'Historial',
     titleRepair: 'REPORTE DE SERVICIO · REPARACIONES', titleMaint: 'REPORTE DE SERVICIO A EQUIPO', faults: 'Fallas', addFault: '+ Agregar', faultN: 'Falla {n}', faultPh: 'Describe la falla',
@@ -727,20 +692,10 @@ const I18N = {
     noReportsYet: 'Aún no hay reportes en esta tablet.', copied: 'Copiado a un reporte nuevo', removeSynced: '¿Quitar el reporte #{n} de esta tablet? La oficina conserva su copia.',
     removeUnsynced: 'Este reporte NO ha llegado a la oficina. Si lo quitas se borra para siempre. ¿Continuar?', removed: 'Quitado de la tablet', downloaded: '{n} reportes descargados', noConnShort: 'Sin conexión',
     replaceDraft: 'Tienes un reporte en proceso. ¿Reemplazarlo con este trabajo?',
+    roleTech: 'Técnico', roleSup: 'Supervisor', openPanel: 'Entrar al panel del supervisor', notSupervisor: 'Esta cuenta no es de supervisor. Elige “Técnico”.',
     custNew: 'Cliente nuevo: queda registrado con este reporte y pendiente hasta que el supervisor lo apruebe.',
     custChanged: 'Este cliente ya está registrado. Los datos de contacto que cambiaste se envían al supervisor para su aprobación; el cliente no cambia hasta entonces.',
-    import: 'Importar', impContact: 'Contacto', importTitle: 'Importar desde Excel / Word', impCustomers: 'Clientes', impParts: 'Partes / inventario',
-    impHintC: 'Excel (.xlsx, .xls), CSV o una tabla de Word (.docx) con columnas como Empresa, Contacto, Dirección, Correo, Teléfono. Los duplicados se unen y los teléfonos se pasan a formato WhatsApp.',
-    impHintP: 'Excel, CSV o una tabla de Word (sirve una cotización del proveedor) con No. de parte, Descripción, Cantidad, Unidad, Precio unitario. Una fila de "Flete/Freight" se reparte entre las partes como costo real.',
-    impPick: 'Elegir archivo', impTemplate: 'Descargar plantilla', impReading: 'Leyendo archivo…', impNoHeader: 'No encontré encabezados de columna (p. ej. "Empresa" o "Part Number"). Usa la plantilla.',
-    impNoRows: 'El archivo no tiene filas para importar.', impDocOld: 'Formato de Word antiguo (.doc). Ábrelo en Word y guárdalo como .docx, o usa Excel.', impDocNoTable: 'El archivo de Word no tiene ninguna tabla.',
-    impTooBig: 'Archivo demasiado grande (máx. 5 MB).', impLibFail: 'No se pudo cargar el lector de Excel. Revisa la conexión a internet.',
-    impReady: '{n} listos para importar', impNew: 'nuevo', impUpd: 'actualiza', impGo: 'Importar {n}', impDone: 'Importados: {n}',
-    impDup: 'Duplicado unido: fila {a} = fila {b}', impNoContact: 'Sin correo, teléfono ni dirección: {n}', impBadEmail: 'Correo inválido, se deja vacío: {e}', impBadPhone: 'Teléfono con formato no reconocido: {p}',
-    impFreight: 'Flete {f} repartido entre las partes (+{p}% sobre el costo)', impLanded: 'Costo real', impSub: 'Subtotal partes {s} · total {t}',
-    impLocalOnly: 'El servidor no aceptó la importación ({e}). Los clientes se guardaron solo en esta tablet, para autocompletar. La oficina debe activar la importación en el servidor.',
-    impServerFail: 'El servidor no aceptó la importación ({e}). No se cambió nada. La oficina debe activar la importación en el servidor.'
-  }
+      }
 };
 const LS = {
   get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -1580,186 +1535,6 @@ $('#pullMine').onclick = async () => {
   } catch (e) { toast(e.offline ? t('noConnShort') : e.message); }
 };
 
-/* ---------------- import (Excel / CSV / Word) ---------------- */
-/* the Excel reader (~900 KB) is only downloaded when someone opens an import: local copy first, CDN as fallback */
-let xlsxP;
-function loadXLSX() {
-  if (window.XLSX) return Promise.resolve(window.XLSX);
-  return xlsxP || (xlsxP = new Promise((res, rej) => {
-    const add = (src, sri) => {
-      const s = document.createElement('script'); s.src = src;
-      if (sri) { s.integrity = sri; s.crossOrigin = 'anonymous'; s.referrerPolicy = 'no-referrer'; }
-      const next = () => { s.remove(); if (sri) { xlsxP = null; rej(new Error(t('impLibFail'))); } else add('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', 'sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA=='); };
-      s.onload = () => window.XLSX ? res(window.XLSX) : next(); s.onerror = next;
-      document.head.appendChild(s);
-    };
-    add('vendor/xlsx.full.min.js');
-  }));
-}
-const IMP_COLS = {
-  customers: { company: /^(company|customer|client|cliente|empresa|compa|raz[oó]n social|name|nombre)/, contact: /^(contact|contacto|attn|persona)/, address: /^(address|direcci|domicilio)/,
-    email: /(e-?mail|correo)/, phone: /^(phone|tel|cell|mobile|m[oó]vil|whatsapp|celular)/ },
-  parts: { partNo: /^(part ?(number|no\.?|#)|p\/?n\b|no\.? ?de ?parte|n[uú]mero de parte|sku|code|c[oó]digo|ref)/, name: /^(description|descripci|name|nombre|art[ií]culo|item name)/,
-    qty: /^(qty|quantity|cant)/, unit: /^(unit|unidad|uom|u\/m)\.?$/, price: /^(unit ?(price|cost)|precio|price|cost|costo)/, vendor: /^(vendor|supplier|proveedor)/ }
-};
-const impTpl = {
-  customers: ['Company Name', 'Contact Person', 'Address', 'Email', 'Phone'],
-  parts: ['Part Number', 'Description', 'Qty', 'Unit', 'Unit price', 'Vendor']
-};
-const num = v => { const n = parseFloat(String(v ?? '').replace(/[^0-9.\-]/g, '')); return isFinite(n) ? n : 0; };
-const cellTxt = v => String(v ?? '').replace(/\s+/g, ' ').trim();
-let impKind = 'customers', impData = null;
-async function fileRows(file) {
-  if (file.size > 5 * 1024 * 1024) throw new Error(t('impTooBig'));
-  const ext = (file.name.split('.').pop() || '').toLowerCase();
-  if (ext === 'doc') throw new Error(t('impDocOld'));
-  const X = await loadXLSX(), buf = new Uint8Array(await file.arrayBuffer());
-  if (ext === 'docx') {   // Word: read the tables of word/document.xml
-    const z = X.CFB.read(buf, { type: 'array' }), f = z.FileIndex[z.FullPaths.findIndex(p => /(^|\/)word\/document\.xml$/i.test(p))];
-    const xml = f?.content && new DOMParser().parseFromString(new TextDecoder().decode(new Uint8Array(f.content)), 'application/xml');
-    const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
-    const rows = xml ? [...xml.getElementsByTagNameNS(W, 'tr')].map(tr => [...tr.getElementsByTagNameNS(W, 'tc')].map(tc =>
-      [...tc.getElementsByTagNameNS(W, 'p')].map(p => [...p.getElementsByTagNameNS(W, 't')].map(x => x.textContent).join('')).join(' '))) : [];
-    if (!rows.length) throw new Error(t('impDocNoTable'));
-    return [rows];
-  }
-  const wb = X.read(buf, { type: 'array', cellDates: false });
-  return wb.SheetNames.map(n => X.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: false, defval: '' }));
-}
-/* find the header row (the first 25 rows with the most recognised column names) and map each field to its column */
-function mapHeader(rows, kind) {
-  let best = null;
-  rows.slice(0, 25).forEach((r, i) => {
-    const map = {};
-    r.forEach((c, j) => { const h = cellTxt(c).toLowerCase(); if (!h) return;
-      for (const [k, re] of Object.entries(IMP_COLS[kind])) if (map[k] == null && re.test(h)) { map[k] = j; break; } });
-    const n = Object.keys(map).length, key = kind === 'customers' ? 'company' : 'partNo';
-    if (map[key] != null && n >= 2 && (!best || n > best.n)) best = { i, map, n };
-  });
-  return best;
-}
-function e164(p) {
-  const d = String(p || '').replace(/\D/g, '');
-  if (!d) return '';
-  if (d.length === 10) return '+1' + d;                 // US / Jamaica (+1 876) 10-digit numbers
-  if (d.length === 11 && d[0] === '1') return '+' + d;
-  if (d.length >= 11 && d.length <= 15) return '+' + d;  // already has a country code
-  return null;
-}
-function parseCustomers(rows, h) {
-  const out = [], byKey = {}, notes = [], known = LS.get('cher.customers', {}), knownKey = {};
-  Object.keys(known).forEach(k => { knownKey[k.toLowerCase()] = k; });
-  rows.slice(h.i + 1).forEach((r, x) => {
-    const g = k => h.map[k] == null ? '' : cellTxt(r[h.map[k]]), row = h.i + x + 2;
-    let company = g('company'); const contact = g('contact');
-    if (!company) return;
-    if (/^cash customer$/i.test(company) && contact) company = 'Cash customer - ' + contact;   // walk-ins: keep them apart
-    let email = g('email').toLowerCase();
-    if (email && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/.test(email)) { notes.push(t('impBadEmail', { e: email })); email = ''; }
-    let phone = e164(g('phone'));
-    if (phone === null) { notes.push(t('impBadPhone', { p: g('phone') })); phone = g('phone'); }
-    const c = { row, name: company, contact, address: g('address'), email, phone };
-    const k = company.toLowerCase(), prev = byKey[k];
-    if (prev) { for (const f of ['contact', 'address', 'email', 'phone']) prev[f] = prev[f] || c[f]; notes.push(t('impDup', { a: row, b: prev.row })); return; }
-    if (knownKey[k]) { c.name = knownKey[k]; c.exists = true; }
-    byKey[k] = c; out.push(c);
-  });
-  out.forEach(c => { if (!c.email && !c.phone && !c.address) notes.push(t('impNoContact', { n: c.name })); });
-  return { items: out, notes };
-}
-function parseParts(rows, h) {
-  const out = [], byKey = {}, notes = []; let freight = 0;
-  const known = new Set(inventory.map(i => String(i.partNo || '').toUpperCase()));
-  rows.slice(h.i + 1).forEach((r, x) => {
-    const g = k => h.map[k] == null ? '' : cellTxt(r[h.map[k]]), row = h.i + x + 2, line = r.map(cellTxt).join(' ');
-    if (/freight|flete|shipping|env[ií]o|transporte/i.test(line)) { const v = r.map(num).filter(Boolean); freight += v.length ? v[v.length - 1] : 0; return; }
-    if (r.some(c => /^(sub ?)?total\b|grand total|^importe total/i.test(cellTxt(c)))) return;   // summary rows (Total Amount, Subtotal…)
-    const partNo = g('partNo').toUpperCase();
-    if (!partNo || /^[$€]|^[\d.,]+$/.test(partNo) && !/[a-z]/i.test(partNo) && /[$.,]/.test(partNo)) return;   // empty or a money amount, not a part number
-    const p = { row, partNo, name: g('name') || partNo, qty: num(g('qty')), unit: g('unit') || 'ea', price: num(g('price')), vendor: g('vendor') };
-    const prev = byKey[partNo];
-    if (prev && prev.price === p.price) { prev.qty += p.qty; notes.push(t('impDup', { a: row, b: prev.row })); return; }
-    p.exists = known.has(partNo); byKey[partNo] = p; out.push(p);
-  });
-  const sub = out.reduce((s, p) => s + p.qty * p.price, 0), f = sub && freight ? freight / sub : 0;
-  out.forEach(p => { p.landed = Math.round(p.price * (1 + f) * 100) / 100; });
-  if (freight) notes.unshift(t('impFreight', { f: money(freight), p: (f * 100).toFixed(2) }));
-  return { items: out, notes, freight, sub };
-}
-function setImpKind(k) {
-  impKind = k; impData = null;
-  $$('#impTabs button').forEach(b => b.classList.toggle('on', b.dataset.kind === k));
-  $('#impHint').textContent = t(k === 'customers' ? 'impHintC' : 'impHintP');
-  $('#impVendorWrap').hidden = k !== 'parts';
-  $('#impPreview').innerHTML = ''; $('#impGo').hidden = true; $('#impFile').value = '';
-}
-function renderImp() {
-  const d = impData, box = $('#impPreview'), parts = impKind === 'parts';
-  const head = parts ? ['Part #', t('descLbl'), t('qty'), t('unitPrice'), t('impLanded'), ''] : [t('customerName'), t('impContact'), t('email'), 'WhatsApp', t('address'), ''];
-  box.innerHTML = `<div class="impsum"></div>${d.notes.length ? '<ul class="impnotes"></ul>' : ''}<div class="impwrap"><table class="imp"><thead><tr>${head.map(x => `<th>${esc(x)}</th>`).join('')}</tr></thead><tbody></tbody></table></div>`;
-  box.querySelector('.impsum').textContent = t('impReady', { n: d.items.length }) + (parts && d.sub ? ' · ' + t('impSub', { s: money(d.sub), t: money(d.sub + d.freight) }) : '');
-  const ul = box.querySelector('.impnotes'); d.notes.forEach(n => { const li = document.createElement('li'); li.textContent = n; ul.appendChild(li); });
-  const tb = box.querySelector('tbody');
-  d.items.forEach(it => {
-    const tr = document.createElement('tr');
-    const cells = parts ? [it.partNo, it.name, it.qty + ' ' + it.unit, money(it.price), money(it.landed)] : [it.name, it.contact, it.email, it.phone, it.address];
-    cells.forEach((c, i) => { const td = document.createElement('td'); td.textContent = c || ''; if (parts && i >= 2) td.className = 'num'; tr.appendChild(td); });
-    const td = document.createElement('td'); td.innerHTML = `<span class="pill ${it.exists ? 'info' : 'ok'}">${esc(t(it.exists ? 'impUpd' : 'impNew'))}</span>`; tr.appendChild(td);
-    tb.appendChild(tr);
-  });
-  $('#impGo').textContent = t('impGo', { n: d.items.length }); $('#impGo').hidden = !d.items.length;
-}
-$('#btnImport').onclick = () => { if (!isSup()) return; setImpKind(impKind); openSheet('#impSheet'); loadXLSX().catch(() => {}); if (!inventory.length) pullInventory(); };
-$('#impTabs').onclick = e => { const b = e.target.closest('button'); if (b) setImpKind(b.dataset.kind); };
-$('#impTpl').onclick = () => {
-  const csv = '﻿' + impTpl[impKind].join(',') + '\r\n';
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  a.download = impKind === 'customers' ? 'cher-customers-template.csv' : 'cher-parts-template.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-};
-$('#impFile').onchange = async e => {
-  const file = e.target.files[0]; if (!file) return;
-  const box = $('#impPreview'); box.innerHTML = `<div class="hint">${esc(t('impReading'))}</div>`; $('#impGo').hidden = true; impData = null;
-  try {
-    const sheets = await fileRows(file);
-    let h = null, rows = null;
-    for (const r of sheets) { h = mapHeader(r, impKind); if (h) { rows = r; break; } }
-    if (!h) throw new Error(t('impNoHeader'));
-    impData = impKind === 'customers' ? parseCustomers(rows, h) : parseParts(rows, h);
-    if (!impData.items.length) throw new Error(t('impNoRows'));
-    renderImp();
-  } catch (err) { box.innerHTML = '<div class="office"></div>'; box.firstChild.textContent = err.message; }
-};
-$('#impGo').onclick = async () => {
-  const d = impData, btn = $('#impGo'); if (!d) return;
-  busy(btn, true);
-  try {
-    if (impKind === 'customers') {
-      const customers = d.items.map(c => ({ name: c.name, contact: c.contact, address1: c.address, email: c.email, whatsapp: c.phone }));
-      try {
-        const j = await api('customers_import', { customers });
-        toast(t('impDone', { n: j.imported ?? customers.length })); closeSheet('#impSheet');
-      } catch (err) {
-        $('#impPreview').insertAdjacentHTML('afterbegin', '<div class="office" style="margin-bottom:10px"></div>');
-        $('#impPreview').firstChild.textContent = t('impLocalOnly', { e: err.message });
-      }
-      // either way the tablet learns them, so the customer form autocompletes and fills email / WhatsApp
-      const c = LS.get('cher.customers', {});
-      customers.forEach(x => { const p = c[x.name] || {}; c[x.name] = { address1: x.address1 || p.address1 || '', address2: p.address2 || '', address3: p.address3 || '', whatsapp: x.whatsapp || p.whatsapp || '', email: x.email || p.email || '' }; });
-      LS.set('cher.customers', c); fillCustomers(); pullCustomers();
-    } else {
-      const vendor = $('#impVendor').value.trim();
-      const items = d.items.map(p => ({ partNo: p.partNo, name: p.name, qty: p.qty, unit: p.unit, unitPrice: p.price, landedCost: p.landed, vendor: p.vendor || vendor }));
-      try {
-        const j = await api('inventory_import', { items, freight: d.freight, vendor });
-        toast(t('impDone', { n: j.imported ?? items.length })); closeSheet('#impSheet'); pullInventory();
-      } catch (err) {
-        $('#impPreview').insertAdjacentHTML('afterbegin', '<div class="office" style="margin-bottom:10px"></div>');
-        $('#impPreview').firstChild.textContent = t('impServerFail', { e: err.message });
-      }
-    }
-  } finally { busy(btn, false); }
-};
-
 /* ---------------- views ---------------- */
 function useType(type) {
   if (report && report.type === type) return;
@@ -1808,10 +1583,30 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Backspace') { p.value = p.value.slice(0, -1); e.preventDefault(); }
   else if (e.key === 'Enter') { e.preventDefault(); if (!$('#lgCode').value) $('#lgCode').focus(); else if (!p.value) p.focus(); else loginSubmit(); }
 });
+/* one start page: the same sign-in opens the technician app or the supervisor panel (admin.html, same server and accounts) */
+const ADMIN_LSK = 'cher.adminSession';
+let loginRole = 'tech';
+function setLoginRole(r) {
+  loginRole = r === 'sup' ? 'sup' : 'tech';
+  $$('#lgRole button').forEach(b => b.classList.toggle('on', b.dataset.r === loginRole));
+  $('#lgBtn').dataset.t = loginRole === 'sup' ? 'openPanel' : 'signIn'; $('#lgBtn').textContent = t($('#lgBtn').dataset.t);
+}
+$('#lgRole').onclick = e => { const b = e.target.closest('button'); if (b) { setLoginRole(b.dataset.r); $('#lgErr').textContent = ''; } };
+setLoginRole(/supervisor/i.test(location.hash + location.search) ? 'sup' : /tech/i.test(location.hash + location.search) ? 'tech' : LS.get('cher.lastRole', 'tech'));
+async function supervisorLogin() {
+  const j = await api('login', { code: $('#lgCode').value, pin: $('#lgPin').value, supervisorOnly: true });
+  if (j.user?.role !== 'supervisor') throw new Error(t('notSupervisor'));
+  LS.set('cher.lastRole', 'sup'); LS.set('cher.lastCode', j.user.code);
+  localStorage.setItem(ADMIN_LSK, JSON.stringify({ token: j.token, user: j.user }));
+  // the panel asks for a new PIN when the server requires it (the PIN itself is never stored)
+  if (j.mustChangePin) sessionStorage.setItem('cher.mustChangePin', j.user.code === 'ADMI26' ? 'master' : 'short');
+  $('#lgPin').value = ''; location.href = 'admin.html';
+}
 $('#loginForm').onsubmit = async e => {
   e.preventDefault(); $('#lgErr').textContent = ''; $('#lgBtn').disabled = true;
   try {
-    const j = await api('login', { code: $('#lgCode').value, pin: $('#lgPin').value });
+    if (loginRole === 'sup') { await supervisorLogin(); return; }
+    const j = await api('login', { code: $('#lgCode').value, pin: $('#lgPin').value }); LS.set('cher.lastRole', 'tech');
     session = { token: j.token, user: j.user }; LS.set('cher.session', session); LS.set('cher.lastCode', j.user.code);
     $('#lgPin').value = ''; startSession();
   } catch (err) { $('#lgErr').textContent = err.offline ? t('noNetLogin') : err.message; }
@@ -1824,7 +1619,7 @@ async function signOut(expired) {
     if (dirty) await save(true);
     try { await api('logout'); } catch {}
   }
-  session = null; LS.set('cher.session', null); $('#btnImport').hidden = true;
+  session = null; LS.set('cher.session', null);
   // shared tablets: drop the previous technician's office data (it is downloaded again on the next sign-in);
   // unsent reports (IndexedDB) and queued requests are kept so nothing is lost
   ['cher.jobs', 'cher.requests', 'cher.reqSeen'].forEach(k => { try { localStorage.removeItem(k); } catch {} });
@@ -1836,7 +1631,6 @@ $('#btnLogout').onclick = () => signOut(false);
 function startSession() {
   $('#login').hidden = true;
   $('#whoName').textContent = `${session.user.name} (${session.user.code})`;
-  $('#btnImport').hidden = !isSup();
   const hasJobs = jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled');
   const v0 = LS.get('cher.view', hasJobs ? 'jobs' : 'form');
   const d = LS.get(draftKey(v0 === 'maint' ? 'maintenance' : 'repair'), null);
@@ -1869,6 +1663,7 @@ window.toast = toast;
 document.querySelectorAll('img[data-logo]').forEach(i => { i.src = window.CHER_LOGO_URL; });
 report = blankReport(); render(); applyLang();
 if (session?.token) startSession();
+else if (loginRole === 'sup' && localStorage.getItem(ADMIN_LSK)) location.replace('admin.html');   // supervisor already signed in
 else { $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false; }
 window.addEventListener('pagehide', () => { if (dirty) saveDraft(); });
 </script>

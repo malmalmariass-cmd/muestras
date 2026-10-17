@@ -2,7 +2,8 @@
 
 | Acción | Técnico | Supervisor / admin |
 |--------|:------:|:------:|
-| Importar clientes o partes en masa (Excel / CSV / Word) | ✗ (no ve el botón) | ✓ |
+| Entrar al panel del supervisor (`admin.html`) | ✗ (el servidor lo rechaza) | ✓ |
+| Importar clientes o partes en masa (Excel / CSV / Word) | ✗ (solo existe en el panel) | ✓ |
 | Registrar un cliente **nuevo** llenando el reporte | ✓ queda **pendiente** de aprobación | ✓ queda aprobado |
 | Modificar datos de un cliente ya registrado | ✗ — el cambio viaja como **solicitud** para aprobar | ✓ |
 | Borrar clientes | ✗ | ✓ (desde el panel) |
@@ -11,7 +12,7 @@
 ## Lo que hace la app (`index.html`)
 
 - El rol se toma de `user.role` en la respuesta de `login`. Si no viene, se trata como **técnico** (opción segura).
-  Roles con permisos: `supervisor`, `admin`, `owner`, `manager`.
+  El servidor usa `supervisor` y `tech`.
 - **Clientes**
   - Al escribir un cliente que no está registrado aparece el aviso *"Cliente nuevo: queda registrado con este
     reporte y pendiente hasta que el supervisor lo apruebe"*. El reporte se envía con `customerStatus: "new"`.
@@ -31,7 +32,7 @@
 La app solo oculta; **un técnico con conocimientos podría llamar al API directamente**. La seguridad real está aquí:
 
 ```php
-function is_sup($u) { return in_array($u['role'] ?? '', ['supervisor', 'admin', 'owner', 'manager'], true); }
+function is_sup($u) { return ($u['role'] ?? '') === 'supervisor'; }
 
 // 1) login: devolver el rol
 out(['ok' => true, 'token' => $token, 'user' => ['code' => $u['code'], 'name' => $u['name'], 'role' => $u['role']]]);
@@ -49,8 +50,8 @@ function strip_prices($x) {
 // en inventory_list, preq_list, jobs_list, my_reports, equipment_history, service_items:
 if (!is_sup($user)) $resp = strip_prices($resp);
 
-// 3) importación masiva: solo supervisor
-if (in_array($action, ['customers_import', 'inventory_import'], true) && !is_sup($user)) out(['ok' => false, 'error' => 'Forbidden'], 403);
+// 3) customer_save / customer_delete / inventory_save / inventory_adjust (formularios e importación del panel):
+//    verificar que solo un supervisor pueda llamarlas
 
 // 4) save_report / job_save de un técnico: NO tocar la tabla de clientes directamente
 if (!is_sup($user)) {
