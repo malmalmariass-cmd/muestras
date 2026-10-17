@@ -1,42 +1,77 @@
-# Página de inicio única e importación masiva
+# Importar clientes y partes (Excel / CSV / Word)
 
-## Una sola entrada: `index.html`
+La app tiene ahora un botón **⇪ Importar** arriba, junto a "Salir". **Solo lo ve el supervisor** (o admin); el técnico no lo tiene. Ver `PERMISOS.md`.
 
-La pantalla de inicio tiene dos opciones: **Técnico** o **Supervisor**. Mismo ID de empleado y PIN de siempre.
+- **Clientes**: Excel (.xlsx/.xls), CSV o tabla de Word (.docx). Reconoce columnas como
+  *Company Name / Empresa, Contact / Contacto, Address / Dirección, Email / Correo, Phone / Teléfono*,
+  aunque el encabezado no esté en la primera fila. Une duplicados, pasa los teléfonos a formato
+  WhatsApp (+1…), valida correos y avisa de clientes sin datos de contacto.
+- **Partes / inventario**: Excel, CSV o tabla de Word (sirve una cotización del proveedor tal cual).
+  Reconoce *Part Number, Description, Qty, Unit, Unit price, Vendor*. Ignora las filas de totales y
+  reparte la fila de **flete (Freight / Flete)** entre las partes como **costo real** (landed cost).
+- Muestra una vista previa (nuevo / actualiza) **antes** de importar. Nada se envía sin pulsar "Importar".
+- `.doc` antiguo no se puede leer: guardarlo como `.docx` o usar Excel.
+- Botón **Descargar plantilla** con las columnas correctas.
 
-- **Técnico** → abre la app de reportes (tablet).
-- **Supervisor** → valida en el servidor que la cuenta sea de supervisor (`supervisorOnly`) y abre el panel
-  (`admin.html`) ya con la sesión iniciada. Si la cuenta es de técnico, muestra el error y no entra.
-- La app recuerda la última opción. Un supervisor con sesión abierta que entra a `index.html` va directo al panel.
-- **Salir** del panel vuelve a la página de inicio con "Supervisor" marcado.
-- Si el servidor exige cambiar el PIN (cuenta maestra o PIN corto), el panel lo pide al entrar. El PIN nunca se guarda.
-- `admin.html` ya no tiene su propio login. Su pantalla solo aparece para la **configuración inicial**
-  (primera cuenta de supervisor, cuando la base está vacía).
+El lector de Excel (`vendor/xlsx.full.min.js`, SheetJS 0.18.5) solo se descarga al abrir Importar,
+así no hace más lenta la app. **Hay que subir la carpeta `vendor/` al servidor** junto al `index.html`;
+si falta, se usa la copia del CDN (verificada con SRI).
 
-Siguen siendo dos archivos a propósito: así la tablet del técnico no descarga el código del panel (es más
-rápida y no expone las funciones de supervisor). Para el usuario es una sola página de inicio.
+## Lo que falta en el servidor
 
-## Importación masiva (solo en el panel del supervisor)
+La app envía dos acciones nuevas a `api/api.php`. Mientras el servidor no las tenga:
+- **Clientes**: se guardan solo en esa tablet (sirven para autocompletar) y se avisa.
+- **Partes**: no se cambia nada y se avisa.
 
-Botón **⇪ Import Excel / Word** en **Customers** y en **Inventory**. Lee Excel (.xlsx/.xls), CSV y tablas de
-Word (.docx). `.doc` antiguo: guardarlo como .docx. Muestra una vista previa antes de importar.
+Plantilla para `api/api.php` (adaptar nombres de tablas/columnas a la base real; usa PDO con
+sentencias preparadas y **solo permite supervisor o admin**):
 
-Usa las acciones que el servidor **ya tiene** (`customer_save`, `inventory_save`, `inventory_adjust`), así que
-funciona sin tocar `api/api.php`.
+```php
+case 'customers_import':
+    require_role($user, 'supervisor');                  // solo supervisor (o admin): técnicos no pueden importar
+    $list = array_slice($in['customers'] ?? [], 0, 2000); // límite por envío
+    $st = $pdo->prepare('INSERT INTO customers (name, contact, address1, email, whatsapp)
+        VALUES (:name, :contact, :address1, :email, :whatsapp)
+        ON DUPLICATE KEY UPDATE                          -- requiere UNIQUE(name)
+          contact  = COALESCE(NULLIF(VALUES(contact), ""),  contact),
+          address1 = COALESCE(NULLIF(VALUES(address1), ""), address1),
+          email    = COALESCE(NULLIF(VALUES(email), ""),    email),
+          whatsapp = COALESCE(NULLIF(VALUES(whatsapp), ""), whatsapp)');
+    $pdo->beginTransaction(); $n = 0;
+    foreach ($list as $c) {
+        $name = trim(mb_substr($c['name'] ?? '', 0, 200)); if ($name === '') continue;
+        $email = filter_var($c['email'] ?? '', FILTER_VALIDATE_EMAIL) ?: '';
+        $st->execute([':name' => $name, ':contact' => mb_substr($c['contact'] ?? '', 0, 120),
+            ':address1' => mb_substr($c['address1'] ?? '', 0, 250), ':email' => $email,
+            ':whatsapp' => preg_replace('/[^\d+]/', '', $c['whatsapp'] ?? '')]);
+        $n++;
+    }
+    $pdo->commit();
+    audit($user, 'customers_import', $n);              // registro de quién importó qué
+    out(['ok' => true, 'imported' => $n]);
 
-**Clientes**
-- Une duplicados, teléfonos a formato WhatsApp (+1…), valida correos, separa los "Cash customer" por contacto.
-- Cliente **nuevo** → se crea. El contacto va en Notas ("Contact: Albert").
-- Cliente **ya registrado** → **no se sobrescribe nada**; solo se rellenan sus campos vacíos.
+case 'inventory_import':
+    require_role($user, 'supervisor');
+    $items = array_slice($in['items'] ?? [], 0, 2000);
+    $st = $pdo->prepare('INSERT INTO inventory (part_no, name, qty, unit, unit_price, landed_cost, vendor, kind)
+        VALUES (:p, :n, :q, :u, :pr, :lc, :v, "stock")
+        ON DUPLICATE KEY UPDATE                          -- requiere UNIQUE(part_no)
+          qty = qty + VALUES(qty), unit_price = VALUES(unit_price),
+          landed_cost = VALUES(landed_cost), vendor = VALUES(vendor)');
+    $pdo->beginTransaction(); $n = 0;
+    foreach ($items as $i) {
+        $p = strtoupper(trim(mb_substr($i['partNo'] ?? '', 0, 60))); if ($p === '') continue;
+        $st->execute([':p' => $p, ':n' => mb_substr($i['name'] ?? $p, 0, 200), ':q' => max(0, (float)($i['qty'] ?? 0)),
+            ':u' => mb_substr($i['unit'] ?? 'ea', 0, 10), ':pr' => max(0, (float)($i['unitPrice'] ?? 0)),
+            ':lc' => max(0, (float)($i['landedCost'] ?? 0)), ':v' => mb_substr($i['vendor'] ?? '', 0, 120)]);
+        $n++;
+    }
+    $pdo->commit();
+    audit($user, 'inventory_import', $n);
+    out(['ok' => true, 'imported' => $n]);
+```
 
-**Partes**
-- Ignora filas de totales. La fila de **flete (Freight/Flete)** se reparte entre las partes → **costo real**.
-- Elegir: **Received** (suma al stock) o **Vendor catalog** (catálogo para pedir, no suma stock).
-- **Markup %**: precio de venta = costo real × (1 + markup). Sin markup avisa que se venderían al costo.
-- Parte **nueva** → se crea con su cantidad y precio de venta.
-- Parte **ya existente** → con "Received" se suma la cantidad como *Restock* (queda en el historial de
-  movimientos con el nombre del archivo); su precio no se cambia.
-
-## Archivos a subir al servidor
-
-`index.html`, `admin.html` y la carpeta `vendor/` (lector de Excel; si falta se usa el CDN verificado con SRI).
+Notas:
+- La importación de partes **suma** la cantidad al stock existente (mercancía recibida). Si la
+  cotización es solo un pedido que aún no llega, usar `kind = "order"` y no sumar `qty`.
+- `customers` debe devolver también los clientes importados para que todas las tablets los vean.
