@@ -2047,15 +2047,21 @@ function ltRecord(a, ms, ok, err) {
   const s = LT.stats[a] = LT.stats[a] || { n: 0, err: 0, t: [] };
   s.n++; s.t.push(ms); if (!ok) { s.err++; LT.errors[err] = (LT.errors[err] || 0) + 1; }
 }
-async function ltCall(tech, action, data = {}) {
-  const t0 = performance.now(), ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000); let ok = false, err = '';
+async function ltCall(tech, action, data = {}, tries = 0) {
+  const t0 = performance.now(), ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000); let ok = false, err = '', busy = 0;
   try {
     const res = await fetch(API, { method: 'POST', cache: 'no-store', signal: ctl.signal, headers: { 'Content-Type': 'application/json', ...(tech.token ? { 'X-Auth-Token': tech.token } : {}) }, body: JSON.stringify({ action, ...data }) });
     let j = null; try { j = JSON.parse(await res.text()); } catch {}
     ok = !!(res.ok && j && j.ok); if (!ok) err = `${action}: ${(j && j.error) || 'HTTP ' + res.status}`;
+    // "server busy" (503/429): the technician app keeps the work and tries again a few seconds later — do the same (up to 3 times)
+    if (!ok && tries < 3 && (res.status === 503 || res.status === 429)) busy = Math.min(10, +res.headers.get('Retry-After') || 3);
     return ok ? j : null;
   } catch (e) { err = `${action}: ${e.name === 'AbortError' ? 'no answer in 30 s' : 'network error'}`; return null; }
-  finally { clearTimeout(tm); ltRecord(action, performance.now() - t0, ok, err); }
+  finally {
+    clearTimeout(tm);
+    if (busy) LT.retries++; else ltRecord(action, performance.now() - t0, ok, err);
+    if (busy) { await new Promise(r => setTimeout(r, busy * 1000 * (0.5 + Math.random()))); return ltCall(tech, action, data, tries + 1); }
+  }
 }
 let ltSig = '';
 function fakeSignature() {   // a real-looking signature image, so each report weighs what a real one does
@@ -2088,6 +2094,7 @@ async function ltTech(i) {
     await ltCall(tech, 'preq_list');
     if (Math.random() < 0.35) await ltCall(tech, 'jobs_list');
   }
+  await new Promise(r => setTimeout(r, Math.random() * 8000));   // people don't all sign out in the same second
   await ltCall(tech, 'logout'); LT.active--;
 }
 const pct = (a, p) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
@@ -2097,9 +2104,9 @@ function ltRender(final) {
   const secs = Math.max(1, (Math.min(Date.now(), LT.end) - LT.start) / 1000), p95 = pct(times, 0.95);
   const verdict = !n ? '' : e / n > 0.01 ? ['bad', `✗ ${fmtN(e)} errors (${(e / n * 100).toFixed(1)}%) — the server is not keeping up. See the errors below.`]
     : p95 > 3000 ? ['warn', `⚠ No errors, but slow: 95% of requests answered in under ${(p95 / 1000).toFixed(1)} s (target: under 3 s).`]
-    : ['ok', `✓ Fine: ${fmtN(n)} requests, ${e ? fmtN(e) + ' errors' : 'no errors'}, 95% answered in under ${(p95 / 1000).toFixed(2)} s.`];
+    : ['ok', `✓ Fine: ${fmtN(n)} requests, ${e ? fmtN(e) + ' errors' : 'no errors'}, 95% answered in under ${(p95 / 1000).toFixed(2)} s.${LT.retries ? ` ${fmtN(LT.retries)} had to wait a few seconds because the server was busy, then went through (the tablets do the same by themselves).` : ''}`];
   $('#ltOut').innerHTML = `<div class="kpis k4">${[['Technicians online', `${fmtN(LT.active)} / ${fmtN(LT.n)}`, LT.stop || Date.now() >= LT.end ? 'test finished' : 'signed in now'],
-      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), n ? (e / n * 100).toFixed(1) + '% of requests' : ''], ['Reports saved', fmtN(LT.reports), 'with 2 signatures each']].map(kpi).join('')}</div>
+      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), (n ? (e / n * 100).toFixed(1) + '% of requests' : '') + (LT.retries ? ` · ${fmtN(LT.retries)} retried when busy` : '')], ['Reports saved', fmtN(LT.reports), 'with 2 signatures each']].map(kpi).join('')}</div>
     ${verdict && (final || n > 50) ? `<p style="font-weight:700;color:var(--${verdict[0] === 'ok' ? 'ok' : verdict[0] === 'warn' ? 'warn' : 'red'})">${esc(verdict[1])}</p>` : ''}
     <div class="tablewrap"><table class="t"><thead><tr><th>Action</th><th class="num">Requests</th><th class="num">Errors</th><th class="num">Average</th><th class="num">95% under</th><th class="num">Slowest</th></tr></thead><tbody>
     ${Object.entries(LT.stats).map(([a, x]) => `<tr><td>${esc(a)}</td><td class="num">${fmtN(x.n)}</td><td class="num" style="${x.err ? 'color:var(--red);font-weight:700' : ''}">${fmtN(x.err)}</td>
@@ -2110,7 +2117,7 @@ $('#ltStart').onclick = async () => {
   if (LT && !LT.done) return;
   const n = Math.min(100, Math.max(1, +$('#ltN').value || 50)), min = Math.min(60, Math.max(1, +$('#ltMin').value || 5)), rep = Math.max(1, +$('#ltRep').value || 3);
   if (!confirm(`Simulate ${n} technicians for ${min} minutes? It creates real reports on the server (delete them afterwards with “Reset data”).`)) return;
-  LT = { n, stop: false, done: false, active: 0, reports: 0, stats: {}, errors: {}, pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
+  LT = { n, stop: false, done: false, active: 0, reports: 0, retries: 0, stats: {}, errors: {}, pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
   $('#ltStart').hidden = true; $('#ltStop').hidden = false; $('#ltOut').innerHTML = '';
   try {
     await loadEmps();

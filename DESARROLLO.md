@@ -28,6 +28,11 @@ Simula N técnicos (TEST01, TEST02…) usando la app a la vez: entran, descargan
 trabajos, sincronizan cada ~30 s y envían reportes con dos firmas. Muestra en vivo peticiones por minuto,
 errores y tiempos de respuesta, y al final un veredicto (✓ bien / ⚠ lento / ✗ no aguanta). No envía correos.
 
+Si muchas personas entran en el mismo segundo, MySQL de Hostinger puede rechazar una conexión por un instante.
+El servidor reintenta solo, hasta 5 veces en ~2 s. Si aun así está ocupado, responde **"Server busy"** (503) y la
+tablet guarda el trabajo y lo reenvía sola unos segundos después. La prueba de carga hace lo mismo y lo muestra
+como **"retried when busy"**: eso no es un error. Solo cuenta como error lo que falla después de 3 reintentos.
+
 ### Reset data
 Borra de una vez en el servidor, eligiendo qué:
 clientes · reportes de servicio · ventas y facturas (con sus pagos) · trabajos · solicitudes de partes y
