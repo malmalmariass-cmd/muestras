@@ -4,8 +4,8 @@
 |--------|:------:|:------:|
 | Entrar al panel del supervisor (`admin.html`) | ✗ (el servidor lo rechaza) | ✓ |
 | Importar clientes o partes en masa (Excel / CSV / Word) | ✗ (solo existe en el panel) | ✓ |
-| Registrar un cliente **nuevo** llenando el reporte | ✓ queda **pendiente** de aprobación | ✓ queda aprobado |
-| Modificar datos de un cliente ya registrado | ✗ — el cambio viaja como **solicitud** para aprobar | ✓ |
+| Registrar un cliente **nuevo** llenando el reporte | ✓ queda registrado al guardar | ✓ |
+| Modificar datos de un cliente ya registrado | ✗ — el cambio viaja en el reporte y el supervisor lo **aprueba** desde el reporte | ✓ |
 | Borrar clientes | ✗ | ✓ (desde el panel) |
 | Ver precios / costos de partes | ✗ | ✓ |
 
@@ -27,43 +27,13 @@
   `total`, `margin`, `markup`, `landed`) del inventario, solicitudes de partes, trabajos y reportes antes de
   mostrarlos o guardarlos en la tablet.
 
-## Lo que **debe** hacer el servidor (`api/api.php`)
+## Lo que hace el servidor (`api/api.php`)
 
-La app solo oculta; **un técnico con conocimientos podría llamar al API directamente**. La seguridad real está aquí:
-
-```php
-function is_sup($u) { return ($u['role'] ?? '') === 'supervisor'; }
-
-// 1) login: devolver el rol
-out(['ok' => true, 'token' => $token, 'user' => ['code' => $u['code'], 'name' => $u['name'], 'role' => $u['role']]]);
-
-// 2) sin precios para técnicos en TODAS las respuestas que lleven partes
-function strip_prices($x) {
-    if (!is_array($x)) return $x;
-    $o = [];
-    foreach ($x as $k => $v) {
-        if (is_string($k) && preg_match('/price|cost|amount|total|margin|markup|landed/i', $k)) continue;
-        $o[$k] = strip_prices($v);
-    }
-    return $o;
-}
-// en inventory_list, preq_list, jobs_list, my_reports, equipment_history, service_items:
-if (!is_sup($user)) $resp = strip_prices($resp);
-
-// 3) customer_save / customer_delete / inventory_save / inventory_adjust (formularios e importación del panel):
-//    verificar que solo un supervisor pueda llamarlas
-
-// 4) save_report / job_save de un técnico: NO tocar la tabla de clientes directamente
-if (!is_sup($user)) {
-    if (($r['customerStatus'] ?? '') === 'new' || !empty($in['newCustomer'])) {
-        // INSERT IGNORE INTO customers (..., status) VALUES (..., 'pending')   -- pendiente de aprobación
-    } elseif (($r['customerStatus'] ?? '') === 'changed') {
-        // INSERT INTO customer_change_requests (customer_name, changes_json, requested_by, report_id, created_at)
-    }
-    // ignorar cualquier campo de precio que mande el técnico y conservar los guardados
-}
-```
-
-En el panel del supervisor hacen falta dos listas: **Clientes pendientes** (aprobar / editar / rechazar) y
-**Cambios solicitados** (aprobar / rechazar). Solo el supervisor puede borrar o modificar clientes.
-Los clientes `pending` sí deben devolverse en `customers` al técnico que los creó, para que pueda seguir usándolos.
+Revisado con el `api.php` real:
+- **Precios:** el servidor ya los quita de todo lo que recibe un técnico (inventario, reportes, solicitudes,
+  pedidos, historial de equipos) y conserva los precios de la oficina cuando un técnico guarda.
+- **Clientes:** un cliente nuevo escrito en un reporte se registra solo. Si ya existe, el servidor **solo rellena
+  campos vacíos**, nunca sobrescribe. Los cambios que propone el técnico van en el reporte
+  (`customerChanges`) y el supervisor los aplica con **Approve and update the customer**.
+- **Borrar clientes, inventario, facturas, empleados:** solo supervisores (`need_sup`).
+- **Panel:** `login` con `supervisorOnly` rechaza cuentas de técnico.

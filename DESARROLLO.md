@@ -1,116 +1,90 @@
-# Herramientas de desarrolladora y prueba de carga
+# Herramientas de desarrolladora, base de datos y respaldos
 
-## 1. El error "Cannot connect to the database (check DB_HOST…)"
+## 1. Activar las herramientas (una vez)
 
-Pasó a mitad de la importación: los primeros clientes entraron y los siguientes fallaron. Es el patrón
-del límite de **conexiones por hora** de MySQL en Hostinger: unas **500 conexiones por hora** por usuario
-de base de datos cuando la app se conecta por nombre de servidor o IP, y no por `localhost`. Cada
-petición de la app abre una conexión, así que unas decenas de clientes importados, sumadas a las
-tablets sincronizando, lo agotan.
-
-**Arreglo (5 minutos, en hPanel → Archivos → Administrador de archivos → `api/config.php`):**
+En hPanel → Administrador de archivos → `api/config.php`, añade una línea al final:
 
 ```php
-define('DB_HOST', 'localhost');   // no la IP ni "srvXXX.hstgr.io"
+define('DEV_PIN', 'TU-PIN-DE-DESARROLLADORA');
 ```
 
-Hostinger recomienda exactamente esto para este error. Con `localhost` la conexión es local y ese límite
-deja de aplicar. **Es imprescindible antes de la prueba de 50 técnicos**: 50 tablets sincronizando cada
-30 s hacen unas 6 000 peticiones por hora.
+- El PIN **solo** vive en `config.php`, en el servidor. No aparece en el panel, en la app ni en GitHub.
+- El servidor lo comprueba en cada acción. 5 intentos fallidos bloquean las herramientas 1 hora.
+- Aprovecha y revisa en el mismo archivo que diga `define('DB_HOST', 'localhost');`.
 
-Si después de cambiarlo sigue fallando, en phpMyAdmin → SQL ejecuta `SHOW PROCESSLIST;` y mándame el
-mensaje exacto del error (en `api/api.php` se puede registrar el error real de PDO en un log privado).
+## 2. La barra de desarrolladora (panel del supervisor)
 
-Cambios en la app para no repetirlo:
-- La importación ahora va **de uno en uno** y **reintenta** (1,5 s, 6 s, 13,5 s) si el servidor falla.
-- Si fallan 3 seguidos, **se pausa** en vez de seguir gastando conexiones, y deja un botón para
-  reintentar solo los que faltaron. Volver a importar el mismo archivo tampoco duplica nada.
+- **Settings → Developer → 🛠 Developer tools** → PIN de desarrolladora → **Turn on / Turn off**.
+- Mientras están **encendidas** aparece una **barra naranja** debajo del menú en todas las pantallas:
+  **Load test · Reset data · Export data · Turn off**. Al apagarlas, la barra desaparece y el servidor
+  rechaza borrar y la prueba de carga, aunque alguien tenga el PIN. Quedan registradas en el Activity log.
 
-## 2. Herramientas de desarrolladora (panel → Settings → Developer)
+### Load test
+Simula N técnicos (TEST01, TEST02…) usando la app a la vez: entran, descargan clientes/inventario/
+trabajos, sincronizan cada ~30 s y envían reportes con dos firmas. Muestra en vivo peticiones por minuto,
+errores y tiempos de respuesta, y al final un veredicto (✓ bien / ⚠ lento / ✗ no aguanta). No envía correos.
 
-Se desbloquean con el **PIN de desarrolladora**. 5 intentos fallidos bloquean 15 minutos.
+### Reset data
+Borra de una vez en el servidor, eligiendo qué:
+clientes · reportes de servicio · ventas y facturas (con sus pagos) · trabajos · solicitudes de partes y
+pedidos a proveedores · técnicos de prueba TEST… y sus reportes · desactivar los demás técnicos ·
+archivar el inventario · número de la próxima factura.
+Los supervisores nunca se borran y las cantidades de inventario no se tocan. Pide escribir `RESET`.
 
-### Prueba de carga (Load test)
-Simula N técnicos desde tu navegador haciendo lo mismo que la app de la tablet: entrar, descargar
-clientes/inventario/trabajos, sincronizar cada 24–36 s y enviar reportes con dos firmas.
-- Crea o reactiva solos a **TEST01 … TEST50** con un PIN aleatorio nuevo en cada prueba.
-- Los técnicos van entrando durante los primeros ~30 s, como en la vida real.
-- Muestra en vivo: técnicos conectados, peticiones por minuto, errores, y tiempos por acción
-  (promedio, el 95 % responde en menos de…, el más lento), con los mensajes de error agrupados.
-- Veredicto al final: ✓ bien (sin errores, 95 % en < 3 s), ⚠ lento, o ✗ el servidor no aguanta.
-- **No envía correos** (Hostinger limita los envíos por día).
+### Export data
+Un Excel con una hoja por cada parte de la app: clientes, reportes, partes de reportes, facturas, líneas de
+factura, pagos, solicitudes de partes, pedidos a proveedores, inventario, movimientos de stock, trabajos,
+empleados y registro de actividad. (Sin las imágenes de las firmas; el respaldo `.sql` sí las tiene.)
+También está siempre en **Settings → Security & backup → Export all data (Excel)** con el PIN de supervisor,
+aunque las herramientas estén apagadas.
 
-### Borrar datos (Reset data)
-Borra de una vez: reportes, facturas, trabajos, clientes (opcional), inventario (se archiva),
-técnicos de prueba TEST… o todos los técnicos (se desactivan), y fija el próximo número de factura.
-Pide tu PIN de supervisor (el servidor lo exige para borrar reportes y facturas), escribir `RESET`,
-y ofrece descargar una copia de seguridad antes.
+## 3. ¿Qué pasa si se llena la base de datos?
 
-**Hoy funciona sin cambiar el servidor**: borra elemento por elemento con las mismas acciones que ya
-usa el panel. Las copias de los reportes y facturas borrados quedan en el Activity log.
-Las **solicitudes de partes** y los **pedidos a proveedores** no se pueden borrar desde el panel; para
-eso, y para que el borrado sea instantáneo, añade al servidor el código de abajo.
+Hostinger pone un tope de unos **3 GB por base de datos**. **Settings** muestra ahora el tamaño actual
+("Database size: … of about 3 GB") y avisa en rojo al pasar el 70 %.
 
-### Sobre el PIN 2324
-- Mientras el servidor no tenga `dev_check`, el panel compara el PIN con una huella (hash) guardada en
-  `admin.html`. **El 2324 no aparece escrito** en el código, pero un PIN de 4 dígitos se puede adivinar
-  probando las 10 000 combinaciones contra esa huella. Como estas herramientas solo hacen en bloque lo
-  que un supervisor ya puede hacer uno por uno, no da poderes nuevos a nadie; aun así, la protección
-  real es que el servidor compruebe el PIN (abajo).
-- Cuando termines las pruebas, desactiva las herramientas: `DEV_TOOLS_ENABLED` en `false`.
+Si se llena, el servidor deja de poder **guardar** nada nuevo:
 
-## 3. Código para `api/api.php` (añadir cuando me pases ese archivo)
+| Qué | Qué pasa |
+|---|---|
+| Reportes de las tablets | **No se pierden**: se quedan guardados en la tablet y reintentan solos, pero no llegan a la oficina, no reciben número de factura y no sale la copia por correo. |
+| Iniciar sesión | **Falla**: cada inicio de sesión guarda un registro. Quien ya tiene la sesión abierta sigue viendo datos. |
+| Facturas, clientes, inventario, trabajos | No se pueden crear ni cambiar desde el panel. |
+| Ver, buscar, exportar | Sigue funcionando. |
 
-En `api/config.php` (fuera del alcance del navegador):
+Cómo evitarlo, en este orden:
+1. Vigilar el tamaño en Settings (una vez al mes).
+2. Las firmas son casi todo el peso (~75 KB por reporte). La solución definitiva es guardarlas como
+   archivos aparte en el servidor; dímelo cuando quieras hacerlo.
+3. Una vez al año: exportar a Excel + respaldo `.sql`, y archivar los reportes viejos en otra base de datos.
 
-```php
-define('DEV_TOOLS_ENABLED', true);   // false cuando termine la etapa de pruebas
-define('DEV_PIN_HASH', '$2y$10$...'); // password_hash('2324', PASSWORD_DEFAULT) — nunca el PIN en texto
-```
+## 4. Respaldos: qué hacer para no perder nada
 
-En `api/api.php`, dentro del `switch ($action)`:
+**Rutina**
+1. **Automático (Hostinger):** el plan Business incluye copias automáticas de archivos y base de datos.
+   Compruébalo en hPanel → Archivos → **Copias de seguridad**.
+2. **Cada semana:** panel → Settings → **Download full backup (.sql)** (pide tu PIN de supervisor) y
+   **Export all data (Excel)**. Guarda ambos fuera del hosting (Google Drive o tu computadora).
+3. **Antes de subir cualquier cambio** (`index.html`, `admin.html`, `api.php`): descarga primero los
+   archivos actuales y un respaldo `.sql`.
 
-```php
-case 'dev_check':
-case 'dev_reset':
-    if (!DEV_TOOLS_ENABLED) out(['ok' => false, 'error' => 'Developer tools are off'], 403);
-    require_supervisor($user);
-    // máx. 5 intentos fallidos por hora por usuario → "locked"
-    if (dev_attempts($user) >= 5) out(['ok' => false, 'error' => 'Developer PIN locked for 1 hour'], 429);
-    if (!password_verify((string)($in['pin'] ?? ''), DEV_PIN_HASH)) { dev_fail($user); out(['ok' => false, 'error' => 'Wrong developer PIN'], 403); }
-    if ($action === 'dev_check') out(['ok' => true, 'dev' => true]);
+**Si algo sale mal**
 
-    $w = $in['wipe'] ?? []; $deleted = [];
-    $pdo->beginTransaction();
-    // ⚠ Adaptar los nombres de las tablas a los reales de la base de datos
-    if (!empty($w['reports']))   { $deleted['reports']   = $pdo->exec('DELETE FROM reports'); }
-    if (!empty($w['invoices']))  { $deleted['invoices']  = $pdo->exec('DELETE FROM invoices'); $pdo->exec('DELETE FROM invoice_lines'); $pdo->exec('DELETE FROM payments'); }
-    if (!empty($w['jobs']))      { $deleted['jobs']      = $pdo->exec('DELETE FROM jobs'); }
-    if (!empty($w['reports']) || !empty($w['jobs'])) { $pdo->exec('DELETE FROM parts_requests'); $pdo->exec('DELETE FROM orders'); }
-    if (!empty($w['customers'])) { $deleted['customers'] = $pdo->exec('DELETE FROM customers'); }
-    if (!empty($w['inventory'])) { $deleted['inventory'] = $pdo->exec('UPDATE inventory SET active = 0'); }
-    if (!empty($w['testTechs'])) { $deleted['testTechs'] = $pdo->exec("DELETE FROM employees WHERE role = 'tech' AND code LIKE 'TEST%'"); }
-    if (!empty($w['allTechs']))  { $deleted['techs']     = $pdo->exec("UPDATE employees SET active = 0 WHERE role = 'tech'"); }
-    if (!empty($in['nextInvoice'])) { /* actualizar el contador de facturas igual que settings_save */ }
-    $pdo->commit();
-    audit($user, 'developer_reset', json_encode($deleted));   // queda registrado quién y cuándo
-    out(['ok' => true, 'dev' => true, 'deleted' => $deleted]);
-```
+| Problema | Qué hacer |
+|---|---|
+| Un archivo nuevo rompió la app | Vuelve a subir el archivo anterior. Los datos no se tocan. |
+| Se borraron datos por error | hPanel → Copias de seguridad → restaurar **solo la base de datos** del día anterior. O phpMyAdmin → Importar el último `.sql`. |
+| Se perdió todo el hosting | Sube de nuevo los archivos, abre la app una vez (crea las tablas) y luego phpMyAdmin → Importar el `.sql`. |
+| Una tablet se rompió | Los reportes ya sincronizados están en el servidor. Solo se pierde lo que no llegó a sincronizar. |
 
-Los supervisores nunca se borran, así que no te puedes quedar fuera del sistema.
+Prueba la restauración una vez, con calma, en una base de datos de prueba. Así sabrás hacerlo el día que haga falta.
 
-## 4. Plan para la prueba de mañana
+## 5. Plan para la prueba de carga
 
-1. Cambia `DB_HOST` a `localhost` (sección 1).
-2. Sube `index.html`, `admin.html` y la carpeta `vendor/` completa.
-3. Panel → Settings → **Download full backup** (por si acaso).
-4. Panel → Settings → Developer → PIN → **Load test**: empieza con **10 técnicos, 3 minutos**.
-   Si sale ✓, repite con **50 técnicos, 10 minutos**.
-5. Mientras corre, abre la app en una tablet real y usa todo normal: así ves cómo se siente.
-6. Mira el veredicto y los errores. Si aparece algo, hazle captura y mándamela.
-7. **Reset data** → marca Service reports, Invoices, Jobs y Test technicians → tu PIN de supervisor →
-   `RESET` → pon el próximo número de factura que quieras para empezar en limpio.
-
-Lo que puede limitar a 50 usuarios en Hostinger Business (además de las conexiones por hora):
-procesos PHP simultáneos y CPU del plan. Si el resultado es ⚠ lento, hPanel → **Uso de recursos**
-muestra cuál se llenó durante la prueba.
+1. `api/config.php`: `DB_HOST` = `localhost` y la línea `DEV_PIN`.
+2. Sube los archivos del paquete.
+3. Settings → **Download full backup (.sql)**.
+4. Developer tools → PIN → **Turn on** → **Load test**: primero 10 técnicos / 3 minutos, luego 50 / 10.
+5. Mientras corre, usa la app en una tablet real.
+6. **Reset data** (reportes, ventas, trabajos, solicitudes, técnicos de prueba) → `RESET`.
+7. **Turn off** al terminar.

@@ -138,6 +138,8 @@ table.t .num{text-align:right;font-variant-numeric:tabular-nums}
 .modal .mc.xl{max-width:1020px}
 nav button .tc{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;background:#e6ebf5;color:var(--ink-2);font-size:11px;font-weight:700;line-height:18px;vertical-align:1px}
 nav button.on .tc{background:rgba(255,255,255,.25);color:#fff}
+.devbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 20px;background:var(--warn-50);border-bottom:1px solid var(--line);color:var(--warn);}
+.devbar .btn{min-height:34px;padding:6px 12px}
 .impwrap{max-height:40vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
 .impwrap table{width:100%;border-collapse:collapse;font-size:13px}
 .impwrap th{position:sticky;top:0;background:#f3f6fc;text-align:left;padding:6px 8px;color:var(--muted)}
@@ -237,6 +239,8 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <button id="logout">Sign out</button>
   </nav>
 </header>
+<div id="devBar" class="devbar" hidden><b>🛠 Developer mode is ON</b><span class="sub" style="margin:0">Testing tools are active. Turn them off when testing is over.</span>
+  <span style="flex:1"></span><button type="button" class="btn s" data-dev="load">Load test</button><button type="button" class="btn s" data-dev="reset">Reset data</button><button type="button" class="btn s" data-dev="export">Export data</button><button type="button" class="btn d" data-dev="off">Turn off</button></div>
 
 <main>
   <!-- REPORTS -->
@@ -445,11 +449,11 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <h2 style="font-size:17px;margin:24px 0 8px">Security &amp; backup</h2>
     <div class="card" style="max-width:640px">
       <div class="sub" style="margin:0 0 10px">The data lives in the MySQL database on Hostinger. Download a full copy from time to time and keep it somewhere safe (it includes customers, reports, invoices, inventory and employees).</div>
-      <div class="acts" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn p" id="bkBtn">⬇ Download full backup (.sql)</button><button type="button" class="btn s" id="myPinBtn">Change my PIN</button></div>
+      <div class="acts" style="justify-content:flex-start;flex-wrap:wrap"><div class="sub" id="dbSize" style="margin:0 0 10px;flex-basis:100%"></div><button type="button" class="btn p" id="bkBtn">⬇ Download full backup (.sql)</button><button type="button" class="btn s" id="xlBtn">⬇ Export all data (Excel)</button><button type="button" class="btn s" id="myPinBtn">Change my PIN</button></div>
     </div>
     <h2 style="font-size:17px;margin:24px 0 8px">Developer</h2>
     <div class="card" style="max-width:640px">
-      <div class="sub" style="margin:0 0 10px">Load test (simulate many technicians at once) and reset of test data. Locked with the developer PIN.</div>
+      <div class="sub" style="margin:0 0 10px">Load test, reset of test data and data export. Protected with the developer PIN (set in api/config.php). Status: <b id="devState">—</b></div>
       <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="devBtn">🛠 Developer tools</button></div>
     </div>
     <h2 style="font-size:17px;margin:24px 0 8px">Activity log</h2>
@@ -665,11 +669,13 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <h2>🛠 Developer tools</h2>
     <div id="devLock" class="form">
       <div class="sub" style="margin:0">Only for the developer.</div>
-      <div class="row"><div><label>Developer PIN</label><input id="devPin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div><div style="align-self:end"><button type="button" class="btn p" id="devUnlock">Unlock</button></div></div>
+      <div class="row"><div><label>Developer PIN</label><input id="devPin" type="password" inputmode="numeric" maxlength="12" autocomplete="off"></div><div style="align-self:end"><button type="button" class="btn p" id="devUnlock">Unlock</button></div></div>
       <div class="err" id="devErr"></div>
     </div>
     <div id="devBody" hidden>
-      <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button></div>
+      <div class="acts" style="justify-content:flex-start;align-items:center;margin:0 0 12px"><span>Developer tools are <b id="devOnOff">—</b></span><button type="button" class="btn s" id="devToggle"></button></div>
+      <div id="devTools">
+      <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button><button type="button" data-d="export">Export data</button></div>
       <div id="devLoad" class="form">
         <div class="sub" style="margin:0">Simulates technicians using the tablet app at the same time, from this browser: sign in, download customers / inventory / jobs, sync every ~30 s and send service reports (with signatures, like the real app). Test technicians <b>TEST01, TEST02…</b> are created (or re-activated) automatically. No emails are sent.</div>
         <div class="row3"><div><label>Technicians</label><input id="ltN" type="number" min="1" max="100" value="50"></div><div><label>Duration (minutes)</label><input id="ltMin" type="number" min="1" max="60" value="5"></div><div><label>A report every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div></div>
@@ -677,19 +683,25 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
         <div id="ltOut"></div>
       </div>
       <div id="devReset" class="form" hidden>
-        <div class="sub" style="margin:0">Deletes test data in one go. <b>Download a backup first.</b> Deleted reports and invoices keep a copy in the Activity log.</div>
+        <div class="sub" style="margin:0">Deletes in one step on the server. <b>Download a backup first.</b> Supervisors are never deleted, and stock quantities are not changed.</div>
         <div class="row3">
-          <label class="chk"><input type="checkbox" data-w="reports" checked> Service reports</label>
-          <label class="chk"><input type="checkbox" data-w="invoices" checked> Invoices</label>
-          <label class="chk"><input type="checkbox" data-w="jobs" checked> Jobs &amp; appointments</label>
           <label class="chk"><input type="checkbox" data-w="customers"> Customers</label>
-          <label class="chk"><input type="checkbox" data-w="inventory"> Inventory (archive all parts)</label>
-          <label class="chk"><input type="checkbox" data-w="testTechs" checked> Test technicians (TEST…)</label>
-          <label class="chk"><input type="checkbox" data-w="allTechs"> All other technicians (deactivate)</label>
+          <label class="chk"><input type="checkbox" data-w="reports" checked> Service reports</label>
+          <label class="chk"><input type="checkbox" data-w="sales" checked> Sales &amp; invoices (with payments)</label>
+          <label class="chk"><input type="checkbox" data-w="jobs" checked> Jobs &amp; appointments</label>
+          <label class="chk"><input type="checkbox" data-w="requests" checked> Parts requests &amp; vendor orders</label>
+          <label class="chk"><input type="checkbox" data-w="testTechs" checked> Load-test technicians (TEST…) and their reports</label>
+          <label class="chk"><input type="checkbox" data-w="allTechs"> Deactivate all other technicians</label>
+          <label class="chk"><input type="checkbox" data-w="inventory"> Archive all inventory parts</label>
         </div>
-        <div class="row3"><div><label>Next invoice number after the reset</label><input id="rsNext" type="number" min="1" placeholder="leave as is"></div><div><label>Your supervisor PIN</label><input id="rsSupPin" type="password" inputmode="numeric" maxlength="8" autocomplete="off"></div><div><label>Type RESET to confirm</label><input id="rsConfirm" autocomplete="off" autocapitalize="characters"></div></div>
+        <div class="row"><div><label>Next invoice number after the reset</label><input id="rsNext" type="number" min="1" placeholder="leave as is"></div><div><label>Type RESET to confirm</label><input id="rsConfirm" autocomplete="off" autocapitalize="characters"></div></div>
         <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="rsBackup">⬇ Download backup first</button><button type="button" class="btn d" id="rsGo">Reset now</button></div>
         <div id="rsLog" style="font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:30vh;overflow:auto;background:#f6f8fc;border-radius:8px;padding:8px 10px" hidden></div>
+      </div>
+      <div id="devExport" class="form" hidden>
+        <div class="sub" style="margin:0">One Excel file with a sheet for each part of the app: customers, service reports, report parts, invoices, invoice lines, payments, parts requests, vendor orders, inventory, stock movements, jobs, employees and the activity log. Signature images are left out (the .sql backup keeps them).</div>
+        <div class="acts" style="justify-content:flex-start"><button type="button" class="btn p" id="exGo">⬇ Export all data (Excel)</button><button type="button" class="btn s" id="exSql">⬇ Full backup (.sql)</button><span id="exState" style="align-self:center;color:var(--ink-2);font-size:13px"></span></div>
+      </div>
       </div>
     </div>
     <div class="acts"><button type="button" class="btn s" data-cancel>Close</button></div>
@@ -928,6 +940,29 @@ $('#csv').onclick = async () => {
 
 /* drawer */
 let openR = null;
+/* customers: a technician registers a new one just by writing it on the report; changing a registered customer
+   needs the supervisor — the change travels on the report and is applied here */
+const CUST_FLD = { address1: 'Address', address2: 'City / State', address3: 'ZIP / Country', whatsapp: 'WhatsApp', email: 'Email' };
+function custChangeBox(r) {
+  if (r.customerStatus === 'new') return `<div class="fbox" style="margin:8px 0">🆕 <b>New customer</b> registered by the technician with this report.</div>`;
+  const ch = r.customerStatus === 'changed' && r.customerChanges && typeof r.customerChanges === 'object' ? Object.entries(r.customerChanges).filter(([k, v]) => CUST_FLD[k] && v) : [];
+  if (!ch.length) return '';
+  return `<div class="fbox" style="margin:8px 0;border-color:var(--warn);background:var(--warn-50)"><b>✎ The technician asks to change this customer's data</b>
+    <table class="mini" style="margin:6px 0">${ch.map(([k, v]) => `<tr><td>${esc(CUST_FLD[k])}</td><td><b>${esc(v)}</b></td></tr>`).join('')}</table>
+    <button type="button" class="btn p" id="applyCust">Approve and update the customer</button> <span class="eq" id="applyCustMsg"></span></div>`;
+}
+document.addEventListener('click', async e => {
+  if (e.target.id !== 'applyCust' || !openR) return;
+  const r = openR, b = e.target; b.disabled = true;
+  try {
+    const list = (await api('customers_list', { q: r.customerName })).customers;
+    const c = list.find(x => x.name.trim().toLowerCase() === String(r.customerName || '').trim().toLowerCase());
+    if (!c) throw new Error('This customer is no longer in the customer list.');
+    const upd = Object.assign({}, c); for (const [k, v] of Object.entries(r.customerChanges || {})) if (CUST_FLD[k] && v) upd[k] = String(v).slice(0, 160);
+    await api('customer_save', upd);
+    $('#applyCustMsg').textContent = 'Customer updated ✓'; custCache = []; toast('Customer updated');
+  } catch (err) { $('#applyCustMsg').textContent = err.message; b.disabled = false; }
+});
 async function openReport(id) {
   try {
     const j = await api('report_get', { id }); openR = j.report; const r = j.report; openRReqs = j.requests || [];
@@ -935,10 +970,11 @@ async function openReport(id) {
     const kv = (pairs) => `<dl class="kv">${pairs.filter(p => p[1]).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
     const fmtT = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
     const time = (r.time || []).filter(t => t && Object.values(t).some(Boolean));
-    const sig = (k, l) => { const s = r.sigs?.[k]; return `<div><b>${l}</b>${s?.img ? `<img src="${s.img}" alt="">${esc(s.name || '')}<br>${fmtDT(s.at)}` : '<br>Not signed'}</div>`; };
+    const sig = (k, l) => { const s = r.sigs?.[k], img = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s?.img || '') ? s.img : ''; return `<div><b>${l}</b>${img ? `<img src="${img}" alt="">${esc(s.name || '')}<br>${fmtDT(s.at)}` : '<br>Not signed'}</div>`; };
     const st = [r.initialDisassembly && 'Initial disassembly', r.followUp && 'Follow up repair', r.returnToCustomer && 'Return to customer'].filter(Boolean).join(', ');
     $('#dBody').innerHTML =
       `<div class="sect">Customer &amp; job</div>` + kv([['Technician', `${j.techName || ''} (${r.employeeId || ''})`], ['Work order', r.workOrder], ['Customer', r.customerName], ['Address', [r.address1, r.address2, r.address3].filter(Boolean).join('\n')], ['Instructions', r.instructions]]) +
+      custChangeBox(r) +
       `<div class="sect">Equipment</div>` + kv([['Make', r.make], ['Model', r.model], ['Serial No.', r.serialNo], ['Hours', r.hour], ['Location', r.location], ['Delivery date', r.deliveryDate && fmtD(r.deliveryDate)]]) +
       (time.length ? `<div class="sect">Daily time record</div><table class="mini"><tr><th>Date</th><th>Left shop</th><th>Started</th><th>Completed</th><th>Mileage</th></tr>${time.map(t => `<tr><td>${fmtD(t.date)}</td><td>${fmtT(t.left)}</td><td>${fmtT(t.started)}</td><td>${fmtT(t.completed)}</td><td>${esc(t.mileage || '')}</td></tr>`).join('')}</table>` : '') +
       (r.serialNo ? `<button type="button" class="linkbtn" id="openEquip">View full history of S/N ${esc(r.serialNo)}</button>` : '') +
@@ -1004,8 +1040,14 @@ $('#empForm').onsubmit = async ev => {
 };
 
 /* ---------------- settings ---------------- */
+/* database size against Hostinger's ~3 GB per database: when it is full, nothing new can be saved (not even sign-ins) */
+function dbSizeLine(b) {
+  const el = $('#dbSize'); if (!el) return; if (b == null) { el.textContent = ''; return; }
+  const mb = b / 1048576, pct = mb / 3072 * 100;
+  el.innerHTML = `Database size: <b>${mb >= 1024 ? (mb / 1024).toFixed(2) + ' GB' : mb.toFixed(1) + ' MB'}</b> of about 3 GB (${pct.toFixed(1)}%)${pct >= 70 ? ' — <b style="color:var(--red)">getting full: archive old reports soon</b>' : ''}`;
+}
 async function loadSettings() {
-  try { const j = await api('settings_get'); $('#nextInv').value = j.nextInvoice; $('#setTax').value = j.taxRate; $('#setLabor').value = j.laborRate || ''; $('#ivSetErr').textContent = ''; $('#maxInv').textContent = j.maxInvoice ? `Highest invoice used so far: #${String(j.maxInvoice).padStart(4, '0')}` : 'No invoices used yet.'; $('#setErr').textContent = ''; }
+  try { const j = await api('settings_get'); $('#nextInv').value = j.nextInvoice; dbSizeLine(j.dbBytes); $('#setTax').value = j.taxRate; $('#setLabor').value = j.laborRate || ''; $('#ivSetErr').textContent = ''; $('#maxInv').textContent = j.maxInvoice ? `Highest invoice used so far: #${String(j.maxInvoice).padStart(4, '0')}` : 'No invoices used yet.'; $('#setErr').textContent = ''; }
   catch (e) { toast(e.message); }
 }
 $('#saveSet').onclick = async () => {
@@ -1573,6 +1615,7 @@ async function loadBadges() {
     const set = (k, n) => $$(`.nb[data-b="${k}"]`).forEach(el => { el.hidden = !n; el.textContent = n > 99 ? '99+' : n; el.title = n ? n + ' pending' : ''; });
     set('jobs', b.jobsOverdue + b.jobsUnassigned); set('invoices', b.invoicesOverdue); set('parts', b.requests + b.orders);
     set('requests', b.requests); set('orders', b.orders); set('stock', b.lowStock);
+    if ('devTools' in b) { devOn = !!b.devTools; $('#devBar').hidden = !devOn; $('#devState').textContent = devOn ? 'ON' : 'OFF'; }
   } catch {}
 }
 async function loadRequests() {
@@ -1926,31 +1969,33 @@ async function invoiceFromReport(r) {
 $('#cuInv').onclick = () => { const c = custEdit; closeModal('#custModal'); invoiceModal(null, { customer: c }); };
 
 /* ---------------- developer tools (developer PIN) ---------------- */
-/* The PIN is checked by the server when api.php has the "dev_check" action (see DESARROLLO.md); until then by this hash.
-   These tools only do in bulk what a supervisor can already do one by one (delete, archive, deactivate). */
-const DEV_HASH = '474adc458b753ed2c44ecebecf32e19e9a3b4243a63ebef4b655d04432895fde';
-let devPin = '';
-async function sha256(t) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
-async function devCheck(pin) {
-  try { const j = await api('dev_check', { pin }); if (j.dev === true) return true; if (j.dev === false) return false; }
-  catch (e) { if (/wrong|incorrect|locked/i.test(e.message)) throw e; }   // the server has the check and said no
-  return await sha256('cher-dev-v1:' + pin) === DEV_HASH;
+/* The developer PIN lives only in api/config.php (DEV_PIN) and the server checks it on every developer action.
+   The supervisor turns the tools on or off; while they are on, a bar under the header shows it. */
+let devPin = '', devOn = false;
+function devRender() {
+  $('#devOnOff').textContent = devOn ? 'ON' : 'OFF'; $('#devOnOff').style.color = devOn ? 'var(--warn)' : 'var(--ok)';
+  $('#devToggle').textContent = devOn ? 'Turn off' : 'Turn on'; $('#devToggle').className = 'btn ' + (devOn ? 'd' : 'p');
+  $('#devTools').hidden = !devOn; $('#devBar').hidden = !devOn; $('#devState').textContent = devOn ? 'ON' : 'OFF';
 }
-$('#devBtn').onclick = () => { $('#devLock').hidden = !!devPin; $('#devBody').hidden = !devPin; $('#devPin').value = ''; $('#devErr').textContent = ''; openModal('#devModal'); if (!devPin) $('#devPin').focus(); };
+function devTab(d) { $$('#devTabs button').forEach(x => x.classList.toggle('on', x.dataset.d === d)); $('#devLoad').hidden = d !== 'load'; $('#devReset').hidden = d !== 'reset'; $('#devExport').hidden = d !== 'export'; }
+function openDev(tab) {
+  $('#devLock').hidden = !!devPin; $('#devBody').hidden = !devPin; $('#devPin').value = ''; $('#devErr').textContent = '';
+  if (tab) devTab(tab); devRender(); openModal('#devModal'); if (!devPin) $('#devPin').focus();
+}
+$('#devBtn').onclick = () => openDev();
+$('#devBar').onclick = e => { const b = e.target.closest('[data-dev]'); if (!b) return; if (b.dataset.dev === 'off') { openDev(); if (devPin) $('#devToggle').click(); } else openDev(b.dataset.dev); };
 $('#devUnlock').onclick = async () => {
-  const lock = +localStorage.getItem('cher.devLock') || 0;
-  if (Date.now() < lock) { $('#devErr').textContent = `Too many wrong PINs. Try again at ${new Date(lock).toLocaleTimeString()}.`; return; }
-  const pin = $('#devPin').value.trim(); $('#devErr').textContent = '';
-  let ok = false; try { ok = await devCheck(pin); } catch (e) { $('#devErr').textContent = e.message; return; }
-  if (!ok) {
-    const n = (+sessionStorage.getItem('cher.devFails') || 0) + 1; sessionStorage.setItem('cher.devFails', n);
-    if (n >= 5) { localStorage.setItem('cher.devLock', Date.now() + 15 * 60000); sessionStorage.removeItem('cher.devFails'); }
-    $('#devErr').textContent = 'Wrong developer PIN.'; return;
-  }
-  sessionStorage.removeItem('cher.devFails'); devPin = pin; $('#devLock').hidden = true; $('#devBody').hidden = false;
+  $('#devErr').textContent = '';
+  try { const j = await api('dev_check', { pin: $('#devPin').value.trim() }); devPin = $('#devPin').value.trim(); devOn = !!j.enabled; $('#devLock').hidden = true; $('#devBody').hidden = false; devRender(); }
+  catch (e) { $('#devErr').textContent = /Unknown action/i.test(e.message) ? 'Upload the new api/api.php to the server first.' : e.message; }
 };
 $('#devPin').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#devUnlock').click(); } });
-$('#devTabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; $$('#devTabs button').forEach(x => x.classList.toggle('on', x === b)); $('#devLoad').hidden = b.dataset.d !== 'load'; $('#devReset').hidden = b.dataset.d !== 'reset'; };
+$('#devToggle').onclick = async () => {
+  if (devOn && LT && !LT.done) { toast('Stop the load test first'); return; }
+  try { const j = await api('dev_toggle', { pin: devPin, on: !devOn }); devOn = !!j.enabled; devRender(); toast(devOn ? 'Developer tools ON' : 'Developer tools OFF'); }
+  catch (e) { toast(e.message); }
+};
+$('#devTabs').onclick = e => { const b = e.target.closest('button'); if (b) devTab(b.dataset.d); };
 
 /* ---- load test: N virtual technicians doing what the tablet app does ---- */
 let LT = null;
@@ -2041,42 +2086,43 @@ $('#ltStart').onclick = async () => {
 };
 $('#ltStop').onclick = () => { if (LT) LT.stop = true; };
 
-/* ---- reset: the server does it in one step when api.php has "dev_reset"; otherwise this page deletes item by item ---- */
+/* ---- reset (one step on the server) ---- */
 const rsLog = m => { const b = $('#rsLog'); b.hidden = false; b.insertAdjacentHTML('beforeend', `<div>${esc(new Date().toLocaleTimeString())} · ${esc(m)}</div>`); b.scrollTop = b.scrollHeight; };
-$('#rsBackup').onclick = () => $('#bkBtn').click();
+const RS_LBL = { reports: 'Service reports', testReports: 'Load-test reports', invoices: 'Invoices', partsRequests: 'Parts requests', vendorOrders: 'Vendor orders', jobs: 'Jobs', customers: 'Customers',
+  testCustomers: 'Load-test customers', partsArchived: 'Parts archived', testTechs: 'Test technicians', testTechsDeactivated: 'Test technicians deactivated', techsDeactivated: 'Technicians deactivated', nextInvoice: 'Next invoice number' };
+$('#rsBackup').onclick = $('#exSql').onclick = () => $('#bkBtn').click();
 $('#rsGo').onclick = async () => {
   const w = {}; $$('#devReset [data-w]').forEach(c => { w[c.dataset.w] = c.checked; });
-  const supPin = $('#rsSupPin').value.trim(), next = +$('#rsNext').value || 0;
+  const next = +$('#rsNext').value || 0;
   if ($('#rsConfirm').value.trim().toUpperCase() !== 'RESET') { toast('Type RESET to confirm'); return; }
-  if ((w.reports || w.invoices) && !supPin) { toast('Your supervisor PIN is needed to delete reports and invoices'); return; }
   if (!Object.values(w).some(Boolean) && !next) { toast('Nothing selected'); return; }
+  if (LT && !LT.done) { toast('Stop the load test first'); return; }
   const btn = $('#rsGo'); btn.disabled = true; $('#rsLog').innerHTML = '';
   try {
-    try { const j = await api('dev_reset', { pin: devPin, supervisorPin: supPin, wipe: w, nextInvoice: next || null }); if (j.dev === true) { rsLog('Done on the server: ' + JSON.stringify(j.deleted || {})); return; } } catch (e) { if (/pin|forbidden|locked/i.test(e.message)) throw e; }
-    rsLog('Deleting from this page, one item at a time…');
-    const reason = 'Developer reset (test data)', each = async (label, list, fn) => {
-      let ok = 0, bad = 0;
-      for (const x of list) { try { await withRetry(() => fn(x)); ok++; } catch (e) { bad++; if (bad <= 3) rsLog(`${label}: ${e.message}`); } if ((ok + bad) % 10 === 0) rsLog(`${label}: ${ok + bad} / ${list.length}`); }
-      rsLog(`${label}: ${ok} done${bad ? `, ${bad} failed` : ''}`); return bad;
-    };
-    if (w.reports) for (let round = 0; round < 50; round++) {
-      const rows = (await withRetry(() => api('reports_list', { limit: 100, offset: 0 }))).rows || []; if (!rows.length) break;
-      if (await each('Service reports', rows, r => api('report_delete', { id: r.id, pin: supPin, reason })) === rows.length) break;
-    }
-    if (w.invoices) { const rows = (await withRetry(() => api('invoices_list', {}))).rows || []; await each('Invoices', rows, v => api('invoice_delete', { id: v.id, pin: supPin, reason })); }
-    if (w.jobs) { const rows = (await withRetry(() => api('jobs_list', { from: '2000-01-01', to: '2100-12-31', status: '', employeeId: '', unassigned: false }))).jobs || []; await each('Jobs', rows, x => api('job_delete', { id: x.id })); }
-    if (w.customers) { const rows = (await withRetry(() => api('customers_list', {}))).customers || []; await each('Customers', rows, c => api('customer_delete', { id: c.id })); }
-    if (w.inventory) { const rows = ((await withRetry(() => api('inventory_list', { includeArchived: true }))).items || []).filter(i => i.active); await each('Inventory (archived)', rows, i => api('inventory_archive', { id: i.id, active: false })); }
-    if (w.testTechs || w.allTechs) {
-      await loadEmps();
-      const me = session?.user?.code, rows = emps.filter(e => e.active && e.role === 'tech' && e.code !== me && (w.allTechs || /^TEST\d+$/i.test(e.code)));
-      await each('Technicians (deactivated)', rows, e => api('employee_save', { id: e.id, name: e.name, code: e.code, role: e.role, pin: '', active: false }));
-    }
-    if (next) { await withRetry(() => api('settings_save', { nextInvoice: next })); rsLog('Next invoice number: ' + next); }
-    rsLog('Finished. Parts requests and vendor orders cannot be deleted from the panel — the server reset (DESARROLLO.md) clears them too.');
-  } catch (e) { rsLog('Stopped: ' + e.message); }
+    const j = await api('dev_reset', { pin: devPin, wipe: w, nextInvoice: next || null });
+    const d = Object.entries(j.deleted || {});
+    d.length ? d.forEach(([k, v]) => rsLog(`${RS_LBL[k] || k}: ${fmtN(v)}`)) : rsLog('Nothing to delete');
+    rsLog('Done.'); toast('Reset done');
+  } catch (e) { rsLog('Not done: ' + e.message); }
   finally { btn.disabled = false; $('#rsConfirm').value = ''; loadEmps(); loadCounts(); view(current); }
 };
+/* ---- export: every table to one Excel file (sheet per table) ---- */
+async function exportExcel(params, stateEl) {
+  const say = m => { if (stateEl) stateEl.textContent = m; };
+  say('Preparing…');
+  const [X, j] = await Promise.all([loadXLSX(), api('data_export', params)]);
+  const wb = X.utils.book_new();
+  for (const [name, rows] of Object.entries(j.sheets)) {
+    const ws = rows.length ? X.utils.json_to_sheet(rows) : X.utils.aoa_to_sheet([['(empty)']]);
+    if (rows.length) ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.min(48, Math.max(10, k.length + 2, ...rows.slice(0, 200).map(r => String(r[k] ?? '').length))) }));
+    X.utils.book_append_sheet(wb, ws, name.slice(0, 31));
+  }
+  X.writeFile(wb, `cher-data-${iso(new Date())}.xlsx`);
+  say(`Exported ${Object.values(j.sheets).reduce((s, r) => s + r.length, 0).toLocaleString()} rows in ${Object.keys(j.sheets).length} sheets.`);
+}
+$('#exGo').onclick = async () => { $('#exGo').disabled = true; try { await exportExcel({ devPin }, $('#exState')); } catch (e) { $('#exState').textContent = e.message; } finally { $('#exGo').disabled = false; } };
+$('#xlBtn').onclick = () => askPin({ title: 'Export all data (Excel)', text: 'Type your PIN. The file has all the data of the app — keep it private.', button: 'Export', reason: false,
+  onOk: async pin => { await exportExcel({ pin }); toast('Excel file downloaded'); } });
 
 /* ---------------- bulk import (Excel / CSV / Word) ---------------- */
 /* Supervisor only (this panel). Uses the same customer_save / inventory_save / inventory_adjust the forms use.
