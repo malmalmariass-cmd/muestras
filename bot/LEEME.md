@@ -11,7 +11,12 @@ La página (`index.html`) ya envía a `notify.php`, junto con la entrada de cada
 - `first`: fecha de la primera visita (milisegundos)
 - `prev`: fecha de la visita anterior (milisegundos)
 
-## Instalación (2 minutos)
+## Instalación
+
+Si usas el `notify.php` que te pasó Claude (ya integrado), solo sube `notify.php` y la carpeta `bot/`
+y cambia `MAL_VIS_SALT` en `bot/visitas.php`. Lo de abajo es para integrarlo a mano.
+
+### Integración manual
 
 1. Sube la carpeta `bot/` a tu servidor, en la misma carpeta que `notify.php`.
 2. En `bot/visitas.php`, cambia `MAL_VIS_SALT` por una frase secreta tuya.

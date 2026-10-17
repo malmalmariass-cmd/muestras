@@ -31,7 +31,7 @@ function mal_linea_visita(array $d): string
     $vis = (isset($d['vis']) && is_array($d['vis'])) ? $d['vis'] : [];
     $uid = isset($vis['uid']) ? preg_replace('/[^a-f0-9]/i', '', (string)$vis['uid']) : '';
     $ua  = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-    $ip  = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
+    $ip  = function_exists('ip_cliente') ? ip_cliente() : (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
     $fp  = 'fp:' . substr(hash('sha256', MAL_VIS_SALT . '|' . $ip . '|' . $ua), 0, 24);
     $key = $uid !== '' ? 'id:' . substr($uid, 0, 32) : $fp;
 
