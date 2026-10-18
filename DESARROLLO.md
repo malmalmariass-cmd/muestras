@@ -49,6 +49,19 @@ con un círculo naranja que marca cada toque y un letrero con lo que está hacie
 **Tutorials → Start recording** → comparte **esa ventana**. Los pasos de la guía se anotan solos. Si la ventana
 no se abre, permite las ventanas emergentes (pop-ups) para tu dominio.
 
+**Bloqueo del hosting (HTTP 403).** Todas las personas simuladas salen de **tu computadora, con una sola
+conexión a internet**. La protección de Hostinger (Imunify360) bloquea por un rato una conexión que manda
+demasiadas peticiones por minuto. Las tablets reales no tienen ese problema: cada una sale con su propia conexión.
+- La prueba lo detecta y lo separa: *"blocked by the hosting"* (con el mensaje del hosting) no cuenta como error
+  de la app. Dice **a cuántas peticiones por minuto** empezó el bloqueo y se **pausa 60 s** en vez de insistir
+  (insistir alarga el bloqueo).
+- Para medir la app sin que el hosting bloquee: pon **Max. requests per minute** un 30 % por debajo de ese
+  número (la prueba te lo sugiere). Las personas entran repartidas en el primer tercio de la prueba, como en la vida real.
+- Otras opciones: correr la mitad de la prueba desde otra red (por ejemplo, el celular como hotspot), o pedir al
+  soporte de Hostinger que permita tu IP durante las pruebas.
+- Si después de una prueba la página no abre desde tu computadora, es ese bloqueo: espera 15–60 minutos o usa otra red.
+- La app del técnico trata ese 403 como "sin conexión": el reporte se queda en la tablet y se reenvía solo.
+
 Si muchas personas entran en el mismo segundo, MySQL de Hostinger puede rechazar una conexión por un instante.
 El servidor reintenta solo, hasta 5 veces en ~2 s. Si aun así está ocupado, responde **"Server busy"** (503) y la
 tablet guarda el trabajo y lo reenvía sola unos segundos después. La prueba de carga hace lo mismo y lo muestra

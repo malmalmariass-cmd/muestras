@@ -715,6 +715,8 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
         <div class="row3"><div><label>2 reports + 1 parts request every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div>
           <div><label>Show on screen (new window)</label><select id="ltWatch"><option value="tech">A technician (TEST01)</option><option value="sup">A supervisor (TESTSUP1)</option><option value="none">Nobody</option></select></div>
           <div class="sub" style="margin:0;align-self:end">The window shows that person doing everything step by step. To make a tutorial from it: <b>Tutorials → Start recording</b> and share that window.</div></div>
+        <div class="row3"><div><label>Max. requests per minute from this computer (0 = no limit)</label><input id="ltRpm" type="number" min="0" max="5000" value="0"></div>
+          <div class="sub" style="margin:0;align-self:end;grid-column:span 2">All the simulated people use <b>this computer's internet connection</b>. The hosting may block a connection that sends too many requests (real tablets each have their own). If that happens the test says at what pace it happened; set a limit below it, or run part of the people from another network.</div></div>
         <div id="ltDemo" class="sub" style="margin:0;color:var(--navy);font-weight:600" hidden></div>
         <div class="acts" style="justify-content:flex-start"><button type="button" class="btn p" id="ltStart">▶ Start test</button><button type="button" class="btn d" id="ltStop" hidden>■ Stop</button><span id="ltState" style="align-self:center;color:var(--ink-2);font-size:13px"></span></div>
         <div id="ltOut"></div>
@@ -844,8 +846,9 @@ const idleOver = () => { try { lastAct = Math.max(lastAct, +(localStorage.getIte
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2400); }
 window.toast = toast;
+const REQ_TIMES = [];   // when this page sent each request (the load test reports the pace per minute)
 async function api(action, data = {}) {
-  let res;
+  let res; REQ_TIMES.push(Date.now()); if (REQ_TIMES.length > 20000) REQ_TIMES.splice(0, 10000);
   try { res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Idle-Seconds': String(idleSecs()), ...(session?.token ? { 'X-Auth-Token': session.token } : {}) }, body: JSON.stringify({ action, ...data }) }); }
   catch { throw new Error('No connection to the server'); }
   let txt = ''; try { txt = await res.text(); } catch {}
@@ -2211,23 +2214,49 @@ $('#devTabs').onclick = e => { const b = e.target.closest('button'); if (b) devT
 /* ---- load test: N virtual technicians doing what the tablet app does ---- */
 let LT = null;
 const sleepUntil = async (ms, stop) => { const end = Date.now() + ms; while (Date.now() < end && !stop()) await sleep(Math.min(500, end - Date.now())); };
-function ltRecord(a, ms, ok, err) {
-  const s = LT.stats[a] = LT.stats[a] || { n: 0, err: 0, t: [] };
-  s.n++; s.t.push(ms); if (!ok) { s.err++; LT.errors[err] = (LT.errors[err] || 0) + 1; }
+function ltRecord(a, ms, ok, err, host) {
+  const s = LT.stats[a] = LT.stats[a] || { n: 0, err: 0, host: 0, t: [] };
+  s.n++; if (!host) s.t.push(ms); if (!ok) { s.err++; if (host) s.host++; LT.errors[err] = (LT.errors[err] || 0) + 1; }
+}
+/* All simulated people share THIS computer's internet connection. The hosting's firewall can block a connection that
+   sends too many requests: it answers with its own page (not the app's JSON). When that happens everyone pauses 60 s
+   (hammering only makes the block longer), and the requests per minute at that moment are noted. */
+async function ltGate() {
+  while (Date.now() < LT.pauseUntil && !LT.stop) await sleep(500);
+  while (LT.inflight >= 12) await sleep(40);   // a browser sends only a few requests at the same time
+  await ltPace();
+  REQ_TIMES.push(Date.now()); if (REQ_TIMES.length > 20000) REQ_TIMES.splice(0, 10000); LT.inflight++;
+}
+/* the limit counts every request of this page (also creating the test accounts and the panel's own refreshes) */
+async function ltPace() { while (LT.maxRpm && ltRpmNow() >= LT.maxRpm && !LT.stop) await sleep(200 + Math.random() * 400); }
+const ltRpmNow = () => { const now = Date.now(); let n = 0; for (let i = REQ_TIMES.length - 1; i >= 0 && now - REQ_TIMES[i] < 60000; i--) n++; return n; };
+function ltBlocked(why) {
+  LT.blocked++;
+  if (!LT.blockAt) LT.blockAt = { at: Date.now(), after: Date.now() - LT.start, rpm: ltRpmNow(), why };
+  if (Date.now() >= LT.pauseUntil) { LT.pauseUntil = Date.now() + 60000; LT.pauses++; }
 }
 async function ltCall(tech, action, data = {}, tries = 0) {
-  const t0 = performance.now(), ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000); let ok = false, err = '', busy = 0;
+  await ltGate();
+  const t0 = performance.now(), ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 30000); let ok = false, err = '', busy = 0, host = false;
   try {
     const res = await fetch(API, { method: 'POST', cache: 'no-store', signal: ctl.signal, headers: { 'Content-Type': 'application/json', ...(tech.token ? { 'X-Auth-Token': tech.token } : {}) }, body: JSON.stringify({ action, ...data }) });
-    let j = null; try { j = JSON.parse(await res.text()); } catch {}
+    const txt = await res.text(); let j = null; try { j = JSON.parse(txt); } catch {}
     ok = !!(res.ok && j && j.ok); if (!ok) err = `${action}: ${(j && j.error) || 'HTTP ' + res.status}`;
+    if (!ok && !j && [403, 406, 429, 503, 508].includes(res.status)) {   // not the app answering: the hosting's protection
+      const title = ((txt.match(/<title[^>]*>([^<]*)/i) || [])[1] || txt.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()).slice(0, 70);
+      host = true; err = `${action}: blocked by the hosting (HTTP ${res.status}${title ? ' · “' + title + '”' : ''})`; ltBlocked(err);
+    }
     // "server busy" (503/429): the technician app keeps the work and tries again a few seconds later — do the same (up to 3 times)
     if (!ok && tries < 3 && (res.status === 503 || res.status === 429)) busy = Math.min(10, +res.headers.get('Retry-After') || 3);
     return ok ? j : null;
-  } catch (e) { err = `${action}: ${e.name === 'AbortError' ? 'no answer in 30 s' : 'network error'}`; return null; }
+  } catch (e) {
+    err = `${action}: ${e.name === 'AbortError' ? 'no answer in 30 s' : 'network error'}`;
+    if (LT.blockAt) { host = true; err += ' (connection refused while the hosting was blocking)'; ltBlocked(err); }
+    return null;
+  }
   finally {
-    clearTimeout(tm);
-    if (busy) LT.retries++; else ltRecord(action, performance.now() - t0, ok, err);
+    clearTimeout(tm); LT.inflight--;
+    if (busy) LT.retries++; else ltRecord(action, performance.now() - t0, ok, err, host);
     if (busy) { await new Promise(r => setTimeout(r, busy * 1000 * (0.5 + Math.random()))); return ltCall(tech, action, data, tries + 1); }
   }
 }
@@ -2260,7 +2289,7 @@ const fmtT = t => t ? new Date(t).toLocaleTimeString([], { hour: 'numeric', minu
 async function ltTech(i) {
   const tech = { code: 'TEST' + String(i).padStart(2, '0'), token: null }, stop = () => LT.stop || Date.now() >= LT.end;
   if (LT.watch === 'tech' && i === 1) return;   // TEST01 is the one on screen, driven by the real app
-  await sleepUntil(Math.random() * Math.min(30000, LT.durMs / 4), stop);   // technicians arrive over the first ~30 s
+  await sleepUntil(Math.random() * Math.min(180000, LT.durMs / 3), stop);   // people arrive over the first third of the test (up to 3 min), not all in the same second
   if (stop()) return;
   const P = ltPerson(tech.code, 'Technician');
   const j = await ltCall(tech, 'login', { code: tech.code, pin: LT.pin }); if (!j) return;
@@ -2303,7 +2332,7 @@ async function ltTech(i) {
 async function ltSup(i) {
   const sup = { code: 'TESTSUP' + i, token: null }, stop = () => LT.stop || Date.now() >= LT.end;
   if (LT.watch === 'sup' && i === 1) return;   // TESTSUP1 is the one on screen
-  await sleepUntil(Math.random() * Math.min(20000, LT.durMs / 4), stop); if (stop()) return;
+  await sleepUntil(Math.random() * Math.min(180000, LT.durMs / 3), stop); if (stop()) return;
   const P = ltPerson(sup.code, 'Supervisor');
   const j = await ltCall(sup, 'login', { code: sup.code, pin: LT.pin, supervisorOnly: true }); if (!j) return;
   sup.token = j.token; LT.activeSup++; P.in = Date.now(); ltSt(P, 'Sign in');
@@ -2360,11 +2389,14 @@ function ltRender(final) {
   if (!LT) return;
   const all = Object.values(LT.stats), n = all.reduce((s, x) => s + x.n, 0), e = all.reduce((s, x) => s + x.err, 0), times = all.flatMap(x => x.t);
   const secs = Math.max(1, (Math.min(Date.now(), LT.end) - LT.start) / 1000), p95 = pct(times, 0.95);
-  const verdict = !n ? '' : e / n > 0.01 ? ['bad', `✗ ${fmtN(e)} errors (${(e / n * 100).toFixed(1)}%) — the server is not keeping up. See the errors below.`]
+  const hostE = all.reduce((x, s) => x + (s.host || 0), 0), appE = e - hostE, B = LT.blockAt;
+  const verdict = !n ? '' : hostE ? ['bad', `⛔ The hosting's protection blocked this computer ${fmtDur(B.after)} after the start, at about ${fmtN(B.rpm)} requests per minute from this one internet connection (${fmtN(hostE)} requests refused; the test paused ${fmtN(LT.pauses)} × 60 s). `
+      + `The app itself: ${appE ? fmtN(appE) + ' errors' : 'no errors'}, 95% of its answers in under ${(p95 / 1000).toFixed(2)} s. Real tablets each have their own connection. To measure the app, run it again with “Max. requests per minute” at about ${fmtN(Math.max(30, Math.floor(B.rpm * 0.7)))}, or ask Hostinger to allow your IP during tests.`]
+    : appE / n > 0.01 ? ['bad', `✗ ${fmtN(e)} errors (${(e / n * 100).toFixed(1)}%) — the server is not keeping up. See the errors below.`]
     : p95 > 3000 ? ['warn', `⚠ No errors, but slow: 95% of requests answered in under ${(p95 / 1000).toFixed(1)} s (target: under 3 s).`]
     : ['ok', `✓ Fine: ${fmtN(n)} requests, ${e ? fmtN(e) + ' errors' : 'no errors'}, 95% answered in under ${(p95 / 1000).toFixed(2)} s.${LT.retries ? ` ${fmtN(LT.retries)} had to wait a few seconds because the server was busy, then went through (the tablets do the same by themselves).` : ''}`];
   $('#ltOut').innerHTML = `<div class="kpis k4">${[['People online', `${fmtN(LT.active + LT.activeSup)} / ${fmtN(LT.n + LT.ns)}`, LT.stop || Date.now() >= LT.end ? 'test finished' : `${fmtN(LT.active)} technicians · ${fmtN(LT.activeSup)} supervisors`],
-      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), (n ? (e / n * 100).toFixed(1) + '% of requests' : '') + (LT.retries ? ` · ${fmtN(LT.retries)} retried when busy` : '')], ['Reports saved', fmtN(LT.reports), `${fmtN(LT.byType.repair)} service · ${fmtN(LT.byType.maintenance)} equipment${LT.demoReports ? ` · ${fmtN(LT.demoReports)} on screen` : ''} · ${fmtN(LT.requests)} parts requests`]].map(kpi).join('')}</div>
+      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), (n ? (e / n * 100).toFixed(1) + '% of requests' : '') + (hostE ? ` · ${fmtN(hostE)} blocked by the hosting, ${fmtN(appE)} from the app` : '') + (LT.retries ? ` · ${fmtN(LT.retries)} retried when busy` : '')], ['Reports saved', fmtN(LT.reports), `${fmtN(LT.byType.repair)} service · ${fmtN(LT.byType.maintenance)} equipment${LT.demoReports ? ` · ${fmtN(LT.demoReports)} on screen` : ''} · ${fmtN(LT.requests)} parts requests`]].map(kpi).join('')}</div>
     ${ltJourneyHtml()}
     ${verdict && (final || n > 50) ? `<p style="font-weight:700;color:var(--${verdict[0] === 'ok' ? 'ok' : verdict[0] === 'warn' ? 'warn' : 'red'})">${esc(verdict[1])}</p>` : ''}
     <div class="tablewrap"><table class="t"><thead><tr><th>Action</th><th class="num">Requests</th><th class="num">Errors</th><th class="num">Average</th><th class="num">95% under</th><th class="num">Slowest</th></tr></thead><tbody>
@@ -2395,6 +2427,7 @@ $('#ltStart').onclick = async () => {
   if (!confirm(`Simulate ${n} technicians and ${ns} supervisors for ${min} minutes? It creates real reports and parts requests on the server (delete them afterwards with “Reset data”).`)) return;
   if (watch !== 'none') window.open('index.html#demo', 'cherDemo', 'noopener');   // opened now: browsers only allow pop-ups right after a click
   LT = { n, ns, watch, stop: false, done: false, active: 0, activeSup: 0, reports: 0, demoReports: 0, requests: 0, byType: { repair: 0, maintenance: 0 }, retries: 0, stats: {}, errors: {}, people: {}, journey: { in: null, out: null, taps: 0, stations: [] },
+    inflight: 0, pauseUntil: 0, pauses: 0, blocked: 0, blockAt: null, maxRpm: Math.max(0, +$('#ltRpm').value || 0),
     pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
   $('#ltStart').hidden = true; $('#ltStop').hidden = false; $('#ltOut').innerHTML = ''; $('#ltDemo').hidden = true;
   const accounts = [...Array.from({ length: n }, (_, i) => ({ code: 'TEST' + String(i + 1).padStart(2, '0'), name: 'Test Tech ' + String(i + 1).padStart(2, '0'), role: 'tech' })),
@@ -2403,13 +2436,14 @@ $('#ltStart').onclick = async () => {
     await loadEmps();
     for (let i = 0; i < accounts.length && !LT.stop; i++) {   // create / re-activate the test accounts with a fresh PIN for this run
       const a = accounts[i], ex = emps.find(e => String(e.code).toUpperCase() === a.code);
-      $('#ltState').textContent = `Preparing test accounts… ${i + 1} / ${accounts.length}`;
+      $('#ltState').textContent = `Preparing test accounts… ${i + 1} / ${accounts.length}`; await ltPace();
       await withRetry(() => api('employee_save', { id: ex?.id || 0, name: a.name, code: a.code, role: a.role, pin: LT.pin, active: true }));
     }
   } catch (e) { $('#ltState').textContent = 'Could not create the test accounts: ' + e.message; $('#ltStart').hidden = false; $('#ltStop').hidden = true; LT.done = true; return; }
   LT.start = Date.now(); LT.end = LT.start + LT.durMs; demoStart();
   setTimeout(() => { if (LT.watch !== 'none' && !LT.demoSeen && !LT.done) { $('#ltDemo').hidden = false; $('#ltDemo').textContent = 'The on-screen window did not open: allow pop-ups for this site and start again.'; } }, 8000);
-  const tick = setInterval(() => { ltRender(false); const left = Math.max(0, LT.end - Date.now()); $('#ltState').textContent = LT.stop ? 'Stopping…' : `Running · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')} left`; }, 1000);
+  const tick = setInterval(() => { ltRender(false); const left = Math.max(0, LT.end - Date.now()); $('#ltState').textContent = LT.stop ? 'Stopping…' : `Running · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')} left · ${fmtN(ltRpmNow())} requests in the last minute`
+    + (Date.now() < LT.pauseUntil ? ` · ⏸ paused: the hosting is blocking this computer (resumes in ${Math.ceil((LT.pauseUntil - Date.now()) / 1000)} s)` : ''); }, 1000);
   await Promise.all([...Array.from({ length: n }, (_, i) => ltTech(i + 1)), ...Array.from({ length: ns }, (_, i) => ltSup(i + 1))]);
   clearInterval(tick); LT.done = true; demoChan?.postMessage({ type: 'stop' }); ltRender(true);
   // the test supervisors could open this panel: switch them off until the next test

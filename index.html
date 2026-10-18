@@ -1242,7 +1242,8 @@ async function api(action, data = {}) {
   let txt = ''; try { txt = await res.text(); } catch {}
   // 429 (rate limit) and 5xx gateway errors are temporary: treat them like "offline" so the work stays queued and retries
   const busySrv = res.status === 429 || res.status >= 502;
-  let j; try { j = JSON.parse(txt); } catch { throw Object.assign(new Error(`Server error (HTTP ${res.status})`), { offline: res.status === 0 || busySrv }); }
+  // a page that is not the app's answer with 403/406 is the hosting's protection: keep the work and try again later
+  let j; try { j = JSON.parse(txt); } catch { throw Object.assign(new Error(`Server error (HTTP ${res.status})`), { offline: res.status === 0 || busySrv || res.status === 403 || res.status === 406 }); }
   if (busySrv) throw Object.assign(new Error(j.error || `Server busy (HTTP ${res.status})`), { offline: true, status: res.status });
   if (res.status === 401 && action !== 'login') signOut(true);
   if (!j.ok) throw Object.assign(new Error(j.error || 'Error'), { status: res.status });
