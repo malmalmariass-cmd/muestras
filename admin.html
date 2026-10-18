@@ -129,8 +129,8 @@ table.t .num{text-align:right;font-variant-numeric:tabular-nums}
 .vbars{position:relative;height:220px}
 .vbars svg{width:100%;height:100%;overflow:visible}
 .tip{position:fixed;pointer-events:none;background:#16202e;color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;z-index:60;white-space:nowrap;opacity:0;transition:opacity .1s}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202e;color:#fff;padding:11px 18px;border-radius:12px;opacity:0;transition:.2s;z-index:70;pointer-events:none}
-.toast.on{opacity:1}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#16202e;color:#fff;padding:11px 18px;border-radius:12px;opacity:0;transition:.2s;z-index:70;pointer-events:none;cursor:pointer;max-width:min(92vw,640px);line-height:1.4}
+.toast.on{opacity:1;pointer-events:auto}
 .presets{display:flex;gap:6px;flex-wrap:wrap}
 .presets button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 12px;font-weight:600;font-size:13px;cursor:pointer}
 .presets button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -232,7 +232,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
   <img data-logo alt="Cher Services LLC">
   <div class="ttl">Supervisor Panel<small id="whoami"></small></div>
   <nav>
-    <button data-v="reports" class="on">Reports &amp; Jobs<span class="tc" data-c="reports" hidden></span><span class="nb" data-b="jobs" hidden></span><span class="nb" data-b="changes" hidden title="Change requests"></span></button>
+    <button data-v="reports" class="on">Reports &amp; Jobs<span class="tc" data-c="reports" hidden></span><span class="nb" data-b="jobs" hidden></span><span class="nb" data-b="changes" hidden title="Change requests"></span><span class="nb" data-b="issues" hidden title="Possibly empty or duplicate reports"></span></button>
     <button data-v="invoices">Invoices<span class="tc" data-c="invoices" hidden></span><span class="nb" data-b="invoices" hidden></span></button>
     <button data-v="requests">Parts &amp; Orders<span class="tc" data-c="requests" hidden></span><span class="nb" data-b="parts" hidden></span><span id="rqCnt" hidden></span></button>
     <button data-v="customers">Customers<span class="tc" data-c="customers" hidden></span><span class="nb" data-b="customers" hidden></span></button>
@@ -256,6 +256,9 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <p class="sub" id="repSub">All reports sent from the tablets.</p>
     <div class="fbox" id="chgBox" hidden style="margin-bottom:12px;border-color:var(--warn);background:var(--warn-50)"><b>🔒 Change requests on signed reports</b>
       <div class="sub" style="margin:2px 0 8px">Technicians cannot change or delete a signed report. Approve to let the technician edit it for 24 hours, or decline.</div><div id="chgList"></div></div>
+    <div class="fbox" id="qaBox" hidden style="margin-bottom:12px;border-color:var(--warn);background:var(--warn-50)"><b>⚠ Reports that may not be worth keeping</b>
+      <div class="sub" style="margin:2px 0 8px"><b>Empty</b> = nothing written and no signatures. <b>Possible duplicate</b> = same customer, same day, same type and same machine as another report. Keep it (the warning goes away) or delete it to save space.</div><div id="qaList"></div></div>
+    <div style="margin:-4px 0 12px"><button type="button" class="linkbtn" id="qaScan">Check all reports for empty or duplicate ones</button> <span class="eq" id="qaScanState"></span></div>
     <div class="filters">
       <div class="f grow"><label>Search</label><input id="fQ" placeholder="Invoice, customer, serial, model, work order…"></div>
       <div class="f"><label>Technician</label><select id="fTech"><option value="">All</option></select></div>
@@ -482,6 +485,11 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
         <div><label>Send a test email to</label><input id="testTo" type="email"></div>
         <div class="acts" style="justify-content:flex-start"><button class="btn s" id="testMail">Send test email</button></div>
       </div>
+    </div>
+    <h2 style="font-size:17px;margin:24px 0 8px">Daily summary for the office</h2>
+    <div class="card" style="max-width:560px">
+      <div id="dailyStatus" class="sub" style="margin:0 0 10px"></div>
+      <div class="acts" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn s" id="dailyYest">Send yesterday's summary now</button><button class="btn s" id="dailyToday">Send today so far</button></div>
     </div>
     <h2 style="font-size:17px;margin:24px 0 8px">Weekly copy of the reports</h2>
     <div class="card" style="max-width:560px">
@@ -848,7 +856,9 @@ const idleSecs = () => Math.max(0, Math.round((Date.now() - lastAct) / 1000));
 const idleOver = () => { try { lastAct = Math.max(lastAct, +(localStorage.getItem(IDLE_KEY) || 0)); } catch {} return Date.now() - lastAct > idleMin * 60000; };
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2400); }
+document.addEventListener('click', e => { if (e.target.id === 'toast') e.target.classList.remove('on'); });
+/* pop-up messages stay long enough to read: 5 s, plus a little per word (up to 15 s); a tap closes them */
+function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('on'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('on'), Math.min(15000, 5000 + String(m).length * 60)); }
 window.toast = toast;
 const REQ_TIMES = [];   // when this page sent each request (the load test reports the pace per minute)
 async function api(action, data = {}) {
@@ -951,7 +961,7 @@ function view(v) {
   $$('nav button[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === grp));
   $$('.subtabs.grp button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
   $$('[data-view]').forEach(s => s.hidden = s.dataset.view !== v);
-  if (v === 'reports') { loadReports(); loadChanges(); }
+  if (v === 'reports') { loadReports(); loadChanges(); loadIssues(); }
   if (v === 'invoices') { ivSub === 'stats' ? loadIvStats() : loadInvoices(); }
   loadBadges();
   if (v === 'requests') loadRequests();
@@ -1564,10 +1574,18 @@ $('#dBody').addEventListener('click', async e => {
 async function loadWeekly() {
   try {
     const w = await api('weekly_status');
+    $('#dailyStatus').innerHTML = `Every morning from ${w.dailyHour}:00 the documents of the day before (service reports and invoices) go to <b>${esc(w.to.join(', '))}</b> in <b>one email</b>, with an Excel list and a link to download each PDF.`
+      + (w.eachCopy ? ' One email per document is also sent (OFFICE_COPY_EACH).' : ' No separate email per document.') + `<br>${w.lastDay ? 'Last one: ' + esc(w.lastDay) + '.' : 'Not sent yet.'}`;
     $('#weeklyStatus').innerHTML = `Every Monday from ${w.hour}:00 (${esc(w.tz)}) last week's service reports go to <b>${esc(w.to.join(', '))}</b>: a summary, a list for Excel and the signed PDFs in a zip.`
       + `<br>${w.lastWeek ? 'Last one sent: ' + esc(w.lastWeek) + '.' : 'Not sent yet.'}`;
   } catch (e) { $('#weeklyStatus').textContent = e.message; }
 }
+async function dailyNow(today) {
+  const b = today ? $('#dailyToday') : $('#dailyYest'); b.disabled = true; toast('Sending…');
+  try { const r = await api('daily_send_now', { today }); toast(`Daily summary sent: ${r.reports} reports and ${r.invoices} invoices, to ${r.to.join(', ')}`); loadWeekly(); }
+  catch (e) { toast(e.message); } finally { b.disabled = false; }
+}
+$('#dailyYest').onclick = () => dailyNow(false); $('#dailyToday').onclick = () => dailyNow(true);
 async function weeklyNow(thisWeek) {
   const b = thisWeek ? $('#weeklyThis') : $('#weeklyLast'); b.disabled = true; toast('Sending…');
   try { const r = await api('weekly_send_now', { thisWeek }); toast(`Sent: ${r.reports} reports (${r.pdfs} PDFs) to ${r.to.join(', ')}`); loadWeekly(); }
@@ -1723,7 +1741,29 @@ function notifyNewCustomer(n) {
   toast('🆕 ' + msg + ' — see Customers');
   try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: msg, icon: 'icons/icon-192.png' }); } catch {}
 }
-let lastChg = null;
+let lastChg = null, lastQa = null;
+async function loadIssues() {
+  try {
+    const l = (await api('report_issues')).issues, box = $('#qaBox'); box.hidden = !l.length;
+    $('#qaList').innerHTML = l.map(x => `<div class="fbox" style="background:#fff;display:flex;flex-wrap:wrap;gap:8px;align-items:center" data-id="${esc(x.id)}" data-no="${esc(x.invoiceNo)}">
+      <span style="flex:1;min-width:240px"><b>#${esc(x.invoiceNo)}</b> · ${esc(x.customer || 'No customer')} · ${esc(x.tech || '')} · ${fmtD(x.date)} · ${fmtN(x.kb)} KB<br>
+      <b style="color:var(--red)">${x.flag === 'empty' ? 'Empty: nothing written and no signatures' : `Possible duplicate of #${esc(x.of)}`}</b></span>
+      <button type="button" class="btn s" data-q="open">Open</button><button type="button" class="btn s" data-q="keep">Keep</button><button type="button" class="btn d" data-q="del">Delete</button></div>`).join('');
+  } catch {}
+}
+$('#qaList').onclick = async e => {
+  const b = e.target.closest('[data-q]'), row = e.target.closest('[data-id]'); if (!b || !row) return;
+  const id = row.dataset.id, no = row.dataset.no;
+  if (b.dataset.q === 'open') return openReport(id);
+  if (b.dataset.q === 'keep') { try { await api('report_qa_keep', { id }); toast(`Report #${no} kept`); loadIssues(); loadBadges(); } catch (err) { toast(err.message); } return; }
+  askPin({ title: `Delete report #${no}?`, text: 'Its in-house parts go back to stock and a copy stays in Settings › Activity log.',
+    onOk: async (pin, reason) => { await api('report_delete', { id, pin, reason }); toast(`Report #${no} deleted`); loadIssues(); loadReports(); loadBadges(); } });
+};
+$('#qaScan').onclick = async () => {
+  const st = $('#qaScanState'); let off = 0, n = 0, f = 0;
+  try { for (;;) { const j = await api('report_scan', { offset: off }); n += j.checked; f += j.found; st.textContent = `Checked ${fmtN(n)} reports…`; if (j.next == null) break; off = j.next; } st.textContent = `Checked ${fmtN(n)} reports: ${fmtN(f)} to review.`; loadIssues(); loadBadges(); }
+  catch (e) { st.textContent = e.message; }
+};
 async function loadChanges() {
   try {
     const l = (await api('change_requests')).requests, box = $('#chgBox'); box.hidden = !l.length;
@@ -1747,6 +1787,10 @@ async function loadBadges() {
     set('customers', b.newCustomers || 0); set('changes', b.changeRequests || 0);
     if (b.changeRequests > (lastChg ?? b.changeRequests)) { const m = 'A technician asks to change a signed report — see Reports'; toast('🔒 ' + m); try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: m }); } catch {} }
     if (b.changeRequests !== lastChg && current === 'reports') loadChanges();
+    set('issues', b.reportIssues || 0);
+    if (b.reportIssues > (lastQa ?? b.reportIssues)) toast('⚠ A report looks empty or duplicated — see Reports & Jobs to keep or delete it');
+    if (b.reportIssues !== lastQa && current === 'reports') loadIssues();
+    lastQa = b.reportIssues || 0;
     lastChg = b.changeRequests || 0;
     if (b.newCustomers > (lastNewCust ?? b.newCustomers)) notifyNewCustomer(b.newCustomers - lastNewCust);
     lastNewCust = b.newCustomers || 0;
@@ -2214,6 +2258,7 @@ $('#ivSave').onclick = async () => {
       date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, reportId: $('#ivWO').value !== 'none' ? $('#ivWO').value : null, noReport: $('#ivWO').value === 'none', requestId: ivRequestId,
       lines: ivLines, taxRate: $('#ivTax').value || 0, notes: $('#ivNotes').value } });
     closeModal('#ivModal'); ivDraftClear(); toast(`Invoice #${j.invoice.invoiceNo} saved`); custCache = []; invAll = null;
+    invB64(j.invoice).then(pdf => api('invoice_store_pdf', { id: j.invoice.id, pdf })).catch(() => {});   // the office copy (link in the daily summary)
     if (current !== 'invoices') view('invoices'); else loadInvoices();
     openInvoice(j.invoice.id);
   } catch (e) { $('#ivErr').textContent = e.message; }

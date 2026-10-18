@@ -137,6 +137,32 @@ Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets n
 - En el panel, **Customers → (cliente) → Other contacts** se ven, cambian o quitan.
 - Todos los correos llevan copia oculta a la oficina (ver `SEGURIDAD.md`).
 
+## Resumen diario para la oficina (un solo correo al día)
+- Ya **no** llega un correo por cada reporte o factura. Cada mañana desde las **7:00** llega a
+  info@cherservices.com y cherservices21@gmail.com **un correo** con todo lo del día anterior (reportes y facturas):
+  una tabla, un **Excel** (.xlsx) con los datos generales y, en cada línea, un enlace **Download PDF**.
+- Los días sin movimiento no se manda nada.
+- Settings → **Daily summary for the office**: *Send yesterday's summary now* / *Send today so far*.
+- Cron (opcional, para que salga aunque nadie use la app temprano): `curl -s "https://TU-DOMINIO/api/api.php?cron=all"`
+  todos los días a las 7:05 (hace el diario y, los lunes, el semanal).
+- Si algún día quieres además un correo por documento: `define('OFFICE_COPY_EACH', true);` en `config.php`.
+
+## Enlaces de los PDF (WhatsApp y resumen diario)
+- El enlace abre una página de Cher Services con un **botón grande "Download PDF"**, la opción de abrirlo en el
+  navegador y una vista previa. El archivo descargado se llama con el código del documento
+  (`ACME-0046-20261018_ServiceReport.pdf`).
+- Los enlaces viejos (`doc.php?t=…`) siguen funcionando como antes.
+
+## Reportes vacíos o duplicados
+- El servidor marca un reporte como **vacío** (nada escrito: ni fallas, ni servicios, ni partes, ni notas, ni firmas) o
+  **posible duplicado** (mismo cliente, mismo día, mismo tipo y misma máquina que otro reporte anterior).
+- El panel lo avisa: contador en **Reports & Jobs**, mensaje emergente y un recuadro con **Open · Keep · Delete**
+  (borrar pide PIN y motivo, y queda en el Activity log). *Keep* quita el aviso para siempre.
+- **Check all reports for empty or duplicate ones** revisa también los reportes guardados antes de esta versión.
+
+## Mensajes emergentes
+- Duran 5 segundos más un poco por cada palabra (hasta 15 s). Tocarlos los cierra.
+
 ## Copia semanal de los reportes (automática)
 - Cada **lunes desde las 7:00** (hora de Florida) llega a **info@cherservices.com** y
   **cherservices21@gmail.com** un correo con los reportes de la semana anterior: resumen, una lista que abre en

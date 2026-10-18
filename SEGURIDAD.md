@@ -36,8 +36,20 @@ de jsPDF 2.5.1 (npm). **Después de subirlo, abre la app y revisa que el PDF se 
 **Ya está hecho en el servidor** (`api/api.php`). La app nunca decide a quién van las copias: si lo hiciera,
 cualquiera podría usar el API para mandar correos a quien quisiera.
 
-- Cada reporte y cada factura que se envía por correo (al cliente o la copia de la oficina) lleva
-  **copia oculta (BCC)** a cherservices21@gmail.com e info@cherservices.com. El cliente no ve esas direcciones.
+- La oficina (cherservices21@gmail.com e info@cherservices.com) recibe **un resumen diario** con todos los
+  documentos del día, un Excel y un enlace para descargar cada PDF (ver `DESARROLLO.md`). Para recibir además una
+  copia oculta de cada correo: `define('OFFICE_COPY_EACH', true);` en `config.php`.
+
+### Que los correos no lleguen a spam
+Se arregla en el **dominio**, no en la app (hPanel → Emails → tu dominio → *DNS / Autenticación*):
+1. **SPF**: un registro TXT en el dominio: `v=spf1 include:_spf.mail.hostinger.com ~all` (solo uno; si ya hay
+   otro SPF, se juntan en el mismo).
+2. **DKIM**: actívalo en hPanel (Hostinger crea el registro). Es lo que más ayuda con Gmail.
+3. **DMARC**: TXT en `_dmarc`: `v=DMARC1; p=none; rua=mailto:info@cherservices.com`.
+4. En `config.php`, `MAIL_FROM` debe ser **el mismo buzón** que `SMTP_USER` (por ejemplo info@cherservices.com).
+5. En Gmail, marca uno como **"No es spam"** y agrega el remitente a contactos. Hostinger tiene un comprobador en
+   hPanel → Emails → *Email deliverability*; también sirve mail-tester.com.
+Con un solo resumen al día en vez de muchos correos sueltos, Gmail también confía más.
 - Para cambiarlas: en `api/config.php`, `define('OFFICE_COPIES', 'correo1@..., correo2@...');`
 - Además, **cada lunes** llega a esas dos direcciones la copia semanal de todos los reportes de la semana
   (ver `DESARROLLO.md`, sección "Copia semanal").

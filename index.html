@@ -122,8 +122,8 @@ table.time .x{background:none;border:0;color:var(--red);font-size:22px;cursor:po
 .padwrap .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#c4ccdb;font-size:22px;pointer-events:none}
 .modal .mf{display:flex;gap:10px;justify-content:space-between;margin-top:10px;flex-wrap:wrap}
 .modal .legal{color:#93a0ba;font-size:12px;margin-top:8px;text-align:center}
-.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#16202e;color:#fff;padding:12px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:60;pointer-events:none;max-width:90vw;text-align:center}
-.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#16202e;color:#fff;padding:12px 18px;border-radius:12px;opacity:0;transition:.25s;z-index:60;max-width:min(92vw,640px);line-height:1.4;cursor:pointer;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 .install{display:none;background:#fff8e6;border:1px solid #f1d38a;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px;align-items:center;gap:10px}
 .install.on{display:flex}
 .install span{flex:1}
@@ -822,7 +822,9 @@ function getDraft(type) {
   const old = LS.get(type === 'maintenance' ? 'cher.draft.maint' : 'cher.draft', null);   // saved by older versions
   return old && old.employeeId === me() ? old : null;
 }
-function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('on'), 2600); }
+document.addEventListener('click', e => { if (e.target.id === 'toast') e.target.classList.remove('on'); });
+/* pop-up messages stay long enough to read: 5 s, plus a little per word (up to 15 s); a tap closes them */
+function toast(msg) { const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(el._h); el._h = setTimeout(() => el.classList.remove('on'), Math.min(15000, 5000 + String(msg).length * 60)); }
 
 /* ---------------- form binding ---------------- */
 function render() {
