@@ -335,7 +335,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
       <div class="card">
         <h2 data-t="customer">Customer</h2>
         <div class="grid">
-          <div class="f"><label data-t="workOrder">Work order #</label><input data-k="workOrder"></div>
+          <div class="f"><label data-t="workOrder">Work order #</label><input data-k="workOrder" readonly data-tp="woAuto" placeholder="Automatic (report number)"><small class="hint" id="docCode"></small></div>
           <div class="f"><label data-t="customerName">Customer name</label><input data-k="customerName" autocomplete="organization" list="custList"></div>
           <div class="f"><label data-t="address">Address</label><input data-k="address1" data-tp="street" placeholder="Street"></div>
           <div class="f"><input data-k="address2" data-tp="cityState" placeholder="City, State / Parish"></div>
@@ -599,7 +599,7 @@ const I18N = {
     installText: 'Install this app on your tablet for full-screen, offline use.', install: 'Install',
     installIos: 'Install on iPad/iPhone: tap Share ⬆ then "Add to Home Screen".', installSafari: 'In Safari: tap Share ⬆, then "Add to Home Screen"',
     myJobs: 'My jobs', refresh: 'Refresh', newJob: '+ New job', jobsHint: 'Jobs assigned to you by the office. Tap “Start report” to open the service report already filled in.',
-    numReserved: 'Number #{n} reserved for this report', askChange: 'Request a change',
+    numReserved: 'Number #{n} reserved for this report', woAuto: 'Automatic (report number)', docCodeLbl: 'Code: {c}', askChange: 'Request a change',
     lockedTxt: '🔒 Signed report: it can no longer be changed here. To change something, request it from the supervisor.', askChangeQ: 'What needs to change, and why? (the supervisor approves or declines)',
     changeSent: 'Request sent to the supervisor', changeAsked: '🔒 Change requested on {d}: waiting for the supervisor.', changeDeclined: '🔒 The supervisor declined the change. {r}',
     unlockedTill: '✎ The supervisor approved the change: you can edit this report until {d}.', lockedKept: 'Report #{n} is signed and locked: the office copy was kept.',
@@ -677,7 +677,7 @@ const I18N = {
     installText: 'Instala esta app en la tablet para usarla a pantalla completa y sin internet.', install: 'Instalar',
     installIos: 'Para instalar en iPad/iPhone: toca Compartir ⬆ y luego "Agregar a inicio".', installSafari: 'En Safari: toca Compartir ⬆ y luego "Agregar a inicio"',
     myJobs: 'Mis trabajos', refresh: 'Actualizar', newJob: '+ Nuevo trabajo', jobsHint: 'Trabajos que te asignó la oficina. Toca “Iniciar reporte” para abrir el reporte ya lleno.',
-    numReserved: 'Número #{n} reservado para este reporte', askChange: 'Solicitar un cambio',
+    numReserved: 'Número #{n} reservado para este reporte', woAuto: 'Automático (número del reporte)', docCodeLbl: 'Código: {c}', askChange: 'Solicitar un cambio',
     lockedTxt: '🔒 Reporte firmado: ya no se puede cambiar aquí. Para cambiar algo, solicítalo al supervisor.', askChangeQ: '¿Qué hay que cambiar y por qué? (el supervisor lo aprueba o lo rechaza)',
     changeSent: 'Solicitud enviada al supervisor', changeAsked: '🔒 Cambio solicitado el {d}: esperando al supervisor.', changeDeclined: '🔒 El supervisor rechazó el cambio. {r}',
     unlockedTill: '✎ El supervisor aprobó el cambio: puedes editar este reporte hasta el {d}.', lockedKept: 'El reporte #{n} está firmado y bloqueado: se conservó la copia de la oficina.',
@@ -836,11 +836,18 @@ function render() {
   $('#formTitle').textContent = t(maint ? 'titleMaint' : 'titleRepair'); $('#formTitle').classList.toggle('maint', maint);
   customerCheck(); renderTime(); renderFaults(); renderServices(); renderParts(); renderJobStatus(); renderSigs(); updateStatus(); renderOffice(); renderJobBanner();
   requestAnimationFrame(() => $$('#viewForm textarea.grow').forEach(grow));
-  renderLock();
+  renderLock(); renderCode();
   histState = { serial: null, list: [] }; $('#histChip').hidden = true; checkHistory();
 }
 /* A report the customer signed is locked for the technician 1 hour later (the server decides, and keeps the office copy).
    To change it, the technician asks; the supervisor approves (the report opens for 24 hours) or declines. */
+/* the work order number is the report number the system gives; the document code is initials-number-date */
+function renderCode() {
+  if (!report) return;
+  if (report.invoiceNo && report.workOrder !== report.invoiceNo) { if (report.workOrder && !report.customerRef) report.customerRef = report.workOrder; report.workOrder = report.invoiceNo; }
+  $('[data-k="workOrder"]').value = report.workOrder || '';
+  $('#docCode').textContent = report.docCode ? t('docCodeLbl', { c: report.docCode }) : '';
+}
 const isLocked = r => !isSup() && !!r?.lockedAt && Date.now() >= Date.parse(r.lockedAt) && !(r.unlockedUntil && Date.now() < Date.parse(r.unlockedUntil));
 function renderLock() {
   const lk = isLocked(report), bar = $('#lockBar');
@@ -882,7 +889,7 @@ function reserveNumber() {
     if (!j.invoiceNo || r.invoiceNo) return;
     reserveTry = 0;   // the 20-second pause is only for retries without internet
     r.invoiceNo = j.invoiceNo; r.reservedAt = new Date().toISOString();
-    if (report === r) { $('#invoiceNo').value = r.invoiceNo; updateStatus(); saveDraft(); toast(t('numReserved', { n: r.invoiceNo })); }
+    if (report === r) { $('#invoiceNo').value = r.invoiceNo; renderCode(); updateStatus(); saveDraft(); toast(t('numReserved', { n: r.invoiceNo })); }
     else { const d = LS.get(draftKey(r.type), null); if (d && d.id === r.id) LS.set(draftKey(r.type), r); }
   }).catch(() => {}).finally(() => { reserving = null; });
 }
@@ -1340,11 +1347,12 @@ async function syncAll(manual) {
         }
         const latest = normalize((await DB.get(r.id)) || r);
         latest.lockedAt = j.lockedAt || null; latest.unlockedUntil = j.unlockedUntil || null;
+        if (j.docCode) { latest.docCode = j.docCode; latest.workOrder = j.workOrder; }
         latest.invoiceNo = j.invoiceNo; latest.officeSentAt = j.officeSentAt || latest.officeSentAt || null; delete latest.reservedAt;
         if (latest.updatedAt === sentAt) latest.synced = true;
         await DB.put(latest);
         if (!hadInv) newInv++;
-        if (report.id === r.id) { report.invoiceNo = j.invoiceNo; delete report.reservedAt; report.lockedAt = latest.lockedAt; report.unlockedUntil = latest.unlockedUntil; renderLock(); report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
+        if (report.id === r.id) { if (j.docCode) { report.docCode = j.docCode; report.workOrder = j.workOrder; } report.invoiceNo = j.invoiceNo; delete report.reservedAt; renderCode(); report.lockedAt = latest.lockedAt; report.unlockedUntil = latest.unlockedUntil; renderLock(); report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
       }
       // office copy: every synced, customer-signed report is emailed to the office once
       for (const r of (await DB.all()).filter(r => r.employeeId === me() && r.synced && r.sigs?.customer?.img && !r.officeSentAt)) await sendOffice(r);
@@ -1969,7 +1977,6 @@ if (DEMO) (() => {
   async function fillReport(maint, n) {
     say(maint ? 'Equipment Service Report: new report' : 'Fill Service Report: new report');
     await tap(maint ? '#tabMaint' : '#tabForm', 800); await tap('#btnNew', 800);
-    await type('[data-k="workOrder"]', 'LT-' + (1000 + Math.floor(Math.random() * 9000)));
     await type('[data-k="customerName"]', 'LOAD TEST CUSTOMER ' + (1 + n % 5));
     await type('[data-k="address1"]', '1 Test Street'); await type('[data-k="address2"]', 'Homestead, FL');
     say('Equipment data');

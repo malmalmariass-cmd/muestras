@@ -110,6 +110,25 @@ Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets n
   Los números viejos (0045…) no se tocan. En *Settings* se ve la serie actual y el próximo número. Si quieres que
   la nueva serie empiece en otro número, escríbelo en *Next invoice number after the reset*.
 
+## Orden de trabajo y código de documento
+- La **orden de trabajo (Work order #)** es el número que el sistema le da al reporte. En la tablet se llena sola y
+  no se escribe a mano. Lo que estuviera escrito ahí antes (por ejemplo el PO del cliente) se guarda como
+  *Customer reference*.
+- Cada documento lleva un **código**: siglas del cliente, número de orden de trabajo y fecha (todo en números menos
+  las siglas). Ejemplo: **AC-0046-20261018** = ACME Construction, orden 0046, 18 de octubre de 2026.
+  - Siglas: la primera letra de cada palabra (hasta 4), sin "LLC", "Inc", "Corp", "de", "la"…; si el nombre es de una
+    sola palabra, sus primeras 4 letras (Beta Corp → BETA).
+  - El reporte y **todas sus facturas** comparten el inicio (**AC-0046**), aunque se hagan en fechas distintas: es
+    su "carpeta". Buscar "AC-0046" en Reports o en Invoices trae todo lo de esa orden.
+- **Al crear una factura hay que elegir la orden de trabajo** (el reporte de servicio). Si se crea desde el reporte
+  ya viene elegida. Para una venta sin reporte se elige *Sale without a service report*: entonces la orden es el
+  número de la propia factura.
+- El código aparece en: la lista y el detalle de reportes y facturas, el campo *Reference* de la factura (si se deja
+  vacío), el asunto de los correos (`[AC-0046-20261018]`) y el nombre de los PDF enviados por correo
+  (`AC-0046-20261018_ServiceReport.pdf`, `AC-0046-20261025_Invoice-0051.pdf`) y del zip semanal.
+- El nombre del PDF que se **descarga** desde la tablet o el panel lo pone `pdf.js` (archivo que está en tu
+  servidor y que no tengo); para que también use el código, mándame `pdf.js`.
+
 ## Enviar al cliente: elegir el contacto
 - Al tocar **Send / PDF** (técnico) o **Email / WhatsApp** de una factura o reporte (panel) aparece la lista de
   contactos del cliente registrado: el principal y los **otros contactos**. Se toca uno y se envía.

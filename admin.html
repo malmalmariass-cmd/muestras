@@ -516,9 +516,11 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
       <div class="row3"><div><label>Phone</label><input id="ivPhone" type="tel"></div><div><label>WhatsApp</label><input id="ivWa" type="tel" placeholder="+1 786 555 0101"></div><div><label>Email</label><input id="ivEmail" type="email"></div></div>
       <label class="chk"><input type="checkbox" id="ivSaveCust" checked> <span id="ivSaveCustL">Save this customer's information in Customers</span></label>
       <div class="fsect">Invoice</div>
+      <div class="row"><div><label>Work order (service report) — required</label><select id="ivWO"></select></div>
+        <div style="align-self:end;padding-bottom:9px" class="eq">Document code: <b id="ivCode">—</b></div></div>
       <div class="row4"><div><label>Invoice date</label><input id="ivDate" type="date"></div>
         <div><label>Terms</label><select id="ivTerms"><option value="Due upon receipt">Due upon receipt</option><option value="Net 15">Net 15</option><option value="Net 30">Net 30</option><option value="Net 45">Net 45</option><option value="">Custom due date</option></select></div>
-        <div><label>Due date</label><input id="ivDue" type="date"></div><div><label>Reference / PO / Work order</label><input id="ivRef"></div></div>
+        <div><label>Due date</label><input id="ivDue" type="date"></div><div><label>Reference (the document code if empty)</label><input id="ivRef" placeholder="automatic"></div></div>
       <div class="fsect">What are you billing?</div>
       <div class="tablewrap"><table class="lines"><thead><tr><th style="width:110px">Part no.</th><th>Description</th><th style="width:80px" class="r">Qty</th><th style="width:64px">Unit</th><th style="width:100px" class="r">Unit price</th><th style="width:40px" title="Taxable">Tax</th><th style="width:100px" class="r">Amount</th><th style="width:40px"></th></tr></thead><tbody id="ivLines"></tbody></table></div>
       <div class="addrow">
@@ -978,7 +980,7 @@ async function loadReports() {
     const tb = $('#repBody');
     if (!j.rows.length) tb.innerHTML = `<tr><td colspan="8" class="empty">${j.total ? '' : 'No reports match these filters.'}</td></tr>`;
     else tb.innerHTML = j.rows.map(r => `<tr data-id="${esc(r.id)}">
-      <td class="inv">#${docNo(r.invoice_no)}${r.report_type === 'maintenance' ? '<div class="eq" style="font-weight:600">Equipment service</div>' : ''}</td>
+      <td class="inv">#${docNo(r.invoice_no)}<div class="eq" style="font-weight:600">${esc(`${custInitials(r.customer_name)}-${docNo(r.invoice_no)}-${String(r.job_date || '').replace(/-/g, '')}`)}</div>${r.report_type === 'maintenance' ? '<div class="eq" style="font-weight:600">Equipment service</div>' : ''}</td>
       <td>${fmtD(r.job_date)}</td>
       <td><b>${esc(r.customer_name || '—')}</b>${r.work_order ? `<div class="eq">WO ${esc(r.work_order)}</div>` : ''}</td>
       <td class="hide-sm eq">${esc([r.make, r.model].filter(Boolean).join(' ') || '—')}${r.serial_no ? `<div>S/N ${esc(r.serial_no)}</div>` : ''}</td>
@@ -1045,7 +1047,7 @@ async function openReport(id) {
     const sig = (k, l) => { const s = r.sigs?.[k], img = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(s?.img || '') ? s.img : ''; return `<div><b>${l}</b>${img ? `<img src="${img}" alt="">${esc(s.name || '')}<br>${fmtDT(s.at)}` : '<br>Not signed'}</div>`; };
     const st = [r.initialDisassembly && 'Initial disassembly', r.followUp && 'Follow up repair', r.returnToCustomer && 'Return to customer'].filter(Boolean).join(', ');
     $('#dBody').innerHTML =
-      `<div class="sect">Customer &amp; job</div>` + kv([['Technician', `${j.techName || ''} (${r.employeeId || ''})`], ['Work order', r.workOrder], ['Customer', r.customerName], ['Address', [r.address1, r.address2, r.address3].filter(Boolean).join('\n')], ['Instructions', r.instructions]]) +
+      `<div class="sect">Customer &amp; job</div>` + kv([['Document code', r.docCode ? `${r.docCode}  (${r.docCode.split('-').slice(0, -1).join('-')} = this report and all its invoices)` : ''], ['Technician', `${j.techName || ''} (${r.employeeId || ''})`], ['Work order', r.workOrder], ['Customer reference', r.customerRef], ['Customer', r.customerName], ['Address', [r.address1, r.address2, r.address3].filter(Boolean).join('\n')], ['Instructions', r.instructions]]) +
       custChangeBox(r) +
       `<div class="sect">Equipment</div>` + kv([['Make', r.make], ['Model', r.model], ['Serial No.', r.serialNo], ['Hours', r.hour], ['Location', r.location], ['Delivery date', r.deliveryDate && fmtD(r.deliveryDate)]]) +
       (time.length ? `<div class="sect">Daily time record</div><table class="mini"><tr><th>Date</th><th>Left shop</th><th>Started</th><th>Completed</th><th>Mileage</th></tr>${time.map(t => `<tr><td>${fmtD(t.date)}</td><td>${fmtT(t.left)}</td><td>${fmtT(t.started)}</td><td>${fmtT(t.completed)}</td><td>${esc(t.mileage || '')}</td></tr>`).join('')}</table>` : '') +
@@ -1060,7 +1062,7 @@ async function openReport(id) {
       `<div class="sect">Signatures</div><div class="sigrow">${sig('serviceman', 'Serviceman')}${sig('supervisor', 'Supervisor')}${sig('customer', 'Customer')}</div>` +
       `<div class="sect">Sent</div>` + ((j.sendLog || []).length ? `<table class="mini"><tr><th>When</th><th>How</th><th>To</th><th>Result</th></tr>${j.sendLog.map(l => `<tr><td>${fmtDT(l.at)}</td><td>${{ email: 'Email', whatsapp: 'WhatsApp', office: 'Office copy' }[l.channel] || l.channel}</td><td>${esc(l.recipient || '')}</td><td>${+l.ok ? (l.channel === 'whatsapp' ? '<span class="ok-line">Link created</span>' : '<span class="ok-line">Sent</span>') : `<span class="bad-line" title="${esc(l.error || '')}">Failed</span>`}</td></tr>`).join('')}</table>` : '<div class="eq">Not sent yet.</div>') +
       `<div style="margin-top:10px"><button type="button" class="btn s" id="resendOffice">Send office copy again</button></div>` +
-      `<div class="sect">Billing</div>` + ((j.invoices || []).length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">${j.invoices.map(v => `<button type="button" class="btn s" data-bill="${v.id}">Invoice #${esc(v.invoiceNo)} · ${money(v.total)} · ${v.status === 'paid' ? 'Paid' : 'Unpaid'}</button>`).join('')}</div>` : '<div class="eq" style="margin-bottom:8px">Not invoiced yet.</div>') +
+      `<div class="sect">Billing</div>` + ((j.invoices || []).length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">${j.invoices.map(v => `<button type="button" class="btn s" data-bill="${v.id}" title="${esc(v.docCode || '')}">Invoice #${esc(v.invoiceNo)}${v.docCode ? ' · ' + esc(v.docCode) : ''} · ${money(v.total)} · ${v.status === 'paid' ? 'Paid' : 'Unpaid'}</button>`).join('')}</div>` : '<div class="eq" style="margin-bottom:8px">Not invoiced yet.</div>') +
       `<button type="button" class="btn p" id="repInvoice">${(j.invoices || []).length ? 'Create another invoice' : 'Create invoice from this report'}</button>`;
     $('#ivDrawer').hidden = true; $('#drawer').hidden = $('#shade').hidden = false;
   } catch (e) { toast(e.message); }
@@ -1600,7 +1602,7 @@ async function loadInvoices() {
     $('#ivKpis').innerHTML = [['Unpaid balance', money(k.unpaid), `${fmtN(k.unpaid_n)} open invoice${k.unpaid_n == 1 ? '' : 's'}`], ['Overdue', money(k.overdue), `${fmtN(k.overdue_n)} past the due date`],
       ['Invoiced this month', money(k.month), `${fmtN(k.month_n)} invoice${k.month_n == 1 ? '' : 's'}`], ['Collected this month', money(k.paid), `${fmtN(k.paid_n)} payment${k.paid_n == 1 ? '' : 's'} received`]].map(kpi).join('');
     $('#ivBody').innerHTML = ivRows.length ? ivRows.map(x => `<tr data-id="${x.id}">
-      <td class="inv">#${esc(x.invoiceNo)}${x.fromReport ? '<div class="eq" style="font-weight:400">from service report</div>' : ''}</td>
+      <td class="inv">#${esc(x.invoiceNo)}${x.docCode ? `<div class="eq" style="font-weight:600">${esc(x.docCode)}</div>` : ''}${x.fromReport ? '<div class="eq" style="font-weight:400">from service report</div>' : ''}</td>
       <td>${fmtD(x.date)}</td><td><b>${esc(x.customer)}</b></td>
       <td class="hide-sm">${x.dueDate && x.dueDate !== x.date ? fmtD(x.dueDate) : 'On receipt'}</td>
       <td class="num"><b>${money(x.total)}</b></td><td class="num hide-sm">${x.status === 'void' ? '—' : money(x.balance)}</td><td>${ivTag(x)}</td></tr>`).join('')
@@ -1630,7 +1632,7 @@ async function openInvoice(id) {
     $('#ivdBody').innerHTML =
       `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="bigtot">${money(v.total)}</span>${ivTag(v)}${v.status !== 'void' && v.paidAmount > 0 ? `<span class="eq">Received ${money(v.paidAmount)} · balance <b>${money(v.balance)}</b></span>` : ''}</div>` +
       `<div class="sect">Bill to</div>` + kv([['Customer', `<b>${esc(c.name)}</b>`], ['Address', esc([c.address1, c.address2, c.address3].filter(Boolean).join('\n'))], ['Phone', esc(c.phone)], ['WhatsApp', esc(c.whatsapp)], ['Email', esc(c.email)]]) +
-      `<div class="sect">Details</div>` + kv([['Invoice date', fmtD(v.date)], ['Due date', v.dueDate ? fmtD(v.dueDate) : 'On receipt'], ['Terms', esc(v.terms)], ['Reference', esc(v.reference)],
+      `<div class="sect">Details</div>` + kv([['Document code', `<b>${esc(v.docCode || '')}</b>`], ['Work order', esc(v.workOrder || '')], ['Invoice date', fmtD(v.date)], ['Due date', v.dueDate ? fmtD(v.dueDate) : 'On receipt'], ['Terms', esc(v.terms)], ['Reference', esc(v.reference)],
         ['Service report', v.reportNo ? `<button type="button" class="linkbtn" data-rep="${esc(v.reportId)}">#${esc(v.reportNo)}</button>` : ''], ['Parts request', v.requestId ? `<button type="button" class="linkbtn" data-req="${v.requestId}">PR-${String(v.requestId).padStart(4, '0')}</button>` : ''], ['Created by', esc(v.createdBy || '')], ['Last change', fmtDT(v.updatedAt)]]) +
       `<div class="sect">Lines</div><table class="mini"><tr><th>Part no.</th><th>Description</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr>${v.lines.map(l => `<tr><td>${esc(l.partNo || '')}</td><td>${esc(l.name)}${l.taxable ? ' <span class="eq">(T)</span>' : ''}${src(l)}</td><td class="r">${fmtN(l.qty, l.qty % 1 ? 2 : 0)} ${esc(l.unit || '')}</td><td class="r">${money(l.price)}</td><td class="r">${money(l.qty * l.price)}</td></tr>`).join('')}
         <tr><td colspan="4" class="r">Subtotal</td><td class="r">${money(v.subtotal)}</td></tr><tr><td colspan="4" class="r">Sales tax (${v.taxRate}%)</td><td class="r">${money(v.tax)}</td></tr><tr><td colspan="4" class="r"><b>Total</b></td><td class="r"><b>${money(v.total)}</b></td></tr></table>` +
@@ -2032,6 +2034,7 @@ async function ivResume() {
   $('#ivDate').value = d.date || $('#ivDate').value; $('#ivDue').value = d.dueDate || $('#ivDue').value; $('#ivTerms').value = d.terms ?? ''; $('#ivRef').value = d.reference || '';
   $('#ivNotes').value = d.notes || ''; $('#ivTax').value = d.taxRate ?? $('#ivTax').value; ivLines = (d.lines || []).map(l => ({ ...l })); custState(); renderLines();
   ivDraftBase = null;
+  await ivLoadWO(d.reportId || '');
 }
 $('#ivUnsavedOpen').onclick = ivResume;
 $('#ivUnsavedDel').onclick = () => { if (confirm('Delete this invoice that was never saved?')) { ivDraftClear(); toast('Deleted'); } };
@@ -2065,7 +2068,34 @@ async function invoiceModal(v, preset) {
   $('#ivTax').value = d.taxRate ?? ivSettings.taxRate ?? 0;
   $('#ivPick').hidden = true; $('#ivErr').textContent = '';
   custState(); renderLines(); openModal('#ivModal'); ivDraftBase = ivSnap();
+  await ivLoadWO(ivReportId || (v ? 'none' : ''));   // from a report: already chosen
 }
+/* work order = the service report this invoice is for (its number). Document code: initials-workorder-date, like the server. */
+function custInitials(n) {
+  const skip = new Set(['LLC', 'INC', 'CO', 'CORP', 'CORPORATION', 'COMPANY', 'LTD', 'THE', 'OF', 'AND', 'DE', 'LA', 'EL', 'Y', 'SA', 'SRL']);
+  const w = String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().split(/[^A-Z0-9]+/).filter(x => x && !skip.has(x));
+  if (!w.length) return 'CUST';
+  if (w.length === 1) return (w[0].replace(/[^A-Z]/g, '') || w[0]).slice(0, 4);
+  return (w.filter(x => /^[A-Z]/.test(x)).map(x => x[0]).join('') || 'CUST').slice(0, 4);
+}
+let ivWORows = [];
+async function ivLoadWO(keep) {
+  const sel = $('#ivWO'), name = $('#ivCust').value.trim(), want = keep ?? sel.value;
+  try { ivWORows = name ? (await api('reports_list', { q: name, limit: 40, offset: 0 })).rows.filter(r => String(r.customer_name || '').toLowerCase() === name.toLowerCase()) : []; } catch { ivWORows = []; }
+  if (ivReportId && !ivWORows.some(r => r.id === ivReportId) && ivEdit?.reportNo) ivWORows.unshift({ id: ivReportId, invoice_no: null, label: '#' + ivEdit.reportNo });
+  sel.innerHTML = `<option value="">— Choose the work order —</option>` + ivWORows.map(r => `<option value="${esc(r.id)}">${esc(r.label || `#${docNo(r.invoice_no)} · ${fmtD(r.job_date)} · ${[r.make, r.model].filter(Boolean).join(' ') || (r.report_type === 'maintenance' ? 'Equipment service' : 'Service report')}`)}</option>`).join('')
+    + `<option value="none">Sale without a service report (parts / counter sale)</option>`;
+  sel.value = want && [...sel.options].some(o => o.value === want) ? want : '';
+  ivCodePreview();
+}
+function ivCodePreview() {
+  const v = $('#ivWO').value, r = ivWORows.find(x => x.id === v), date = ($('#ivDate').value || iso(new Date())).replace(/-/g, '');
+  const wo = r?.invoice_no ? docNo(r.invoice_no) : r?.label ? r.label.slice(1) : v === 'none' ? (ivEdit?.invoiceNo || 'new no.') : '';
+  $('#ivCode').textContent = wo ? `${custInitials($('#ivCust').value)}-${wo}-${date}` : '—';
+}
+$('#ivWO').onchange = () => { const v = $('#ivWO').value; ivReportId = v && v !== 'none' ? v : null; ivCodePreview(); };
+$('#ivDate').addEventListener('change', ivCodePreview);
+let ivWOT; $('#ivCust').addEventListener('input', () => { clearTimeout(ivWOT); ivWOT = setTimeout(() => ivLoadWO(), 500); });
 function custMatch() { const n = $('#ivCust').value.trim().toLowerCase(); return n ? custCache.find(x => x.name.toLowerCase() === n) : null; }
 function custState() {
   const n = $('#ivCust').value.trim(), c = custMatch();
@@ -2176,11 +2206,12 @@ $('#ivSave').onclick = async () => {
   const name = $('#ivCust').value.trim();
   if (!name) { $('#ivErr').textContent = 'Choose a saved customer or type the new customer\'s name.'; $('#ivCust').focus(); return; }
   if (!ivLines.some(l => String(l.name || '').trim() && +l.qty > 0)) { $('#ivErr').textContent = 'Add at least one line (a part, labor or a service).'; return; }
+  if (!$('#ivWO').value) { $('#ivErr').textContent = 'Choose the work order (service report) this invoice is for, or “Sale without a service report”.'; $('#ivWO').focus(); return; }
   const c = custMatch(), btn = $('#ivSave'); btn.disabled = true;
   try {
     const j = await api('invoice_save', { invoice: { id: ivEdit?.id || 0, customerId: c?.id || null, saveCustomer: $('#ivSaveCust').checked,
       customer: { name, address1: $('#ivA1').value, address2: $('#ivA2').value, address3: $('#ivA3').value, phone: $('#ivPhone').value, whatsapp: $('#ivWa').value, email: $('#ivEmail').value },
-      date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, reportId: ivReportId, requestId: ivRequestId,
+      date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, reportId: $('#ivWO').value !== 'none' ? $('#ivWO').value : null, noReport: $('#ivWO').value === 'none', requestId: ivRequestId,
       lines: ivLines, taxRate: $('#ivTax').value || 0, notes: $('#ivNotes').value } });
     closeModal('#ivModal'); ivDraftClear(); toast(`Invoice #${j.invoice.invoiceNo} saved`); custCache = []; invAll = null;
     if (current !== 'invoices') view('invoices'); else loadInvoices();
