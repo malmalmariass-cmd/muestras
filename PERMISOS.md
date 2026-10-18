@@ -8,6 +8,10 @@
 | Modificar datos de un cliente ya registrado | ✗ — el cambio viaja en el reporte y el supervisor lo **aprueba** desde el reporte | ✓ |
 | Borrar clientes | ✗ | ✓ (desde el panel) |
 | Ver precios / costos de partes | ✗ | ✓ |
+| Borrar reportes, facturas o lo que sea (también "quitar de la tablet") | ✗ | ✓ (desde el panel, con PIN y motivo) |
+| Cambiar un reporte **firmado** (1 hora después de la firma del cliente) | Solo si el supervisor **aprueba** su "Solicitar un cambio" (queda abierto 24 h) | ✓ |
+| Cancelar una solicitud de partes | ✗ — "Pedir cancelar": decide el supervisor | ✓ (Decline) |
+| Descartar un reporte empezado | ✗ — "Nuevo" lo guarda primero; si nunca se guarda, se borra solo a las 24 h | ✓ |
 
 ## Lo que hace la app (`index.html`)
 
@@ -39,3 +43,13 @@ Revisado con el `api.php` real:
   (`customerChanges`) y el supervisor los aplica con **Approve and update the customer**.
 - **Borrar clientes, inventario, facturas, empleados:** solo supervisores (`need_sup`).
 - **Panel:** `login` con `supervisorOnly` rechaza cuentas de técnico.
+
+## Reportes firmados y solicitudes de cambio
+
+- Cuando el cliente firma, el técnico tiene **1 hora** para terminar detalles (por ejemplo, su propia firma).
+  Después el reporte queda **bloqueado** en la tablet: se ve, se manda y se pueden pedir partes, pero no se cambia.
+- **Solicitar un cambio**: el técnico escribe qué y por qué. En el panel aparece en **Reports & Jobs** (contador
+  rojo y recuadro "Change requests") con **Approve (24 h)** / **Decline** (con motivo). Si se aprueba, el técnico
+  puede editarlo durante 24 horas.
+- El servidor lo hace cumplir: si una tablet intenta guardar cambios en un reporte bloqueado, se conserva la copia
+  de la oficina y la tablet la recibe de vuelta.

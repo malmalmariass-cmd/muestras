@@ -38,6 +38,8 @@ header.top .t span{font-size:12px;color:var(--muted)}
 main{max-width:980px;margin:0 auto;padding:16px 16px calc(110px + env(safe-area-inset-bottom))}
 .unsaved{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff4e5;border:1.5px solid #f0a54a;color:#7a3e00;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:600}
 .unsaved span{flex:1;min-width:220px}.unsaved .btn{padding:7px 12px;font-size:14px}
+.lockbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#eef3ff;border:1.5px solid #9db4e8;color:#0a1f5c;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:600}
+.lockbar span{flex:1;min-width:220px}#viewForm.locked .card{opacity:.92}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
 .card h2{margin:0 0 12px;color:var(--navy);font-size:15px;letter-spacing:.6px;text-transform:uppercase}
 .brand{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
@@ -311,6 +313,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
 
   <!-- ============ FORM VIEW ============ -->
   <section id="viewForm">
+    <div class="lockbar" id="lockBar" hidden><span id="lockTxt"></span><button class="btn s" type="button" id="lockAsk" data-t="askChange">Request a change</button></div>
     <div class="card">
       <div class="brand">
         <img data-logo alt="Cher Services LLC">
@@ -596,7 +599,13 @@ const I18N = {
     installText: 'Install this app on your tablet for full-screen, offline use.', install: 'Install',
     installIos: 'Install on iPad/iPhone: tap Share ⬆ then "Add to Home Screen".', installSafari: 'In Safari: tap Share ⬆, then "Add to Home Screen"',
     myJobs: 'My jobs', refresh: 'Refresh', newJob: '+ New job', jobsHint: 'Jobs assigned to you by the office. Tap “Start report” to open the service report already filled in.',
-    numReserved: 'Number #{n} reserved for this report', unsavedOpen: 'Open', delete: 'Delete',
+    numReserved: 'Number #{n} reserved for this report', askChange: 'Request a change',
+    lockedTxt: '🔒 Signed report: it can no longer be changed here. To change something, request it from the supervisor.', askChangeQ: 'What needs to change, and why? (the supervisor approves or declines)',
+    changeSent: 'Request sent to the supervisor', changeAsked: '🔒 Change requested on {d}: waiting for the supervisor.', changeDeclined: '🔒 The supervisor declined the change. {r}',
+    unlockedTill: '✎ The supervisor approved the change: you can edit this report until {d}.', lockedKept: 'Report #{n} is signed and locked: the office copy was kept.',
+    noInvServer: 'The office server did not answer ({why}), so the invoice number is still pending. Create the PDF anyway?',
+    askCancel: 'Ask to cancel', cancelAsked: 'Cancellation requested — the supervisor decides', cancelAskedSent: 'Request sent: the supervisor decides',
+    unsavedBarTech: '⚠ {what} is not saved (started {since}). Save it — if not, it is deleted automatically in {h} h.', unsavedOpen: 'Open', delete: 'Delete',
     unsavedBar: '⚠ {what} is not saved (started {since}). Save it or delete it — it is deleted automatically in {h} h.', unsavedDelQ: 'Delete this report that was never saved? This cannot be undone.',
     unsavedGone: '{what}: a report that was not saved for 24 hours was deleted.', sendToWho: 'Send to', addContact: '+ Add a contact', contactName: 'Name', addContactBtn: 'Add and use this contact',
     mainContact: 'Main contact', thisReport: 'Written on this report', contactSaved: 'Contact saved to {c}', contactNotSaved: 'The contact will be used for this report only (the customer is not registered yet).', needContact: 'Write an email or a WhatsApp number', noContacts: 'No contact registered yet: write one below or add a contact.', invoiceNo: 'INVOICE NO.', customer: 'Customer', workOrder: 'Work order #', customerName: 'Customer name', address: 'Address', street: 'Street',
@@ -668,7 +677,13 @@ const I18N = {
     installText: 'Instala esta app en la tablet para usarla a pantalla completa y sin internet.', install: 'Instalar',
     installIos: 'Para instalar en iPad/iPhone: toca Compartir ⬆ y luego "Agregar a inicio".', installSafari: 'En Safari: toca Compartir ⬆ y luego "Agregar a inicio"',
     myJobs: 'Mis trabajos', refresh: 'Actualizar', newJob: '+ Nuevo trabajo', jobsHint: 'Trabajos que te asignó la oficina. Toca “Iniciar reporte” para abrir el reporte ya lleno.',
-    numReserved: 'Número #{n} reservado para este reporte', unsavedOpen: 'Abrir', delete: 'Borrar',
+    numReserved: 'Número #{n} reservado para este reporte', askChange: 'Solicitar un cambio',
+    lockedTxt: '🔒 Reporte firmado: ya no se puede cambiar aquí. Para cambiar algo, solicítalo al supervisor.', askChangeQ: '¿Qué hay que cambiar y por qué? (el supervisor lo aprueba o lo rechaza)',
+    changeSent: 'Solicitud enviada al supervisor', changeAsked: '🔒 Cambio solicitado el {d}: esperando al supervisor.', changeDeclined: '🔒 El supervisor rechazó el cambio. {r}',
+    unlockedTill: '✎ El supervisor aprobó el cambio: puedes editar este reporte hasta el {d}.', lockedKept: 'El reporte #{n} está firmado y bloqueado: se conservó la copia de la oficina.',
+    noInvServer: 'El servidor de la oficina no respondió ({why}), así que el número de factura está pendiente. ¿Crear el PDF de todos modos?',
+    askCancel: 'Pedir cancelar', cancelAsked: 'Cancelación pedida — decide el supervisor', cancelAskedSent: 'Solicitud enviada: decide el supervisor',
+    unsavedBarTech: '⚠ {what} no está guardado (empezado {since}). Guárdalo: si no, se borra solo en {h} h.', unsavedOpen: 'Abrir', delete: 'Borrar',
     unsavedBar: '⚠ {what} no está guardado (empezado {since}). Guárdalo o bórralo: se borra solo en {h} h.', unsavedDelQ: '¿Borrar este reporte que nunca se guardó? No se puede deshacer.',
     unsavedGone: '{what}: se borró un reporte que estuvo 24 horas sin guardar.', sendToWho: 'Enviar a', addContact: '+ Agregar un contacto', contactName: 'Nombre', addContactBtn: 'Agregar y usar este contacto',
     mainContact: 'Contacto principal', thisReport: 'Escrito en este reporte', contactSaved: 'Contacto guardado en {c}', contactNotSaved: 'El contacto se usará solo para este reporte (el cliente aún no está registrado).', needContact: 'Escribe un correo o un número de WhatsApp', noContacts: 'Aún no hay contactos registrados: escríbelo abajo o agrega un contacto.', invoiceNo: 'FACTURA NO.', customer: 'Cliente', workOrder: 'Orden de trabajo #', customerName: 'Nombre del cliente', address: 'Dirección', street: 'Calle',
@@ -821,8 +836,40 @@ function render() {
   $('#formTitle').textContent = t(maint ? 'titleMaint' : 'titleRepair'); $('#formTitle').classList.toggle('maint', maint);
   customerCheck(); renderTime(); renderFaults(); renderServices(); renderParts(); renderJobStatus(); renderSigs(); updateStatus(); renderOffice(); renderJobBanner();
   requestAnimationFrame(() => $$('#viewForm textarea.grow').forEach(grow));
+  renderLock();
   histState = { serial: null, list: [] }; $('#histChip').hidden = true; checkHistory();
 }
+/* A report the customer signed is locked for the technician 1 hour later (the server decides, and keeps the office copy).
+   To change it, the technician asks; the supervisor approves (the report opens for 24 hours) or declines. */
+const isLocked = r => !isSup() && !!r?.lockedAt && Date.now() >= Date.parse(r.lockedAt) && !(r.unlockedUntil && Date.now() < Date.parse(r.unlockedUntil));
+function renderLock() {
+  const lk = isLocked(report), bar = $('#lockBar');
+  $('#viewForm').classList.toggle('locked', lk);
+  // parts can still be requested and the machine's history looked at; the report itself is read-only
+  $$('#viewForm input, #viewForm textarea, #viewForm select, #viewForm .card button').forEach(el => { if (!['invoiceNo', 'addPart', 'histChip'].includes(el.id)) el.disabled = lk; });
+  $('#btnSave').hidden = lk;
+  const c = report.changeReq, open = !isSup() && report.unlockedUntil && Date.now() < Date.parse(report.unlockedUntil);
+  if (!lk && !open) { bar.hidden = true; return; }
+  bar.hidden = false;
+  $('#lockTxt').textContent = open ? t('unlockedTill', { d: new Date(report.unlockedUntil).toLocaleString() })
+    : c?.status === 'open' ? t('changeAsked', { d: new Date(c.at).toLocaleString() })
+    : c?.status === 'declined' ? t('changeDeclined', { r: c.reply || '' }) : t('lockedTxt');
+  $('#lockAsk').hidden = open || c?.status === 'open';
+}
+async function refreshLock() {   // has the supervisor answered? (only when online)
+  if (!report?.lockedAt || isSup() || !navigator.onLine) return;
+  try {
+    const j = await api('report_status', { id: report.id }), r = report;
+    Object.assign(r, { lockedAt: j.lockedAt, unlockedUntil: j.unlockedUntil, changeReq: j.changeReq });
+    const st = await DB.get(r.id); if (st) { Object.assign(st, { lockedAt: j.lockedAt, unlockedUntil: j.unlockedUntil, changeReq: j.changeReq }); await DB.put(st); }
+    saveDraft(); if (report === r) renderLock();
+  } catch {}
+}
+$('#lockAsk').onclick = async () => {
+  const note = (prompt(t('askChangeQ'), '') || '').trim(); if (!note) return;
+  try { const j = await api('report_change_request', { id: report.id, note }); report.changeReq = j.changeReq; saveDraft(); const st = await DB.get(report.id); if (st) { st.changeReq = j.changeReq; await DB.put(st); } renderLock(); toast(t('changeSent')); }
+  catch (e) { toast(e.offline ? t('noConnShort') : e.message); }
+};
 let dirty = false, autosaveT;
 /* the report number is reserved on the server as soon as the report is started (when there is internet), so it is
    known from the start, never changes and is never given to anyone else. Without internet it is given when it syncs. */
@@ -840,6 +887,7 @@ function reserveNumber() {
   }).catch(() => {}).finally(() => { reserving = null; });
 }
 function markDirty() {
+  if (isLocked(report)) { toast(t('lockedTxt')); return; }
   dirty = true; if (!report.startedAt) report.startedAt = new Date().toISOString();   // for the 24-hour reminder of unsaved reports
   saveDraft(); reserveNumber();
   clearTimeout(autosaveT);
@@ -1069,13 +1117,13 @@ function reqCard(q) {
     <ul>${(q.lines || []).map(l => `<li>${esc(+l.qty + ' ' + (l.unit && l.unit !== 'ea' ? l.unit + ' ' : '') + '× ' + l.name)} <span class="src ${l.source === 'order' ? 'order' : 'stock'}">${esc(l.source === 'order' ? t('srcOrder') : t('srcStock'))}</span></li>`).join('')}</ul>
     ${q.note ? `<div class="hint" style="margin-top:6px">✎ ${esc(q.note)}</div>` : ''}
     ${q.reply ? `<div class="reply"><b>${esc(t('officeNote'))}:</b> ${esc(q.reply)}</div>` : ''}
-    ${['requested', 'quoted', 'queued'].includes(q.status) ? `<div class="acts"><button class="btn s" data-a="edit" type="button">${esc(t('edit'))}</button><button class="btn d" data-a="cancel" type="button">${esc(t('cancelReq'))}</button></div>` : ''}`;
+    ${['requested', 'quoted', 'queued'].includes(q.status) ? `<div class="acts"><button class="btn s" data-a="edit" type="button">${esc(t('edit'))}</button>${q.status === 'queued' ? '' : q.cancelAsked && !isSup() ? `<span class="hint">${esc(t('cancelAsked'))}</span>` : `<button class="btn d" data-a="cancel" type="button">${esc(t(isSup() ? 'cancelReq' : 'askCancel'))}</button>`}</div>` : ''}`;
   d.querySelector('.acts')?.addEventListener('click', async e => {
     const a = e.target.dataset.a; if (!a) return;
     if (a === 'edit') openRequest(q);
     if (a === 'cancel' && confirm(t('cancelReqConfirm'))) {
       if (q.status === 'queued') { setReqQueue(reqQueue().filter(x => x.key !== q.key)); renderParts(); renderReqs(); toast(t('reqCancelled')); return; }
-      try { await api('preq_cancel', { id: q.id }); toast(t('reqCancelled')); pullRequests(); } catch (err) { toast(err.message); }
+      try { const j = await api('preq_cancel', { id: q.id }); toast(t(j.asked ? 'cancelAskedSent' : 'reqCancelled')); pullRequests(); } catch (err) { toast(err.message); }
     }
   });
   return d;
@@ -1205,6 +1253,7 @@ const pad = (() => {
   };
 })();
 $$('.sig').forEach(b => b.addEventListener('click', () => {
+  if (isLocked(report)) { toast(t('lockedTxt')); return; }
   const k = b.dataset.sig;
   if (report.sigs[k]?.img && !confirm(t('replaceSig'))) return;
   pad.open(k);
@@ -1270,7 +1319,7 @@ async function save(silent) {
   if (!silent) toast(t('saved'));
   return syncAll();
 }
-let syncing = null, again = false;
+let syncing = null, again = false, lastSyncErr = '';
 async function syncAll(manual) {
   if (!session) return;
   if (syncing) { again = true; return syncing; }
@@ -1284,12 +1333,18 @@ async function syncAll(manual) {
       for (const r of pend) {
         const sentAt = r.updatedAt, hadInv = !!r.invoiceNo && !r.reservedAt;
         const j = await api('save_report', { report: r });
+        if (j.locked) {   // signed and locked: the office copy wins over changes made on this tablet
+          const o = normalize(Object.assign(forRole(j.report), { synced: true })); await DB.put(o);
+          if (report.id === r.id) { report = o; dirty = false; saveDraft(); render(); }
+          toast(t('lockedKept', { n: o.invoiceNo })); continue;
+        }
         const latest = normalize((await DB.get(r.id)) || r);
+        latest.lockedAt = j.lockedAt || null; latest.unlockedUntil = j.unlockedUntil || null;
         latest.invoiceNo = j.invoiceNo; latest.officeSentAt = j.officeSentAt || latest.officeSentAt || null; delete latest.reservedAt;
         if (latest.updatedAt === sentAt) latest.synced = true;
         await DB.put(latest);
         if (!hadInv) newInv++;
-        if (report.id === r.id) { report.invoiceNo = j.invoiceNo; delete report.reservedAt; report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
+        if (report.id === r.id) { report.invoiceNo = j.invoiceNo; delete report.reservedAt; report.lockedAt = latest.lockedAt; report.unlockedUntil = latest.unlockedUntil; renderLock(); report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
       }
       // office copy: every synced, customer-signed report is emailed to the office once
       for (const r of (await DB.all()).filter(r => r.employeeId === me() && r.synced && r.sigs?.customer?.img && !r.officeSentAt)) await sendOffice(r);
@@ -1300,7 +1355,7 @@ async function syncAll(manual) {
       if (pend.some(r => r.jobId)) pullJobs();
       await flushReqQueue(); pullRequests(); updateBadges();
     } catch (e) {
-      setDot('off');
+      setDot('off'); lastSyncErr = e.offline && !navigator.onLine ? '' : e.message;
       if (manual) toast(e.offline ? t('noConn') : e.message);
     } finally {
       syncing = null;
@@ -1420,8 +1475,8 @@ function checkUnsaved() {
   if (!left.length || $('#login').hidden === false) { bar.hidden = true; return; }
   const d = left[0], hrs = Math.max(1, Math.ceil((Date.parse(d.startedAt) + KEEP_HOURS * 3600000 - now) / 3600000));
   const what = `${t(d.type === 'maintenance' ? 'tabMaint' : 'tabReport')}${d.invoiceNo ? ' #' + d.invoiceNo : ''}${d.customerName ? ' · ' + d.customerName : ''}`;
-  $('#unsavedTxt').textContent = t('unsavedBar', { what, since: new Date(d.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), h: hrs });
-  bar.hidden = false; bar.dataset.id = d.id; bar.dataset.type = d.type;
+  $('#unsavedTxt').textContent = t(isSup() ? 'unsavedBar' : 'unsavedBarTech', { what, since: new Date(d.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), h: hrs });
+  bar.hidden = false; bar.dataset.id = d.id; bar.dataset.type = d.type; $('#unsavedDel').hidden = !isSup();   // technicians don't delete: they save
   // a reminder every 30 minutes: on screen and as a notification when the app is in the background
   const k = 'cher.remind.' + d.id, last = +(localStorage.getItem(k) || 0);
   if (now - last > REMIND_MIN * 60000) {
@@ -1433,13 +1488,15 @@ function checkUnsaved() {
 const unsavedOf = () => unsavedDrafts().find(d => d.id === $('#unsavedBar').dataset.id);
 $('#unsavedOpen').onclick = () => { const d = unsavedOf(); if (d) show(d.type === 'maintenance' ? 'maint' : 'form'); };
 $('#unsavedSave').onclick = async () => { const d = unsavedOf(); if (!d) return; show(d.type === 'maintenance' ? 'maint' : 'form'); if (report.id === d.id) { await save(false); checkUnsaved(); } };
-$('#unsavedDel').onclick = () => { const d = unsavedOf(); if (!d || !confirm(t('unsavedDelQ'))) return; discardDraft(d); toast(t('removed')); checkUnsaved(); };
+$('#unsavedDel').onclick = () => { const d = unsavedOf(); if (!d || !isSup() || !confirm(t('unsavedDelQ'))) return; discardDraft(d); toast(t('removed')); checkUnsaved(); };
 setInterval(() => { if (session) checkUnsaved(); }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && session) checkUnsaved(); });
 // ask once for permission to show reminders while the app is in the background
 document.addEventListener('pointerdown', () => { try { if ('Notification' in window && Notification.permission === 'default' && unsavedDrafts().length) Notification.requestPermission().catch(() => {}); } catch {} }, { passive: true });
-$('#btnNew').onclick = () => {
-  if (dirty && !confirm(t('newConfirm'))) return;
+$('#btnNew').onclick = async () => {
+  const started = report && report.startedAt && !report.updatedAt && !isLocked(report);
+  if (!isSup() && started) await save(true);   // technicians don't discard reports: the current one is saved first
+  else if (dirty && !confirm(t('newConfirm'))) return;
   newReport(); scrollTo(0, 0); toast(t('newReport'));
 };
 
@@ -1533,8 +1590,10 @@ $('#sendWaBtn').onclick = async () => {
   } catch (e) { if (win) win.close(); toast(e.message); } finally { busy(btn, false); }
 };
 $('#sharePdfBtn').onclick = async () => {
-  if (!report.invoiceNo) await syncAll();
-  if (!report.invoiceNo && !confirm(t('noInvConfirm'))) return;
+  if (!isLocked(report) && (!report.updatedAt || dirty)) await save(true);   // a report that was never saved has no number yet
+  if (!report.invoiceNo) { reserveTry = 0; reserveNumber(); if (reserving) await reserving; }
+  if (!report.invoiceNo) { lastSyncErr = ''; await syncAll(); }
+  if (!report.invoiceNo && !confirm(navigator.onLine ? t('noInvServer', { why: lastSyncErr || '—' }) : t('noInvConfirm'))) return;
   await sharePdf(withReqParts(report));
 };
 
@@ -1618,8 +1677,9 @@ async function startJob(j, type) {
   const view = type === 'maintenance' ? 'maint' : 'form';
   const cur = getDraft(type);
   if (cur && cur.jobId === j.id && cur.employeeId === me()) { report = normalize(cur); render(); show(view); return; }
-  if (cur && cur.employeeId === me() && cur.updatedAt === null && JSON.stringify(cur).length > 900 && !confirm(t('replaceDraft'))) return;
-  if (cur && cur.employeeId === me()) releaseIfUnsaved(cur);
+  if (cur && cur.employeeId === me() && !cur.updatedAt && cur.startedAt && !isSup()) { const keep = report; report = normalize(cur); await save(true); report = keep; }   // saved, not lost
+  else if (cur && cur.employeeId === me() && cur.updatedAt === null && JSON.stringify(cur).length > 900 && !confirm(t('replaceDraft'))) return;
+  else if (cur && cur.employeeId === me()) releaseIfUnsaved(cur);
   const r = blankReport(type); r.employeeId = me(); r.jobId = j.id; r.startedAt = new Date().toISOString();
   Object.assign(r, { customerName: j.customerName, address1: j.address1, address2: j.address2, address3: j.address3, customerWhatsapp: j.whatsapp, customerEmail: j.email,
     workOrder: j.workOrder, make: j.make, model: j.model, serialNo: j.serialNo, location: j.location, instructions: j.instructions });
@@ -1658,15 +1718,15 @@ async function renderHist() {
       <div class="info"><b></b><small></small></div>
       ${r.type === 'maintenance' ? `<span class="pill warn">${esc(t('typeMaint'))}</span>` : ''}<span class="pill ${signed ? 'ok' : ''}">${esc(signed ? t('signed') : t('unsigned'))}</span>
       <span class="pill ${r.synced ? 'ok' : ''}">${esc(r.synced ? t('inOffice') : t('pendingSync'))}</span>
-      <div class="acts"><button class="btn s" data-a="open">${esc(t('open'))}</button><button class="btn p" data-a="pdf">PDF</button><button class="btn s" data-a="dup">${esc(t('copy'))}</button><button class="btn d" data-a="del">${esc(t('remove'))}</button></div>`;
+      <div class="acts"><button class="btn s" data-a="open">${esc(t('open'))}</button><button class="btn p" data-a="pdf">PDF</button><button class="btn s" data-a="dup">${esc(t('copy'))}</button>${isSup() ? `<button class="btn d" data-a="del">` : '<button hidden>'}${esc(t('remove'))}</button></div>`;
     d.querySelector('b').textContent = r.customerName || t('noCustomer');
     d.querySelector('small').textContent = [r.make, r.model, r.serialNo && 'S/N ' + r.serialNo].filter(Boolean).join(' · ') + ' — ' + new Date(r.updatedAt || r.createdAt).toLocaleDateString();
     d.querySelector('.acts').onclick = async e => {
       const a = e.target.dataset.a; if (!a) return;
-      if (a === 'open') { report = normalize(r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); }
+      if (a === 'open') { report = normalize(r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); refreshLock(); }
       if (a === 'pdf') sharePdf(withReqParts(r));
       if (a === 'dup') { const n = blankReport(r.type); n.employeeId = me(); ['customerName', 'address1', 'address2', 'address3', 'customerWhatsapp', 'customerEmail', 'model', 'serialNo', 'make', 'location'].forEach(k => n[k] = r[k]); report = n; dirty = true; saveDraft(); render(); show(n.type === 'maintenance' ? 'maint' : 'form'); toast(t('copied')); }
-      if (a === 'del') {
+      if (a === 'del' && isSup()) {
         const msg = r.synced ? t('removeSynced', { n: r.invoiceNo }) : t('removeUnsynced');
         if (confirm(msg)) { await DB.del(r.id); renderHist(); toast(t('removed')); }
       }

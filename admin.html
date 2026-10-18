@@ -232,7 +232,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
   <img data-logo alt="Cher Services LLC">
   <div class="ttl">Supervisor Panel<small id="whoami"></small></div>
   <nav>
-    <button data-v="reports" class="on">Reports &amp; Jobs<span class="tc" data-c="reports" hidden></span><span class="nb" data-b="jobs" hidden></span></button>
+    <button data-v="reports" class="on">Reports &amp; Jobs<span class="tc" data-c="reports" hidden></span><span class="nb" data-b="jobs" hidden></span><span class="nb" data-b="changes" hidden title="Change requests"></span></button>
     <button data-v="invoices">Invoices<span class="tc" data-c="invoices" hidden></span><span class="nb" data-b="invoices" hidden></span></button>
     <button data-v="requests">Parts &amp; Orders<span class="tc" data-c="requests" hidden></span><span class="nb" data-b="parts" hidden></span><span id="rqCnt" hidden></span></button>
     <button data-v="customers">Customers<span class="tc" data-c="customers" hidden></span><span class="nb" data-b="customers" hidden></span></button>
@@ -254,6 +254,8 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
     <div class="subtabs grp"><button type="button" data-go="reports">Service reports</button><button type="button" data-go="jobs">Jobs &amp; appointments<span class="nb" data-b="jobs" hidden></span></button></div>
     <h1>Service reports</h1>
     <p class="sub" id="repSub">All reports sent from the tablets.</p>
+    <div class="fbox" id="chgBox" hidden style="margin-bottom:12px;border-color:var(--warn);background:var(--warn-50)"><b>🔒 Change requests on signed reports</b>
+      <div class="sub" style="margin:2px 0 8px">Technicians cannot change or delete a signed report. Approve to let the technician edit it for 24 hours, or decline.</div><div id="chgList"></div></div>
     <div class="filters">
       <div class="f grow"><label>Search</label><input id="fQ" placeholder="Invoice, customer, serial, model, work order…"></div>
       <div class="f"><label>Technician</label><select id="fTech"><option value="">All</option></select></div>
@@ -947,7 +949,7 @@ function view(v) {
   $$('nav button[data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === grp));
   $$('.subtabs.grp button').forEach(b => b.classList.toggle('on', b.dataset.go === v));
   $$('[data-view]').forEach(s => s.hidden = s.dataset.view !== v);
-  if (v === 'reports') loadReports();
+  if (v === 'reports') { loadReports(); loadChanges(); }
   if (v === 'invoices') { ivSub === 'stats' ? loadIvStats() : loadInvoices(); }
   loadBadges();
   if (v === 'requests') loadRequests();
@@ -1719,13 +1721,31 @@ function notifyNewCustomer(n) {
   toast('🆕 ' + msg + ' — see Customers');
   try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: msg, icon: 'icons/icon-192.png' }); } catch {}
 }
+let lastChg = null;
+async function loadChanges() {
+  try {
+    const l = (await api('change_requests')).requests, box = $('#chgBox'); box.hidden = !l.length;
+    $('#chgList').innerHTML = l.map(x => `<div class="fbox" style="background:#fff;display:flex;flex-wrap:wrap;gap:8px;align-items:center" data-id="${esc(x.id)}">
+      <span style="flex:1;min-width:240px"><b>#${esc(x.invoiceNo)}</b> · ${esc(x.customer || '—')} · ${esc(x.tech || '')} · ${esc(fmtDT(x.at))}<br><i>“${esc(x.note)}”</i></span>
+      <button type="button" class="btn s" data-c="open">Open report</button><button type="button" class="btn s" data-c="no">Decline</button><button type="button" class="btn p" data-c="yes">Approve (24 h)</button></div>`).join('');
+  } catch {}
+}
+$('#chgList').onclick = async e => {
+  const b = e.target.closest('[data-c]'), row = e.target.closest('[data-id]'); if (!b || !row) return;
+  if (b.dataset.c === 'open') return openReport(row.dataset.id);
+  const yes = b.dataset.c === 'yes', reply = yes ? '' : (prompt('Reason for the technician (optional):', '') ?? null); if (reply === null) return;
+  try { await api('report_change_decide', { id: row.dataset.id, approve: yes, reply }); toast(yes ? 'Approved: the technician can edit it for 24 hours' : 'Declined'); loadChanges(); loadBadges(); } catch (err) { toast(err.message); }
+};
 async function loadBadges() {
   try {
     const b = await api('badges');
     const set = (k, n) => $$(`.nb[data-b="${k}"]`).forEach(el => { el.hidden = !n; el.textContent = n > 99 ? '99+' : n; el.title = n ? n + ' pending' : ''; });
     set('jobs', b.jobsOverdue + b.jobsUnassigned); set('invoices', b.invoicesOverdue); set('parts', b.requests + b.orders);
     set('requests', b.requests); set('orders', b.orders); set('stock', b.lowStock);
-    set('customers', b.newCustomers || 0);
+    set('customers', b.newCustomers || 0); set('changes', b.changeRequests || 0);
+    if (b.changeRequests > (lastChg ?? b.changeRequests)) { const m = 'A technician asks to change a signed report — see Reports'; toast('🔒 ' + m); try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: m }); } catch {} }
+    if (b.changeRequests !== lastChg && current === 'reports') loadChanges();
+    lastChg = b.changeRequests || 0;
     if (b.newCustomers > (lastNewCust ?? b.newCustomers)) notifyNewCustomer(b.newCustomers - lastNewCust);
     lastNewCust = b.newCustomers || 0;
     if ('devTools' in b) { devOn = !!b.devTools; $('#devBar').hidden = !devOn; $('#devState').textContent = devOn ? 'ON' : 'OFF'; }
@@ -1746,7 +1766,7 @@ function renderRequests() {
   const list = rqRows.filter(x => !q || [x.no, x.tech, x.customer, x.equipment, x.reportNo, ...x.lines.map(l => l.name + ' ' + l.partNo)].join(' ').toLowerCase().includes(q));
   $('#rqBody').innerHTML = list.length ? list.map(x => `<tr data-id="${x.id}"><td class="inv">${esc(x.no)}${x.reportNo ? `<div class="eq" style="font-weight:400">report #${esc(x.reportNo)}</div>` : ''}</td>
     <td>${fmtD((x.createdAt || '').slice(0, 10))}</td><td>${esc(x.tech || '')}</td><td><b>${esc(x.customer || '—')}</b><div class="eq">${esc(x.equipment || '')}</div></td>
-    <td class="num">${x.lines.length}</td><td class="num">${money(x.total)}</td><td>${rqTag(x.status)}${x.invoiceNo ? `<div class="eq">Invoice #${esc(x.invoiceNo)}</div>` : ''}</td></tr>`).join('')
+    <td class="num">${x.lines.length}</td><td class="num">${money(x.total)}</td><td>${rqTag(x.status)}${x.cancelAsked && ['requested', 'quoted'].includes(x.status) ? '<div class="eq" style="color:var(--red);font-weight:700">Technician asks to cancel</div>' : ''}${x.invoiceNo ? `<div class="eq">Invoice #${esc(x.invoiceNo)}</div>` : ''}</td></tr>`).join('')
     : '<tr><td colspan="7" class="empty">No parts requests here.</td></tr>';
 }
 $('#rqStatus').onchange = loadRequests; $('#rqQ').addEventListener('input', renderRequests);
@@ -1758,7 +1778,8 @@ async function openRequest(id) {
     try { if (!invAll) invAll = (await api('inventory_list')).items; } catch {}
     $('#rqTitle').textContent = `Parts request ${q.no}`; $('#rqStTag').innerHTML = rqTag(q.status);
     $('#rqInfo').innerHTML = [`<b>${esc(q.tech || '')}</b>`, fmtDT(q.createdAt), esc([q.customer, q.equipment].filter(Boolean).join(' · ')), q.reportNo ? `<button type="button" class="linkbtn" data-rep="${esc(q.reportId)}">Report #${esc(q.reportNo)}</button>` : '', q.invoiceNo ? `<button type="button" class="linkbtn" data-bill="${q.invoiceId}">Invoice #${esc(q.invoiceNo)}</button>` : ''].filter(Boolean).join(' · ');
-    $('#rqNote').hidden = !q.note; $('#rqNote').innerHTML = q.note ? `<b>Technician's note:</b> ${esc(q.note)}` : '';
+    $('#rqNote').hidden = !q.note && !q.cancelAsked;
+    $('#rqNote').innerHTML = (q.cancelAsked ? `<div style="color:var(--red);font-weight:700">The technician asks to cancel this request (${esc(fmtDT(q.cancelAsked))}). To cancel it, use Decline.</div>` : '') + (q.note ? `<b>Technician's note:</b> ${esc(q.note)}` : '');
     $('#rqReply').value = q.reply || ''; $('#rqErr').textContent = '';
     $('#rqHist').innerHTML = (q.history || []).slice().reverse().map(h => `<div><b>${(RQ[h.status] || [h.status])[0]}</b> <span>${fmtDT(h.at)}${h.by ? ' · ' + esc(h.by) : ''}</span>${h.note ? `<div class="eq">${esc(h.note)}</div>` : ''}</div>`).join('');
     const locked = q.status === 'invoiced', closed = ['declined', 'cancelled'].includes(q.status);

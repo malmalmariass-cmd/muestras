@@ -133,7 +133,8 @@ Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets n
 
 ## Trabajo sin guardar: 24 horas y avisos
 - **Técnico:** un reporte que se empezó y no se guardó muestra una franja naranja arriba: *"no está guardado
-  (empezado 9:40). Guárdalo o bórralo: se borra solo en 23 h"*, con **Abrir · Guardar · Borrar**. Cada 30 minutos
+  (empezado 9:40). Guárdalo: si no, se borra solo en 23 h"*, con **Abrir · Guardar** (el técnico no borra nada;
+  "Nuevo" guarda primero el reporte actual). Cada 30 minutos
   vuelve a avisar (y con notificación si la app está en segundo plano y la tablet lo permite). A las **24 horas**
   se borra solo y su número reservado pasa al siguiente reporte.
 - **Supervisor:** una factura que se cerró sin guardar queda como borrador en ese navegador con la misma franja
