@@ -241,6 +241,17 @@ El técnico los ve en Parts Requests → "📇 Vendors" (y al pedir una pieza a 
 Employees → **Delete** (pide tu PIN). Sin historial se borra del todo. Con reportes/facturas/solicitudes se quita de la lista y
 no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus trabajos pendientes quedan "sin asignar".
 
+## Pantallas de cualquier tamaño y modo tutorial (`ui-help.js`)
+- Probado en teléfono (360 px), tablet vertical y horizontal, y Chromebook (1366×768): ninguna pantalla se sale por los lados.
+- En pantallas angostas, los menús (pestañas del técnico, menú del panel, sub-pestañas) quedan en **una sola fila que se desliza**.
+- **"Hay más aquí"**: cuando algo queda fuera de vista aparecen flechas ‹ › y un desvanecido en el borde (menús, tablas);
+  si una notificación quedó escondida, la flecha lleva un **punto rojo**. En ventanas largas aparece "▼ hay más abajo".
+- **Modo tutorial**: en la pantalla de inicio de sesión, junto al idioma, la casilla "💡 Modo tutorial" (activada por defecto).
+  - Cada sección muestra una tarjeta con para qué sirve y qué hacer (una vez por sesión; "Entendido" la cierra).
+  - Pasando el mouse sobre un botón (o manteniendo el dedo encima en la tablet) sale una nota de lo que hace.
+  - El botón **💡** arriba lo enciende o apaga en cualquier momento; queda guardado en ese dispositivo.
+  - Los textos van en el idioma elegido (inglés o español). Para cambiar o agregar notas: `G` (tarjetas de sección) y `TIPS` (notas de botones) en `ui-help.js`.
+
 ## Sesiones: una por pestaña
 - Cada pestaña o ventana tiene **su propia sesión**: en una puedes tener el panel del supervisor y en otra la app
   del técnico, al mismo tiempo.
