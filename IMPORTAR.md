@@ -7,7 +7,8 @@ La pantalla de inicio tiene dos opciones: **Técnico** o **Supervisor**. Mismo I
 - **Técnico** → abre la app de reportes (tablet).
 - **Supervisor** → valida en el servidor que la cuenta sea de supervisor (`supervisorOnly`) y abre el panel
   (`admin.html`) ya con la sesión iniciada. Si la cuenta es de técnico, muestra el error y no entra.
-- La app recuerda la última opción. Un supervisor con sesión abierta que entra a `index.html` va directo al panel.
+- La app recuerda la última opción. Cada pestaña tiene su propia sesión: puedes tener el panel en una y la app del
+  técnico en otra. Al cerrar la pestaña, la sesión se cierra.
 - **Salir** del panel vuelve a la página de inicio con "Supervisor" marcado.
 - Si el servidor exige cambiar el PIN (cuenta maestra o PIN corto), el panel lo pide al entrar. El PIN nunca se guarda.
 - `admin.html` ya no tiene su propio login. Su pantalla solo aparece para la **configuración inicial**

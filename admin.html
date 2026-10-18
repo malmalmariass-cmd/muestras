@@ -680,8 +680,12 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
       <div id="devTools">
       <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button><button type="button" data-d="export">Export data</button><button type="button" data-d="tutorial">Tutorials</button></div>
       <div id="devLoad" class="form">
-        <div class="sub" style="margin:0">Simulates technicians using the tablet app at the same time, from this browser: sign in, download customers / inventory / jobs, sync every ~30 s and send service reports (with signatures, like the real app). Test technicians <b>TEST01, TEST02…</b> are created (or re-activated) automatically. No emails are sent.</div>
-        <div class="row3"><div><label>Technicians</label><input id="ltN" type="number" min="1" max="100" value="50"></div><div><label>Duration (minutes)</label><input id="ltMin" type="number" min="1" max="60" value="5"></div><div><label>A report every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div></div>
+        <div class="sub" style="margin:0">Simulates people using the app at the same time, from this browser. <b>Technicians</b> sign in, download everything, sync every ~30 s, go through Jobs / Parts requests / History, and every period send a <b>Fill Service Report</b> and an <b>Equipment Service Report</b> (with signatures) and a <b>parts request</b>. <b>Supervisors</b> go through every tab of this panel, open reports, invoices, customers, parts and equipment, and answer the parts requests. Test accounts <b>TEST01…</b> and <b>TESTSUP1…</b> are created automatically. No emails are sent.</div>
+        <div class="row3"><div><label>Technicians</label><input id="ltN" type="number" min="0" max="100" value="50"></div><div><label>Supervisors</label><input id="ltS" type="number" min="0" max="10" value="3"></div><div><label>Duration (minutes)</label><input id="ltMin" type="number" min="1" max="60" value="5"></div></div>
+        <div class="row3"><div><label>2 reports + 1 parts request every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div>
+          <div><label>Show on screen (new window)</label><select id="ltWatch"><option value="tech">A technician (TEST01)</option><option value="sup">A supervisor (TESTSUP1)</option><option value="none">Nobody</option></select></div>
+          <div class="sub" style="margin:0;align-self:end">The window shows that person doing everything step by step. To make a tutorial from it: <b>Tutorials → Start recording</b> and share that window.</div></div>
+        <div id="ltDemo" class="sub" style="margin:0;color:var(--navy);font-weight:600" hidden></div>
         <div class="acts" style="justify-content:flex-start"><button type="button" class="btn p" id="ltStart">▶ Start test</button><button type="button" class="btn d" id="ltStop" hidden>■ Stop</button><span id="ltState" style="align-self:center;color:var(--ink-2);font-size:13px"></span></div>
         <div id="ltOut"></div>
       </div>
@@ -693,7 +697,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
           <label class="chk"><input type="checkbox" data-w="sales" checked> Sales &amp; invoices (with payments)</label>
           <label class="chk"><input type="checkbox" data-w="jobs" checked> Jobs &amp; appointments</label>
           <label class="chk"><input type="checkbox" data-w="requests" checked> Parts requests &amp; vendor orders</label>
-          <label class="chk"><input type="checkbox" data-w="testTechs" checked> Load-test technicians (TEST…) and their reports</label>
+          <label class="chk"><input type="checkbox" data-w="testTechs" checked> Load-test accounts (TEST…, TESTSUP…) and their reports</label>
           <label class="chk"><input type="checkbox" data-w="allTechs"> Deactivate all other technicians</label>
           <label class="chk"><input type="checkbox" data-w="inventory"> Archive all inventory parts</label>
         </div>
@@ -792,7 +796,10 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const API = 'api/api.php';
 const LSK = 'cher.adminSession';
-let session = (() => { try { return JSON.parse(localStorage.getItem(LSK)); } catch { return null; } })();
+/* the session lives only in this tab (sessionStorage): closing the tab signs out, and another tab can be a technician */
+const SS = { get: () => { try { return JSON.parse(sessionStorage.getItem(LSK)); } catch { return null; } }, set: v => { try { v ? sessionStorage.setItem(LSK, JSON.stringify(v)) : sessionStorage.removeItem(LSK); } catch {} } };
+try { localStorage.removeItem(LSK); localStorage.removeItem('cher.session'); } catch {}   // sessions saved by older versions stayed signed in forever
+let session = SS.get();
 /* inactivity: only real use (touch, click, typing) counts — background syncs do not. Shared by the app and the panel. */
 const IDLE_KEY = 'cher.lastActive';
 let lastAct = +(localStorage.getItem(IDLE_KEY) || 0) || Date.now(), idleMin = 120;
@@ -833,7 +840,7 @@ const toStart = () => location.replace('index.html#supervisor');
 async function boot() {
   if (session?.token && idleOver()) { sessionStorage.setItem('cher.idleOut', '1'); try { await api('logout'); } catch {} }
   else if (session?.token) { try { const j = await api('me'); if (j.idleMinutes) idleMin = j.idleMinutes; if (j.user.role === 'supervisor') return enter(j.user); } catch {} }
-  session = null; localStorage.removeItem(LSK);   // invalid or not a supervisor: drop it so the start page does not send us back here
+  session = null; SS.set(null);   // invalid or not a supervisor: drop it so the start page does not send us back here
   try { if ((await api('status')).needsSetup) return showGate(); } catch {}
   toStart();
 }
@@ -852,7 +859,7 @@ $('#gateForm').onsubmit = async e => {
     const j = setupMode
       ? await api('setup', { name: $('#gName').value, code: $('#gCode').value, pin: $('#gPin').value, startInvoice: +$('#gInv').value || 1 })
       : await api('login', { code: $('#gCode').value, pin: $('#gPin').value, supervisorOnly: true });
-    session = { token: j.token, user: j.user }; localStorage.setItem(LSK, JSON.stringify(session));
+    session = { token: j.token, user: j.user }; SS.set(session);
     const typed = $('#gPin').value; $('#gPin').value = ''; await enter(j.user);
     if (j.mustChangePin) pinModal(typed, j.user.code === 'ADMI26' ? 'You signed in with the master account and its default PIN. Choose a new PIN now so nobody else can use it (at least 6 digits).' : 'Supervisor PINs now need at least 6 digits. Choose a new PIN.');
   } catch (err) { $('#gErr').textContent = err.message; }
@@ -862,7 +869,7 @@ $('#gateForm').onsubmit = async e => {
 setInterval(() => { if (session && idleOver() && !(typeof LT !== 'undefined' && LT && !LT.done) && !(typeof TUT !== 'undefined' && TUT.rec)) { sessionStorage.setItem('cher.idleOut', '1'); logout(false); } }, 60000);
 async function logout(expired) {
   if (!expired) { try { await api('logout'); } catch {} }
-  session = null; localStorage.removeItem(LSK); toStart();
+  session = null; SS.set(null); toStart();
 }
 $('#logout').onclick = () => logout(false);
 
@@ -873,6 +880,7 @@ async function enter(user) {
   await loadEmps(); view('reports'); updateOrdCount(); updateRqCount(); setInterval(updateRqCount, 60000); setInterval(loadBadges, 60000); setTimeout(loadCounts, 1500);
   try { if ('Notification' in window && Notification.permission === 'default') document.addEventListener('click', () => Notification.requestPermission().catch(() => {}), { once: true }); } catch {}
   const must = sessionStorage.getItem('cher.mustChangePin');   // set by the start page when the server asks for a new PIN
+  if (sessionStorage.getItem('cher.demo')) demoRun();   // this window is the on-screen supervisor of a load test
   if (must) { sessionStorage.removeItem('cher.mustChangePin'); pinModal('', must === 'master' ? 'You signed in with the master account and its default PIN. Choose a new PIN now so nobody else can use it (at least 6 digits).' : 'Supervisor PINs now need at least 6 digits. Choose a new PIN.'); }
 }
 
@@ -2071,31 +2079,90 @@ function fakeSignature() {   // a real-looking signature image, so each report w
   for (let i = 1; i < 60; i++) x.lineTo(20 + i * 9.5, 80 + Math.sin(i * 0.9) * 45 + Math.cos(i * 2.3) * 15);
   x.stroke(); return ltSig = c.toDataURL('image/png');
 }
-function fakeReport(tech) {
-  const now = new Date().toISOString(), d = now.slice(0, 10);
-  return { id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), type: Math.random() < 0.3 ? 'maintenance' : 'repair', createdAt: now, updatedAt: now, synced: false,
+function fakeReport(tech, type) {
+  const now = new Date().toISOString(), d = now.slice(0, 10), maint = type === 'maintenance';
+  return { id: 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), type, createdAt: now, updatedAt: now, synced: false,
     invoiceNo: '', employeeId: tech.code, customerName: 'LOAD TEST CUSTOMER ' + (1 + Math.floor(Math.random() * 5)), address1: '1 Test Street', address2: 'Homestead, FL', address3: '33033',
-    customerEmail: '', customerWhatsapp: '', workOrder: 'LT-' + Math.floor(Math.random() * 9999), make: 'Caterpillar', model: '320D', serialNo: 'LT' + (1000 + Math.floor(Math.random() * 50)), hour: '1234',
-    instructions: 'Load test — delete me', parts: [], services: [], faults: [{ fault: 'Hydraulic leak (load test)', correction: 'Replaced hose and tested' }], status: 'complete', statusHistory: [{ status: 'complete', at: now, by: tech.code }],
-    time: [{ date: d, left: '07:30', started: '08:15', completed: '11:40', mileage: '22' }], notes: '', customerComment: 'Load test',
+    customerEmail: '', customerWhatsapp: '', workOrder: 'LT-' + Math.floor(Math.random() * 9999), make: maint ? 'John Deere' : 'Caterpillar', model: maint ? '310SL' : '320D',
+    serialNo: 'LT' + (1000 + Math.floor(Math.random() * 50)), hour: String(1000 + Math.floor(Math.random() * 3000)),
+    instructions: 'Load test — delete me', parts: [],
+    services: maint ? ['Change engine oil', 'Change oil filter', 'Grease all points', 'Check coolant level'].map((name, i) => ({ id: 'lt' + i, name, done: true, note: '' })) : [],
+    faults: maint ? [] : [{ fault: 'Hydraulic leak (load test)', correction: 'Replaced hose and tested' }], status: 'complete', statusHistory: [{ status: 'complete', at: now, by: tech.code }],
+    time: [{ date: d, left: '07:30', started: '08:15', completed: '11:40', mileage: '22' }], notes: maint ? 'Next service at 1450 h' : '', customerComment: 'Load test',
     sigs: { serviceman: { img: fakeSignature(), name: tech.code, at: now }, customer: { img: fakeSignature(), name: 'Test Customer', at: now } } };
 }
+/* one simulated technician: the same calls the tablet app makes, at the same pace */
 async function ltTech(i) {
   const tech = { code: 'TEST' + String(i).padStart(2, '0'), token: null }, stop = () => LT.stop || Date.now() >= LT.end;
+  if (LT.watch === 'tech' && i === 1) return;   // TEST01 is the one on screen, driven by the real app
   await sleepUntil(Math.random() * Math.min(30000, LT.durMs / 4), stop);   // technicians arrive over the first ~30 s
   if (stop()) return;
   const j = await ltCall(tech, 'login', { code: tech.code, pin: LT.pin }); if (!j) return;
   tech.token = j.token; LT.active++;
-  for (const a of ['me', 'customers', 'inventory_list', 'service_items', 'jobs_list', 'preq_list']) { if (stop()) break; await ltCall(tech, a); }
+  // first screen: everything the app downloads after signing in (all its tabs)
+  let stock = [];
+  for (const a of ['me', 'customers', 'inventory_list', 'service_items', 'jobs_list', 'preq_list', 'my_reports']) {
+    if (stop()) break; const r = await ltCall(tech, a); if (a === 'inventory_list' && r?.items) stock = r.items.filter(x => (x.kind || 'stock') === 'stock' && x.active !== false);
+  }
   let nextRep = Date.now() + Math.random() * LT.repMs;
   while (!stop()) {
     await sleepUntil(24000 + Math.random() * 12000, stop); if (stop()) break;   // the app syncs every 24–36 s
-    if (Date.now() >= nextRep) { const r = await ltCall(tech, 'save_report', { report: fakeReport(tech) }); if (r) LT.reports++; nextRep += LT.repMs; }
-    await ltCall(tech, 'preq_list');
-    if (Math.random() < 0.35) await ltCall(tech, 'jobs_list');
+    if (Date.now() >= nextRep) {
+      // every period: a Fill Service Report (repair) and an Equipment Service Report (maintenance), then parts for the job
+      let last = null;
+      for (const type of ['repair', 'maintenance']) {
+        if (stop()) break; const rep = fakeReport(tech, type);
+        if (await ltCall(tech, 'save_report', { report: rep })) { LT.reports++; LT.byType[type]++; if (type === 'repair') last = rep; }
+      }
+      if (last && !stop()) {
+        await ltCall(tech, 'equipment_history', { serial: last.serialNo, excludeId: last.id });   // the "history of this machine" chip
+        const it = stock[Math.floor(Math.random() * stock.length)];
+        const lines = [{ key: 'a' + Math.random().toString(36).slice(2, 9), name: 'Hydraulic hose 1/2 in (load test)', qty: 2, unit: 'ea', source: 'order', vendor: '' }];
+        if (it) lines.unshift({ key: 'b' + Math.random().toString(36).slice(2, 9), itemId: it.id, partNo: it.partNo || '', name: it.name, unit: it.unit || 'ea', qty: 1, source: 'stock' });
+        if (await ltCall(tech, 'preq_save', { request: { reportId: last.id, customer: last.customerName, equipment: `${last.make} ${last.model} S/N ${last.serialNo}`, serialNo: last.serialNo, note: 'Load test', lines } })) LT.requests++;
+      }
+      nextRep += LT.repMs;
+    }
+    await ltCall(tech, 'preq_list');                                  // Parts requests tab
+    if (Math.random() < 0.35) await ltCall(tech, 'jobs_list');         // Jobs tab
+    if (Math.random() < 0.15) await ltCall(tech, 'my_reports');        // History tab
   }
-  await new Promise(r => setTimeout(r, Math.random() * 8000));   // people don't all sign out in the same second
+  await sleepUntil(Math.random() * 8000, () => false);   // people don't all sign out in the same second
   await ltCall(tech, 'logout'); LT.active--;
+}
+/* one simulated supervisor: goes through every tab of this panel, opens records and answers parts requests */
+async function ltSup(i) {
+  const sup = { code: 'TESTSUP' + i, token: null }, stop = () => LT.stop || Date.now() >= LT.end;
+  if (LT.watch === 'sup' && i === 1) return;   // TESTSUP1 is the one on screen
+  await sleepUntil(Math.random() * Math.min(20000, LT.durMs / 4), stop); if (stop()) return;
+  const j = await ltCall(sup, 'login', { code: sup.code, pin: LT.pin, supervisorOnly: true }); if (!j) return;
+  sup.token = j.token; LT.activeSup++;
+  await ltCall(sup, 'me'); await ltCall(sup, 'badges');
+  const range = () => ({ from: iso(new Date(Date.now() - 30 * 864e5)), to: iso(new Date()) });
+  const first = (r, k) => (r && r[k] && r[k].length) ? r[k][Math.floor(Math.random() * Math.min(5, r[k].length))] : null;
+  const TABS = [
+    async () => { const r = first(await ltCall(sup, 'reports_list', { limit: 50, offset: 0 }), 'rows'); if (r) await ltCall(sup, 'report_get', { id: r.id });
+      await ltCall(sup, 'jobs_list', { ...range(), status: '', employeeId: '', unassigned: false }); },
+    async () => { const v = first(await ltCall(sup, 'invoices_list', { q: '', status: '', from: '', to: '' }), 'rows'); if (v) await ltCall(sup, 'invoice_get', { id: v.id });
+      await ltCall(sup, 'invoice_stats', range()); },
+    async () => { const l = await ltCall(sup, 'preq_list', { status: '' }), q = (l?.requests || []).find(x => x.status === 'requested' && x.note === 'Load test');
+      if (q) await ltCall(sup, 'preq_update', { id: q.id, reply: 'Load test: checked, the parts arrive tomorrow', status: 'quoted' });
+      await ltCall(sup, 'orders_list', { status: '' }); },
+    async () => { await ltCall(sup, 'customers_list', {}); },
+    async () => { const p = first(await ltCall(sup, 'inventory_list', { includeArchived: true }), 'items'); if (p) await ltCall(sup, 'inventory_moves', { id: p.id }); },
+    async () => { const e = first(await ltCall(sup, 'equipment_list', { q: '' }), 'equipment'); if (e?.serial_no) await ltCall(sup, 'equipment_history', { serial: e.serial_no }); },
+    async () => { await ltCall(sup, 'stats', { ...range(), employeeId: '' }); },
+    async () => { await ltCall(sup, 'employees_list'); },
+    async () => { await ltCall(sup, 'settings_get'); await ltCall(sup, 'mail_status'); await ltCall(sup, 'audit_list'); }
+  ];
+  let k = Math.floor(Math.random() * TABS.length), lastBadge = Date.now();
+  while (!stop()) {
+    await TABS[k++ % TABS.length]();
+    if (Date.now() - lastBadge > 60000) { await ltCall(sup, 'badges'); lastBadge = Date.now(); }   // the panel refreshes its badges every minute
+    await sleepUntil(15000 + Math.random() * 15000, stop);    // a person reads the screen before moving on
+  }
+  await sleepUntil(Math.random() * 8000, () => false);
+  await ltCall(sup, 'logout'); LT.activeSup--;
 }
 const pct = (a, p) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
 function ltRender(final) {
@@ -2105,49 +2172,72 @@ function ltRender(final) {
   const verdict = !n ? '' : e / n > 0.01 ? ['bad', `✗ ${fmtN(e)} errors (${(e / n * 100).toFixed(1)}%) — the server is not keeping up. See the errors below.`]
     : p95 > 3000 ? ['warn', `⚠ No errors, but slow: 95% of requests answered in under ${(p95 / 1000).toFixed(1)} s (target: under 3 s).`]
     : ['ok', `✓ Fine: ${fmtN(n)} requests, ${e ? fmtN(e) + ' errors' : 'no errors'}, 95% answered in under ${(p95 / 1000).toFixed(2)} s.${LT.retries ? ` ${fmtN(LT.retries)} had to wait a few seconds because the server was busy, then went through (the tablets do the same by themselves).` : ''}`];
-  $('#ltOut').innerHTML = `<div class="kpis k4">${[['Technicians online', `${fmtN(LT.active)} / ${fmtN(LT.n)}`, LT.stop || Date.now() >= LT.end ? 'test finished' : 'signed in now'],
-      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), (n ? (e / n * 100).toFixed(1) + '% of requests' : '') + (LT.retries ? ` · ${fmtN(LT.retries)} retried when busy` : '')], ['Reports saved', fmtN(LT.reports), 'with 2 signatures each']].map(kpi).join('')}</div>
+  $('#ltOut').innerHTML = `<div class="kpis k4">${[['People online', `${fmtN(LT.active + LT.activeSup)} / ${fmtN(LT.n + LT.ns)}`, LT.stop || Date.now() >= LT.end ? 'test finished' : `${fmtN(LT.active)} technicians · ${fmtN(LT.activeSup)} supervisors`],
+      ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), (n ? (e / n * 100).toFixed(1) + '% of requests' : '') + (LT.retries ? ` · ${fmtN(LT.retries)} retried when busy` : '')], ['Reports saved', fmtN(LT.reports), `${fmtN(LT.byType.repair)} service · ${fmtN(LT.byType.maintenance)} equipment${LT.demoReports ? ` · ${fmtN(LT.demoReports)} on screen` : ''} · ${fmtN(LT.requests)} parts requests`]].map(kpi).join('')}</div>
     ${verdict && (final || n > 50) ? `<p style="font-weight:700;color:var(--${verdict[0] === 'ok' ? 'ok' : verdict[0] === 'warn' ? 'warn' : 'red'})">${esc(verdict[1])}</p>` : ''}
     <div class="tablewrap"><table class="t"><thead><tr><th>Action</th><th class="num">Requests</th><th class="num">Errors</th><th class="num">Average</th><th class="num">95% under</th><th class="num">Slowest</th></tr></thead><tbody>
     ${Object.entries(LT.stats).map(([a, x]) => `<tr><td>${esc(a)}</td><td class="num">${fmtN(x.n)}</td><td class="num" style="${x.err ? 'color:var(--red);font-weight:700' : ''}">${fmtN(x.err)}</td>
       <td class="num">${fmtN(x.t.reduce((s, v) => s + v, 0) / x.t.length)} ms</td><td class="num">${fmtN(pct(x.t, 0.95))} ms</td><td class="num">${fmtN(Math.max(...x.t))} ms</td></tr>`).join('')}</tbody></table></div>
     ${Object.keys(LT.errors).length ? `<h3 style="font-size:14px;margin:12px 0 4px">Errors</h3><ul style="margin:0;padding-left:18px;font-size:13px">${Object.entries(LT.errors).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([m, c]) => `<li>${fmtN(c)} × ${esc(m)}</li>`).join('')}</ul>` : ''}`;
 }
+/* the on-screen person (index.html#demo in another window) talks to this panel over a BroadcastChannel */
+const demoChan = 'BroadcastChannel' in window ? new BroadcastChannel('cher-demo') : null;
+function demoStart() { if (LT && LT.watch !== 'none' && LT.start && !LT.done) demoChan?.postMessage({ type: 'start', role: LT.watch, code: LT.watch === 'sup' ? 'TESTSUP1' : 'TEST01', pin: LT.pin, repMs: LT.repMs, until: LT.end }); }
+if (demoChan) demoChan.onmessage = e => {
+  const m = e.data || {}; if (!LT) return;
+  if (m.type === 'ready') { LT.demoSeen = true; demoStart(); }
+  if (m.type === 'status') { LT.demoSeen = true; $('#ltDemo').hidden = false; $('#ltDemo').textContent = `On screen (${m.who === 'sup' ? 'TESTSUP1' : 'TEST01'}): ${m.text}`; }
+  if (m.type === 'report') { LT.reports++; LT.demoReports++; }
+  if (m.type === 'request') LT.requests++;
+};
 $('#ltStart').onclick = async () => {
   if (LT && !LT.done) return;
-  const n = Math.min(100, Math.max(1, +$('#ltN').value || 50)), min = Math.min(60, Math.max(1, +$('#ltMin').value || 5)), rep = Math.max(1, +$('#ltRep').value || 3);
-  if (!confirm(`Simulate ${n} technicians for ${min} minutes? It creates real reports on the server (delete them afterwards with “Reset data”).`)) return;
-  LT = { n, stop: false, done: false, active: 0, reports: 0, retries: 0, stats: {}, errors: {}, pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
-  $('#ltStart').hidden = true; $('#ltStop').hidden = false; $('#ltOut').innerHTML = '';
+  const n = Math.min(100, Math.max(0, +$('#ltN').value || 0)), ns = Math.min(10, Math.max(0, +$('#ltS').value || 0)), min = Math.min(60, Math.max(1, +$('#ltMin').value || 5)), rep = Math.max(1, +$('#ltRep').value || 3);
+  let watch = $('#ltWatch').value; if ((watch === 'tech' && !n) || (watch === 'sup' && !ns)) watch = 'none';
+  if (!n && !ns) { toast('Choose at least one technician or supervisor'); return; }
+  if (!confirm(`Simulate ${n} technicians and ${ns} supervisors for ${min} minutes? It creates real reports and parts requests on the server (delete them afterwards with “Reset data”).`)) return;
+  if (watch !== 'none') window.open('index.html#demo', 'cherDemo', 'noopener');   // opened now: browsers only allow pop-ups right after a click
+  LT = { n, ns, watch, stop: false, done: false, active: 0, activeSup: 0, reports: 0, demoReports: 0, requests: 0, byType: { repair: 0, maintenance: 0 }, retries: 0, stats: {}, errors: {},
+    pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
+  $('#ltStart').hidden = true; $('#ltStop').hidden = false; $('#ltOut').innerHTML = ''; $('#ltDemo').hidden = true;
+  const accounts = [...Array.from({ length: n }, (_, i) => ({ code: 'TEST' + String(i + 1).padStart(2, '0'), name: 'Test Tech ' + String(i + 1).padStart(2, '0'), role: 'tech' })),
+    ...Array.from({ length: ns }, (_, i) => ({ code: 'TESTSUP' + (i + 1), name: 'Test Supervisor ' + (i + 1), role: 'supervisor' }))];
   try {
     await loadEmps();
-    for (let i = 1; i <= n && !LT.stop; i++) {   // create / re-activate TEST01…TESTnn with a fresh PIN for this run
-      const code = 'TEST' + String(i).padStart(2, '0'), ex = emps.find(e => String(e.code).toUpperCase() === code);
-      $('#ltState').textContent = `Preparing test technicians… ${i} / ${n}`;
-      await withRetry(() => api('employee_save', { id: ex?.id || 0, name: 'Test Tech ' + String(i).padStart(2, '0'), code, role: 'tech', pin: LT.pin, active: true }));
+    for (let i = 0; i < accounts.length && !LT.stop; i++) {   // create / re-activate the test accounts with a fresh PIN for this run
+      const a = accounts[i], ex = emps.find(e => String(e.code).toUpperCase() === a.code);
+      $('#ltState').textContent = `Preparing test accounts… ${i + 1} / ${accounts.length}`;
+      await withRetry(() => api('employee_save', { id: ex?.id || 0, name: a.name, code: a.code, role: a.role, pin: LT.pin, active: true }));
     }
-  } catch (e) { $('#ltState').textContent = 'Could not create the test technicians: ' + e.message; $('#ltStart').hidden = false; $('#ltStop').hidden = true; LT.done = true; return; }
-  LT.start = Date.now(); LT.end = LT.start + LT.durMs;
+  } catch (e) { $('#ltState').textContent = 'Could not create the test accounts: ' + e.message; $('#ltStart').hidden = false; $('#ltStop').hidden = true; LT.done = true; return; }
+  LT.start = Date.now(); LT.end = LT.start + LT.durMs; demoStart();
+  setTimeout(() => { if (LT.watch !== 'none' && !LT.demoSeen && !LT.done) { $('#ltDemo').hidden = false; $('#ltDemo').textContent = 'The on-screen window did not open: allow pop-ups for this site and start again.'; } }, 8000);
   const tick = setInterval(() => { ltRender(false); const left = Math.max(0, LT.end - Date.now()); $('#ltState').textContent = LT.stop ? 'Stopping…' : `Running · ${Math.floor(left / 60000)}:${String(Math.floor(left / 1000) % 60).padStart(2, '0')} left`; }, 1000);
-  await Promise.all(Array.from({ length: n }, (_, i) => ltTech(i + 1)));
-  clearInterval(tick); LT.done = true; ltRender(true);
+  await Promise.all([...Array.from({ length: n }, (_, i) => ltTech(i + 1)), ...Array.from({ length: ns }, (_, i) => ltSup(i + 1))]);
+  clearInterval(tick); LT.done = true; demoChan?.postMessage({ type: 'stop' }); ltRender(true);
+  // the test supervisors could open this panel: switch them off until the next test
+  await loadEmps();
+  for (const e of emps.filter(x => /^TESTSUP\d+$/i.test(x.code) && x.active)) { try { await withRetry(() => api('employee_save', { id: e.id, name: e.name, code: e.code, role: e.role, active: false })); } catch {} }
   $('#ltState').textContent = `Finished at ${new Date().toLocaleTimeString()}. Delete the test data with “Reset data”.`; $('#ltStart').hidden = false; $('#ltStop').hidden = true;
   loadEmps(); loadCounts();
 };
-$('#ltStop').onclick = () => { if (LT) LT.stop = true; };
+$('#ltStop').onclick = () => { if (LT) { LT.stop = true; demoChan?.postMessage({ type: 'stop' }); } };
 
 /* ---- tutorials: screen recording + an automatic step-by-step guide with a picture per step ---- */
 const TUT = { rec: null, stream: null, mic: null, chunks: [], steps: [], video: null, t0: 0, timer: null, blob: null, last: '' };
 const tutChan = 'BroadcastChannel' in window ? new BroadcastChannel('cher-tutorial') : null;   // the technician app (other tab) reports its steps here
 const tTxt = s => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 70);
 function tutLabel(el) {   // what the person touched, in the words shown on screen
-  const c = el.closest('button, a, [role=button], summary, label, input, select, textarea, tr[data-id], .sig, .pick, .job, .hist-item, nav button');
+  const c = el.closest('button, a, [role=button], summary, label, input, select, textarea, tr[data-id], tr[data-i], .sig, .pick, .job, .hist-item, nav button');
   if (!c) return null;
   if (/^(INPUT|SELECT|TEXTAREA)$/.test(c.tagName)) {
     const lab = c.labels?.[0] || c.closest('div')?.querySelector('label');
     return { kind: 'field', name: tTxt(c.getAttribute('aria-label') || lab?.textContent || c.placeholder || c.id), secret: c.type === 'password' || /pin/i.test(c.id) };
   }
-  if (c.matches('tr[data-id]')) return { kind: 'row', name: tTxt(c.cells?.[0]?.textContent) };
+  if (c.matches('tr[data-id], tr[data-i]')) {   // a row: its first cell, without badges and buttons, with spaces between lines
+    const k = c.cells?.[0]?.cloneNode(true); k?.querySelectorAll('button, .tag, .nb, .tc').forEach(n => n.remove());
+    return { kind: 'row', name: tTxt([...(k?.childNodes || [])].map(n => n.textContent).join(' ')) };
+  }
   const k = c.cloneNode(true); k.querySelectorAll('.tc, .nb, .star').forEach(n => n.remove());   // tab names without their counters
   return { kind: 'button', name: tTxt(c.getAttribute('aria-label') || k.textContent || c.title) };
 }
@@ -2178,26 +2268,30 @@ function tutAdd(st) {
   setTimeout(() => { st.img = tutFrame(st); }, st.kind === 'button' || st.kind === 'row' ? 0 : 250);
 }
 const tutIgnore = el => el.closest('#devModal, #tutRec, #delModal');
+const tutSend = st => { if (TUT.rec) tutAdd(st); else if (tutRemote) tutChan.postMessage({ type: 'step', step: st }); };
 document.addEventListener('click', e => {
-  if (!TUT.rec || tutIgnore(e.target)) return;
+  if ((!TUT.rec && !tutRemote) || tutIgnore(e.target)) return;
   const l = tutLabel(e.target); if (!l || l.kind === 'field' || e.target.closest('label')) return;
-  tutAdd(Object.assign(l, { page: 'panel', x: e.clientX, y: e.clientY, w: innerWidth, h: innerHeight }));
+  tutSend(Object.assign(l, { page: 'panel', x: e.clientX, y: e.clientY, w: innerWidth, h: innerHeight }));
 }, true);
 document.addEventListener('change', e => {
-  if (!TUT.rec || tutIgnore(e.target)) return;
+  if ((!TUT.rec && !tutRemote) || tutIgnore(e.target)) return;
   const el = e.target, l = tutLabel(el); if (!l || l.kind !== 'field') return;
   const st = { page: 'panel', name: l.name, secret: l.secret };
   if (el.type === 'checkbox' || el.type === 'radio') Object.assign(st, { kind: 'check', on: el.checked });
   else if (el.tagName === 'SELECT') Object.assign(st, { kind: 'select', value: tTxt(el.selectedOptions[0]?.textContent) });
   else if (el.type === 'file') st.kind = 'file';
   else Object.assign(st, { kind: 'text', value: l.secret ? '' : tTxt(el.value).slice(0, 40) });   // PINs are never written down
-  tutAdd(st);
+  tutSend(st);
 }, true);
 if (tutChan) tutChan.onmessage = e => {
   const m = e.data || {};
   if (m.type === 'hello') tutChan.postMessage({ type: 'rec', on: !!TUT.rec });
-  if (m.type === 'step' && TUT.rec) tutAdd(Object.assign({}, m.step, { page: 'tech' }));
+  if (m.type === 'step' && TUT.rec) tutAdd(Object.assign({ page: 'tech' }, m.step));
+  if (m.type === 'rec') tutRemote = !!m.on;   // this window is the on-screen supervisor: send its steps to the panel that records
 };
+let tutRemote = false;
+if (sessionStorage.getItem('cher.demo')) tutChan?.postMessage({ type: 'hello' });
 async function tutStart() {
   if (TUT.rec) return;
   if (!navigator.mediaDevices?.getDisplayMedia) { toast('This browser cannot record the screen. Use Chrome or Edge on a computer.'); return; }
@@ -2585,6 +2679,76 @@ $('#impGo').onclick = async () => {
 };
 
 document.querySelectorAll('img[data-logo]').forEach(i => { i.src = window.CHER_LOGO_URL; });
+/* ---- live demo of a simulated supervisor ("Show on screen: a supervisor" in the load test) ----
+   The start page signs in as TESTSUP1 in a separate window and leaves a note in that window's sessionStorage;
+   then this code clicks through every tab of the panel slowly, like a person, so it can be recorded as a tutorial. */
+async function demoRun() {
+  let cfg; try { cfg = JSON.parse(sessionStorage.getItem('cher.demo')); } catch {} if (!cfg || !('BroadcastChannel' in window)) return;
+  const ch = new BroadcastChannel('cher-demo'); let stopped = false;
+  ch.onmessage = e => { if (e.data?.type === 'stop') stopped = true; };
+  window.confirm = () => true;
+  const st = document.createElement('style');
+  st.textContent = `#demoCur{position:fixed;z-index:9999;left:0;top:0;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:rgba(255,136,0,.3);border:2px solid #ff8800;pointer-events:none;transition:transform .5s ease}
+    #demoCur.tap{background:rgba(255,136,0,.85)}
+    #demoBar{position:fixed;z-index:9998;left:50%;bottom:20px;transform:translateX(-50%);background:#0a1f5c;color:#fff;padding:8px 16px;border-radius:20px;font:600 14px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:92vw;text-align:center;pointer-events:none}`;
+  document.head.appendChild(st);
+  const cur = Object.assign(document.createElement('div'), { id: 'demoCur' }), bar = Object.assign(document.createElement('div'), { id: 'demoBar' });
+  document.body.append(cur, bar);
+  const moveTo = (x, y) => { cur.style.transform = `translate(${x}px,${y}px)`; };
+  moveTo(innerWidth / 2, innerHeight / 2);
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const check = () => { if (stopped) throw new Error('stopped'); };
+  const say = m => { bar.textContent = '▶ ' + m; ch.postMessage({ type: 'status', who: 'sup', text: m }); };
+  const vis = s => $$(s).find(e => e.offsetParent !== null);
+  async function until(f, ms = 8000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { check(); const v = f(); if (v) return v; await wait(150); } return null; }
+  async function tap(s, pause = 900) {
+    check(); const e = typeof s === 'string' ? vis(s) : s; if (!e) return false;
+    e.scrollIntoView({ block: 'center', behavior: 'smooth' }); await wait(400);
+    const r = e.getBoundingClientRect(), x = r.left + Math.min(r.width / 2, 70), y = r.top + r.height / 2; moveTo(x, y); await wait(550);
+    cur.classList.add('tap'); e.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y }));
+    await wait(180); cur.classList.remove('tap'); await wait(pause); return true;
+  }
+  async function type(s, text) {
+    const e = vis(s); if (!e) return; await tap(e, 200); e.value = '';
+    for (const c of text) { e.value += c; e.dispatchEvent(new Event('input', { bubbles: true })); await wait(35); }
+    e.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  const close = async () => { await wait(1800); document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await wait(700); };
+  async function openFirst(body, what) { const tr = await until(() => $(`${body} tr[data-id], ${body} tr[data-i]`), 5000); if (!tr) return false; say(what); await tap(tr, 1500); return true; }
+  try {
+    await wait(1500);
+    for (let n = 0; Date.now() < cfg.until; n++) {
+      const t0 = Date.now();
+      say('Reports & Jobs'); await tap('nav button[data-v="reports"]', 1500);
+      if (await openFirst('#repBody', 'Opening the newest service report')) await close();
+      await tap('[data-go="jobs"]', 1800);
+      say('Invoices'); await tap('nav button[data-v="invoices"]', 1500);
+      if (await openFirst('#ivBody', 'Opening an invoice')) await close();
+      say('Parts & Orders'); await tap('nav button[data-v="requests"]', 1500);
+      if (await openFirst('#rqBody', 'Answering a parts request from a technician')) {
+        if (await until(() => !$('#rqModal').hidden, 5000)) {
+          await type('#rqReply', 'Load test: checked, the parts arrive tomorrow');
+          await tap('#rqQuote', 1500); if (!$('#rqModal').hidden) await close();
+        }
+      }
+      await tap('[data-go="orders"]', 1800);
+      say('Customers'); await tap('nav button[data-v="customers"]', 1500);
+      if (await openFirst('#custBody', 'Opening a customer')) await close();
+      say('Inventory'); await tap('nav button[data-v="inventory"]', 1500);
+      if (await openFirst('#invBody', 'Opening a part')) await close();
+      say('Equipment'); await tap('nav button[data-v="equipment"]', 1500);
+      if (await openFirst('#eqBody', 'Equipment history')) await close();
+      say('Statistics'); await tap('nav button[data-v="stats"]', 2500);
+      say('Employees'); await tap('nav button[data-v="emps"]', 2000);
+      say('Settings'); await tap('nav button[data-v="settings"]', 2500);
+      const next = t0 + cfg.repMs;
+      while (Date.now() < Math.min(next, cfg.until)) { check(); say(`Round ${n + 1} done · next round in ${Math.ceil((next - Date.now()) / 1000)} s`); await wait(1000); }
+    }
+  } catch (e) { if (e.message !== 'stopped') say('Stopped: ' + e.message); }
+  sessionStorage.removeItem('cher.demo'); ch.postMessage({ type: 'done', who: 'sup' });
+  say('Finished — signing out'); await wait(1200); logout(false);
+}
+
 boot();
 </script>
 </body>

@@ -22,11 +22,26 @@ Escribe tu PIN entre las dos comillas (sin borrar las comillas ni el `;`) y guar
 - Mientras están **encendidas** aparece una **barra naranja** debajo del menú en todas las pantallas:
   **Load test · Reset data · Export data · Turn off**. Al apagarlas, la barra desaparece y el servidor
   rechaza borrar y la prueba de carga, aunque alguien tenga el PIN. Quedan registradas en el Activity log.
+- **Siempre empiezan apagadas.** Solo quedan encendidas para la sesión que las encendió: al salir, al cerrar la
+  pestaña o al cerrarse la sesión por inactividad, se apagan solas. Otro supervisor nunca las ve encendidas.
 
 ### Load test
-Simula N técnicos (TEST01, TEST02…) usando la app a la vez: entran, descargan clientes/inventario/
-trabajos, sincronizan cada ~30 s y envían reportes con dos firmas. Muestra en vivo peticiones por minuto,
-errores y tiempos de respuesta, y al final un veredicto (✓ bien / ⚠ lento / ✗ no aguanta). No envía correos.
+Simula personas usando la app a la vez desde tu navegador:
+- **Técnicos (TEST01…)**: entran, descargan todo (clientes, inventario, servicios, trabajos, solicitudes,
+  historial), sincronizan cada ~30 s y recorren Jobs / Parts requests / History. **Cada periodo** (por defecto
+  3 min) envían un **Fill Service Report** y un **Equipment Service Report** con dos firmas, consultan el
+  historial del equipo y mandan una **solicitud de partes** (una parte del stock y una a pedir).
+- **Supervisores (TESTSUP1…)**: recorren todas las pestañas del panel (reportes, trabajos, facturas,
+  solicitudes y pedidos, clientes, inventario, equipos, estadísticas, empleados, ajustes), abren registros y
+  **contestan las solicitudes de partes** con una cotización. Al terminar la prueba se desactivan solos.
+- Muestra en vivo peticiones por minuto, errores, tiempos, reportes por tipo y solicitudes, y al final un veredicto
+  (✓ bien / ⚠ lento / ✗ no aguanta). No envía correos.
+
+**Verlo en pantalla y grabar un tutorial.** En *Show on screen* elige **A technician** o **A supervisor**. Al
+empezar se abre una ventana nueva con la app real, donde TEST01 (o TESTSUP1) hace todo su proceso paso a paso,
+con un círculo naranja que marca cada toque y un letrero con lo que está haciendo. Para el tutorial:
+**Tutorials → Start recording** → comparte **esa ventana**. Los pasos de la guía se anotan solos. Si la ventana
+no se abre, permite las ventanas emergentes (pop-ups) para tu dominio.
 
 Si muchas personas entran en el mismo segundo, MySQL de Hostinger puede rechazar una conexión por un instante.
 El servidor reintenta solo, hasta 5 veces en ~2 s. Si aun así está ocupado, responde **"Server busy"** (503) y la
@@ -36,9 +51,9 @@ como **"retried when busy"**: eso no es un error. Solo cuenta como error lo que 
 ### Reset data
 Borra de una vez en el servidor, eligiendo qué:
 clientes · reportes de servicio · ventas y facturas (con sus pagos) · trabajos · solicitudes de partes y
-pedidos a proveedores · técnicos de prueba TEST… y sus reportes · desactivar los demás técnicos ·
+pedidos a proveedores · cuentas de prueba TEST… y TESTSUP… y sus reportes · desactivar los demás técnicos ·
 archivar el inventario · número de la próxima factura.
-Los supervisores nunca se borran y las cantidades de inventario no se tocan. Pide escribir `RESET`.
+Los supervisores reales nunca se borran (solo los de prueba TESTSUP…) y las cantidades de inventario no se tocan. Pide escribir `RESET`.
 
 ### Export data
 Un Excel con una hoja por cada parte de la app: clientes, reportes, partes de reportes, facturas, líneas de
@@ -60,6 +75,14 @@ Graba un tutorial mientras usas la app, también durante una prueba de carga:
 
 Los pasos se escriben solos: "Toca «Customers»", "Escribe «ACME» en «Customer name»", "Marca «Frequent»"…
 Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets no permiten grabar la pantalla).
+
+## Sesiones: una por pestaña
+- Cada pestaña o ventana tiene **su propia sesión**: en una puedes tener el panel del supervisor y en otra la app
+  del técnico, al mismo tiempo.
+- Al **cerrar la pestaña o la app** la sesión se cierra: al volver a abrir el enlace aparece la pantalla de inicio.
+  Recargar la página (F5) no cierra la sesión.
+- Para el técnico esto significa que **necesita internet para entrar** cada vez que abre la app. Los reportes a
+  medio llenar y los no enviados se quedan guardados en la tablet y se recuperan al entrar.
 
 ## Cierre de sesión por inactividad
 - La sesión (técnico y supervisor) se cierra sola tras **2 horas sin usar la app** (sin tocar la pantalla,
@@ -115,7 +138,7 @@ Prueba la restauración una vez, con calma, en una base de datos de prueba. Así
 1. `api/config.php`: `DB_HOST` = `localhost`. `api/api.php`: tu PIN en `DEV_PIN_AQUI`.
 2. Sube los archivos del paquete.
 3. Settings → **Download full backup (.sql)**.
-4. Developer tools → PIN → **Turn on** → **Load test**: primero 10 técnicos / 3 minutos, luego 50 / 10.
+4. Developer tools → PIN → **Turn on** → **Load test**: primero 10 técnicos + 2 supervisores / 3 minutos, luego 50 + 5 / 10.
 5. Mientras corre, usa la app en una tablet real.
 6. **Reset data** (reportes, ventas, trabajos, solicitudes, técnicos de prueba) → `RESET`.
 7. **Turn off** al terminar.
