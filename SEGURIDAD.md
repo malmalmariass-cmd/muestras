@@ -170,3 +170,10 @@ el correo y teléfonos de la empresa (intencional). Riesgos que quedan:
 ### Dependencias externas
 - [ ] jsPDF desde CDN con SRI (hecho). Alternativa más robusta: copiar `jspdf.umd.min.js` al propio servidor.
 - [ ] Revisar `pdf.js` y `sw.js`: el service worker no debe guardar en caché respuestas del API con datos personales.
+
+## Fotos de pagos
+- Se guardan en `api/files/pay/` (la API crea `api/files/.htaccess` que cierra la carpeta a la web; los documentos y fotos solo se leen a través de la API). Solo el supervisor
+  y el técnico que la envió pueden verla (a través de la API, con sesión).
+- Se borran solas a los 15 días; queda el número de referencia, el monto y quién lo registró.
+- Las fotos se reducen en la tablet (máx. 1280 px, JPEG) antes de enviarse.
+

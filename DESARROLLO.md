@@ -189,6 +189,58 @@ Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets n
   cuenta.
 - Lo **guardado pero sin enviar** (sin internet) nunca se borra: se queda en la tablet hasta que llega a la oficina.
 
+## Firma del supervisor: el trabajo se completa cuando firma
+- En el panel, Reports & Jobs → abrir un reporte → **✍ Sign as supervisor** (si aún no ha firmado).
+- La columna **Signatures** muestra T (técnico), C (cliente) y S (supervisor). Con las tres aparece **✔ Approved**.
+- Filtros: "Waiting for my signature" y "Approved". El trabajo (job) pasa a *Done* solo con la firma del cliente **y** del supervisor.
+
+## Listas de clientes (y proveedores) con ▼
+Toda casilla de cliente o proveedor (`combo.js`) deja escribir para filtrar **o** tocar ▼ para ver la lista completa.
+Las opciones salen de los mismos `<datalist>` de siempre.
+
+## Factura a nombre de una empresa, para una persona de contacto
+En **New invoice**: "A person pays for a company we already serve". Se elige la empresa de la lista (▼) y se escribe la persona
+(nombre, correo, WhatsApp). La factura sale a nombre de la empresa con **Attn: persona**, se le envía a esa persona,
+y queda guardada como contacto más de la empresa. Si se escribe un nombre nuevo, aparece el atajo
+"Works for a company we serve? Bill the company". La orden de trabajo se elige entre los reportes de la empresa.
+
+## Trabajos (jobs) y citas
+- Solo el supervisor crea trabajos. El técnico **ve** el trabajo (instrucciones, dirección con mapa, equipo, contacto) y desde ahí
+  elige *Service report* o *Equipment service*.
+- **Received**: fecha y hora en que el cliente llamó. **Appointment date/time**: la cita.
+- Colores en la app del técnico y en el panel: **amarillo = mañana**, **verde = hoy**.
+- El técnico puede **aplazar** (otra hora, mismo día), **reprogramar** (hasta 1 mes; más lejos lo hace la oficina)
+  y **pedir cancelar** (con motivo). La cancelación la aprueba o rechaza el supervisor en el trabajo (aviso en la pestaña).
+- **Recordatorio por WhatsApp**: si el cliente dio su WhatsApp y permiso ("Customer agrees to WhatsApp reminders"),
+  el técnico o el supervisor tocan "✆ WhatsApp reminder": se abre WhatsApp con el mensaje listo (hay que tocar Enviar).
+- **Chequeo de seguimiento**: desde el reporte, "📅 Schedule follow-up check" (fecha, hora, qué revisar). Crea un trabajo con
+  el **mismo número de reporte**. Ese día el técnico abre el mismo reporte (se agrega una fila de tiempo con la fecha nueva;
+  aunque el reporte estuviera firmado y bloqueado, se puede trabajar ese día) y al terminar toca "Visit done".
+
+## Solicitudes de partes: cotización → pago → factura
+1. El técnico pide partes. El supervisor pone precios y **envía la cotización** (el inventario **no** se toca).
+2. El técnico ve la cotización con precios y puede **verla, descargarla, enviarla por WhatsApp o correo, o imprimirla** (PDF "QUOTE").
+3. Si el cliente acepta: **"Customer accepted — send payment"**: pago completo (pieza de proveedor) o parcial (pieza del taller),
+   número de referencia y **foto del recibo** con la cámara. Llega al supervisor (aviso 💳).
+4. El supervisor ve la foto, revisa y toca **Payment verified**: la **factura se crea sola** con el pago anotado,
+   las piezas del taller salen del inventario y el técnico la ve en su pestaña (se revisa cada 30 s mientras espera).
+   "Not valid" la devuelve al técnico con el motivo.
+- **Approve** (cliente dijo que sí, sin pago todavía): las piezas del taller quedan **reservadas 2 horas** (+2 h, +8 h, +1 día).
+  Mientras están reservadas no cuentan como disponibles. Salen del inventario cuando se hace la factura.
+  (Solicitudes aprobadas antes de esta versión ya habían descontado el inventario; se respetan así.)
+- Buscar por número de reporte: escribe 46, 0046 o 1-005 en la búsqueda de Parts requests. PR-0012 busca la solicitud.
+- La foto se guarda 15 días (carpeta `api/files/pay`, cerrada a la web); después queda solo la referencia.
+- **Verificar la referencia**: el sistema avisa si el mismo número ya se usó en otra solicitud o factura.
+  Confirmar que el pago es real solo se puede en el banco / Zelle / procesador de tarjetas (no hay conexión con ellos).
+
+## Proveedores (Vendors)
+Parts & Orders → **Vendors**: nombre, contacto, teléfono, WhatsApp, correo, web, dirección, notas y número de cuenta (solo oficina).
+El técnico los ve en Parts Requests → "📇 Vendors" (y al pedir una pieza a proveedor) con botones para llamar, WhatsApp, correo y web.
+
+## Borrar empleados
+Employees → **Delete** (pide tu PIN). Sin historial se borra del todo. Con reportes/facturas/solicitudes se quita de la lista y
+no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus trabajos pendientes quedan "sin asignar".
+
 ## Sesiones: una por pestaña
 - Cada pestaña o ventana tiene **su propia sesión**: en una puedes tener el panel del supervisor y en otra la app
   del técnico, al mismo tiempo.

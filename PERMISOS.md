@@ -53,3 +53,18 @@ Revisado con el `api.php` real:
   puede editarlo durante 24 horas.
 - El servidor lo hace cumplir: si una tablet intenta guardar cambios en un reporte bloqueado, se conserva la copia
   de la oficina y la tablet la recibe de vuelta.
+
+## Trabajos, partes y pagos (versión 11)
+| Acción | Técnico | Supervisor |
+|---|---|---|
+| Crear o editar trabajos (citas) | No | Sí |
+| Ver el trabajo e instrucciones, aplazar o reprogramar (hasta 1 mes) | Sí (sus trabajos) | Sí |
+| Cancelar un trabajo | Lo pide, con motivo | Sí, y aprueba o rechaza lo pedido |
+| Programar chequeo de seguimiento desde el reporte | Sí | Sí |
+| Ver precios | Solo en cotizaciones ya enviadas y facturas de sus solicitudes | Sí |
+| Enviar cotización / factura de su solicitud al cliente | Sí | Sí |
+| Registrar pago del cliente (referencia + foto) | Sí | Sí |
+| Verificar el pago (crea la factura) / reservar o extender reserva | No | Sí |
+| Proveedores | Ver | Ver, agregar, editar, quitar |
+| Borrar empleados | No | Sí, con su PIN |
+
