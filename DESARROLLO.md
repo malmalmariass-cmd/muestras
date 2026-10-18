@@ -126,8 +126,10 @@ Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets n
 - El código aparece en: la lista y el detalle de reportes y facturas, el campo *Reference* de la factura (si se deja
   vacío), el asunto de los correos (`[AC-0046-20261018]`) y el nombre de los PDF enviados por correo
   (`AC-0046-20261018_ServiceReport.pdf`, `AC-0046-20261025_Invoice-0051.pdf`) y del zip semanal.
-- El nombre del PDF que se **descarga** desde la tablet o el panel lo pone `pdf.js` (archivo que está en tu
-  servidor y que no tengo); para que también use el código, mándame `pdf.js`.
+- Los PDF que se **descargan o comparten** desde la tablet o el panel también se llaman con el código
+  (`AC-0046-20261018_ServiceReport.pdf`, `AC-0046-20261025_Invoice-0051.pdf`) y lo muestran en la primera página
+  (el reporte, debajo del número; la factura, encima de "Bill to", junto a la orden de trabajo). Lo hace el archivo
+  `pdf-codes.js`, que se carga después de `pdf.js` (este no se toca).
 
 ## Enviar al cliente: elegir el contacto
 - Al tocar **Send / PDF** (técnico) o **Email / WhatsApp** de una factura o reporte (panel) aparece la lista de
