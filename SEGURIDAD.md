@@ -177,3 +177,8 @@ el correo y teléfonos de la empresa (intencional). Riesgos que quedan:
 - Se borran solas a los 15 días; queda el número de referencia, el monto y quién lo registró.
 - Las fotos se reducen en la tablet (máx. 1280 px, JPEG) antes de enviarse.
 
+## Si cambias la contraseña del correo
+La app envía los correos entrando al buzón con `SMTP_USER` / `SMTP_PASS` de `api/config.php`.
+Si cambias la contraseña de ese buzón en hPanel, escribe la nueva en `SMTP_PASS`; si no, los envíos fallan con
+"535 authentication failed". En Settings → "Why do emails go to spam? Check", la línea **Mailbox login (SMTP)**
+prueba el usuario y la contraseña sin enviar nada.
