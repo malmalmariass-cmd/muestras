@@ -36,6 +36,12 @@ Simula personas usando la app a la vez desde tu navegador:
   **contestan las solicitudes de partes** con una cotización. Al terminar la prueba se desactivan solos.
 - Muestra en vivo peticiones por minuto, errores, tiempos, reportes por tipo y solicitudes, y al final un veredicto
   (✓ bien / ⚠ lento / ✗ no aguanta). No envía correos.
+- **Recorrido de cada persona:**
+  - *On screen*: a qué hora **abrió y cerró sesión**, cuánto tiempo estuvo, cuántas veces **tocó la pantalla**
+    (movimientos del cursor), cuántas rondas hizo, y la lista de **estaciones** por las que pasó (pantalla o paso:
+    "Signatures", "Requesting parts", "Invoices"…) con la hora y el tiempo en cada una.
+  - *Simulated people*: para cada técnico y supervisor simulado, entrada, salida, tiempo conectado y las
+    estaciones visitadas con cuántas veces.
 
 **Verlo en pantalla y grabar un tutorial.** En *Show on screen* elige **A technician** o **A supervisor**. Al
 empezar se abre una ventana nueva con la app real, donde TEST01 (o TESTSUP1) hace todo su proceso paso a paso,
@@ -53,7 +59,8 @@ Borra de una vez en el servidor, eligiendo qué:
 clientes · reportes de servicio · ventas y facturas (con sus pagos) · trabajos · solicitudes de partes y
 pedidos a proveedores · cuentas de prueba TEST… y TESTSUP… y sus reportes · desactivar los demás técnicos ·
 archivar el inventario · número de la próxima factura.
-Los supervisores reales nunca se borran (solo los de prueba TESTSUP…) y las cantidades de inventario no se tocan. Pide escribir `RESET`.
+Los supervisores reales nunca se borran (solo los de prueba TESTSUP…) y las cantidades de inventario no se tocan.
+La opción **Start a new number series** hace que la numeración empiece de nuevo como 1-001 (ver "Números"). Pide escribir `RESET`.
 
 ### Export data
 Un Excel con una hoja por cada parte de la app: clientes, reportes, partes de reportes, facturas, líneas de
@@ -75,6 +82,51 @@ Graba un tutorial mientras usas la app, también durante una prueba de carga:
 
 Los pasos se escriben solos: "Toca «Customers»", "Escribe «ACME» en «Customer name»", "Marca «Frequent»"…
 Los PIN nunca se anotan. Funciona en Chrome o Edge en computadora (las tablets no permiten grabar la pantalla).
+
+## Números de reporte y factura
+- Reportes y facturas comparten **un solo contador** en el servidor, para todas las cuentas (técnicos y
+  supervisores): un número nunca se repite.
+- **Se reserva al empezar el reporte.** En cuanto el técnico escribe algo (con internet), el reporte recibe su
+  número y lo muestra arriba ("Número #0046 reservado"). Ese número es suyo hasta que lo guarde. Sin internet,
+  el número llega al sincronizar.
+- Si un reporte se borra sin guardarse, o pasa 24 horas sin guardarse, su número pasa al **siguiente reporte
+  que se empiece**, para que no queden huecos. Por eso, alguna vez, un reporte nuevo puede tener un número
+  algo menor que el anterior.
+- **Series después de un reset de prueba.** En *Reset data* está marcada la opción **Start a new number series**:
+  después del primer reset la numeración empieza en **1-001, 1-002…**, después del segundo en **2-001…**, y así.
+  Los números viejos (0045…) no se tocan. En *Settings* se ve la serie actual y el próximo número. Si quieres que
+  la nueva serie empiece en otro número, escríbelo en *Next invoice number after the reset*.
+
+## Enviar al cliente: elegir el contacto
+- Al tocar **Send / PDF** (técnico) o **Email / WhatsApp** de una factura o reporte (panel) aparece la lista de
+  contactos del cliente registrado: el principal y los **otros contactos**. Se toca uno y se envía.
+- **+ Agregar un contacto**: nombre, correo y/o WhatsApp. Se usa en ese momento y queda guardado en el cliente
+  (agregar no cambia nada de lo que ya tenía; si el cliente aún no está registrado, solo se usa para ese envío).
+- En el panel, **Customers → (cliente) → Other contacts** se ven, cambian o quitan.
+- Todos los correos llevan copia oculta a la oficina (ver `SEGURIDAD.md`).
+
+## Copia semanal de los reportes (automática)
+- Cada **lunes desde las 7:00** (hora de Florida) llega a **info@cherservices.com** y
+  **cherservices21@gmail.com** un correo con los reportes de la semana anterior: resumen, una lista que abre en
+  Excel y los **PDF firmados en un .zip** (si pesan mucho, llegan en varios correos).
+- Se envía con el primer uso de la app del lunes. Para que salga aunque nadie use la app, crea un *Cron Job* en
+  hPanel → Avanzado → Cron Jobs: lunes, 7:05, comando
+  `curl -s "https://TU-DOMINIO/api/api.php?cron=weekly"` (no se manda dos veces la misma semana).
+- **Settings → Weekly copy of the reports**: muestra la última enviada y tiene **Send last week's copy now** /
+  **Send this week so far** para mandarla a mano.
+- Los PDF se guardan en `api/files/reports/` (cerrada a la web) durante 6 semanas. Los reportes en sí quedan
+  para siempre en la base de datos.
+- Otras direcciones: `define('WEEKLY_TO', 'a@..., b@...');` en `config.php`.
+
+## Trabajo sin guardar: 24 horas y avisos
+- **Técnico:** un reporte que se empezó y no se guardó muestra una franja naranja arriba: *"no está guardado
+  (empezado 9:40). Guárdalo o bórralo: se borra solo en 23 h"*, con **Abrir · Guardar · Borrar**. Cada 30 minutos
+  vuelve a avisar (y con notificación si la app está en segundo plano y la tablet lo permite). A las **24 horas**
+  se borra solo y su número reservado pasa al siguiente reporte.
+- **Supervisor:** una factura que se cerró sin guardar queda como borrador en ese navegador con la misma franja
+  (**Open · Delete**), avisos cada 30 minutos y borrado a las 24 horas. Abrir una factura y cerrarla sin cambios no
+  cuenta.
+- Lo **guardado pero sin enviar** (sin internet) nunca se borra: se queda en la tablet hasta que llega a la oficina.
 
 ## Sesiones: una por pestaña
 - Cada pestaña o ventana tiene **su propia sesión**: en una puedes tener el panel del supervisor y en otra la app

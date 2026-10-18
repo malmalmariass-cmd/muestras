@@ -33,26 +33,14 @@ de jsPDF 2.5.1 (npm). **Después de subirlo, abre la app y revisa que el PDF se 
 
 ## 2. Copia a cherservices21@gmail.com e info@cherservices.com
 
-Esto **debe hacerse en el servidor**, no en la app: si la app enviara la lista de copias,
-cualquiera podría usar el API para mandar correos a quien quisiera (relay de spam).
+**Ya está hecho en el servidor** (`api/api.php`). La app nunca decide a quién van las copias: si lo hiciera,
+cualquiera podría usar el API para mandar correos a quien quisiera.
 
-En `api/api.php`, donde se envía el correo de `send_report` (y donde el panel de admin envía
-facturas), añadir las copias. Ejemplo con PHPMailer:
-
-```php
-// Copias fijas de la oficina: cada reporte firmado y cada factura
-const OFFICE_COPIES = ['cherservices21@gmail.com', 'info@cherservices.com'];
-
-foreach (OFFICE_COPIES as $cc) {
-    if (strcasecmp($cc, $to) !== 0) $mail->addBCC($cc);   // BCC: el cliente no ve los correos internos
-}
-```
-
-Con `mail()` nativo: `$headers .= "Bcc: cherservices21@gmail.com, info@cherservices.com\r\n";`
-
-Recomiendo **BCC** (copia oculta). Si se prefiere que el cliente vea la copia, usar `addCC`.
-La app ya envía automáticamente una “copia a la oficina” (`channel: 'office'`) cuando el
-cliente firma; hay que confirmar en el backend a qué dirección va ese canal.
+- Cada reporte y cada factura que se envía por correo (al cliente o la copia de la oficina) lleva
+  **copia oculta (BCC)** a cherservices21@gmail.com e info@cherservices.com. El cliente no ve esas direcciones.
+- Para cambiarlas: en `api/config.php`, `define('OFFICE_COPIES', 'correo1@..., correo2@...');`
+- Además, **cada lunes** llega a esas dos direcciones la copia semanal de todos los reportes de la semana
+  (ver `DESARROLLO.md`, sección "Copia semanal").
 
 ---
 

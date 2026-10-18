@@ -186,6 +186,11 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
 .tl>div::before{content:'';position:absolute;left:-20px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--navy)}
 .tl b{color:var(--ink)}.tl span{color:var(--muted)}
 .fbox{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:14px}
+.unsaved{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff4e5;border:1.5px solid #f0a54a;color:#7a3e00;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:600}
+.unsaved span{flex:1;min-width:220px}
+.contacts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.contacts button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:7px 11px;text-align:left;cursor:pointer;font:inherit;font-size:13px;line-height:1.3}
+.contacts button b{display:block;font-size:14px}.contacts button.on{border-color:var(--navy);background:#eef3ff}
 .fbox .c{margin-top:6px;padding-left:10px;border-left:3px solid #1149c9;color:#1149c9}
 .subtabs{display:inline-flex;background:#eef2f8;border-radius:999px;padding:4px;margin-bottom:14px}
 .subtabs button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font-weight:700;color:var(--navy);cursor:pointer}
@@ -243,6 +248,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
   <span style="flex:1"></span><button type="button" class="btn s" data-dev="load">Load test</button><button type="button" class="btn s" data-dev="reset">Reset data</button><button type="button" class="btn s" data-dev="export">Export data</button><button type="button" class="btn s" data-dev="tutorial">Tutorials</button><span id="tutRec" hidden style="font-weight:700;color:var(--red)">● REC <span id="tutClock">0:00</span> · <span id="tutN">0</span> steps <button type="button" class="btn d" id="tutStopBar">■ Stop</button></span><button type="button" class="btn d" data-dev="off">Turn off</button></div>
 
 <main>
+  <div class="unsaved" id="ivUnsaved" hidden><span id="ivUnsavedTxt"></span><button type="button" class="btn s" id="ivUnsavedOpen">Open</button><button type="button" class="btn d" id="ivUnsavedDel">Delete</button></div>
   <!-- REPORTS -->
   <section data-view="reports">
     <div class="subtabs grp"><button type="button" data-go="reports">Service reports</button><button type="button" data-go="jobs">Jobs &amp; appointments<span class="nb" data-b="jobs" hidden></span></button></div>
@@ -475,6 +481,11 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
         <div class="acts" style="justify-content:flex-start"><button class="btn s" id="testMail">Send test email</button></div>
       </div>
     </div>
+    <h2 style="font-size:17px;margin:24px 0 8px">Weekly copy of the reports</h2>
+    <div class="card" style="max-width:560px">
+      <div id="weeklyStatus" class="sub" style="margin:0 0 10px"></div>
+      <div class="acts" style="justify-content:flex-start;flex-wrap:wrap"><button class="btn s" id="weeklyLast">Send last week's copy now</button><button class="btn s" id="weeklyThis">Send this week so far</button></div>
+    </div>
   </section>
 </main>
 </div>
@@ -593,6 +604,24 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
 </div>
 
 <!-- WhatsApp result -->
+<!-- send an invoice: choose who receives it -->
+<div class="modal" id="sivModal" hidden>
+  <div class="mc">
+    <h2 id="sivTitle">Send invoice</h2>
+    <p class="sub" id="sivSub" style="margin:0 0 6px"></p>
+    <div class="form">
+      <div><label>Send to</label><div class="contacts" id="sivList"></div></div>
+      <div><label id="sivToLbl">Email</label><input id="sivTo" autocomplete="off"></div>
+      <details class="fbox" id="sivAdd"><summary style="cursor:pointer;font-weight:700">+ Add a contact to this customer</summary>
+        <div class="row3" style="margin-top:8px"><div><label>Name</label><input id="sivName" autocomplete="off"></div><div><label>Email</label><input id="sivEmail" type="email"></div><div><label>WhatsApp</label><input id="sivWa" type="tel"></div></div>
+        <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="sivSave">Save and use this contact</button></div>
+      </details>
+      <div class="err" id="sivErr"></div>
+    </div>
+    <div class="acts"><button type="button" class="btn s" data-cancel>Cancel</button><button type="button" class="btn p" id="sivGo">Send</button></div>
+  </div>
+</div>
+
 <div class="modal" id="waModal" hidden>
   <div class="mc">
     <h2>WhatsApp</h2>
@@ -658,6 +687,7 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
       <div><label>Customer / company name</label><input id="cuName" required></div>
       <div class="row3"><div><label>Address</label><input id="cuA1" placeholder="Street"></div><div><label>&nbsp;</label><input id="cuA2" placeholder="City, State"></div><div><label>&nbsp;</label><input id="cuA3" placeholder="ZIP / Country"></div></div>
       <div class="row3"><div><label>Phone</label><input id="cuPhone" type="tel"></div><div><label>WhatsApp</label><input id="cuWa" type="tel" placeholder="+1 786 555 0101"></div><div><label>Email</label><input id="cuEmail" type="email"></div></div>
+      <div><label>Other contacts (reports and invoices can be sent to them)</label><div id="cuContacts"></div><button type="button" class="btn s" id="cuAddContact" style="margin-top:6px">+ Add contact</button></div>
       <div><label>Notes</label><textarea id="cuNotes"></textarea></div>
       <label class="chk"><input type="checkbox" id="cuFreq"> ★ Frequent customer (comes back by appointment)</label>
       <div class="err" id="cuErr"></div>
@@ -700,8 +730,9 @@ nav button.on .nb,.subtabs button.on .nb{box-shadow:0 0 0 2px var(--navy)}
           <label class="chk"><input type="checkbox" data-w="testTechs" checked> Load-test accounts (TEST…, TESTSUP…) and their reports</label>
           <label class="chk"><input type="checkbox" data-w="allTechs"> Deactivate all other technicians</label>
           <label class="chk"><input type="checkbox" data-w="inventory"> Archive all inventory parts</label>
+          <label class="chk"><input type="checkbox" data-w="newSeries" checked> Start a new number series (<b id="rsSeries">1-001</b>…)</label>
         </div>
-        <div class="row"><div><label>Next invoice number after the reset</label><input id="rsNext" type="number" min="1" placeholder="leave as is"></div><div><label>Type RESET to confirm</label><input id="rsConfirm" autocomplete="off" autocapitalize="characters"></div></div>
+        <div class="row"><div><label>Next invoice number after the reset</label><input id="rsNext" type="number" min="1" placeholder="leave as is (new series starts at 1)"></div><div><label>Type RESET to confirm</label><input id="rsConfirm" autocomplete="off" autocapitalize="characters"></div></div>
         <div class="acts" style="justify-content:flex-start"><button type="button" class="btn s" id="rsBackup">⬇ Download backup first</button><button type="button" class="btn d" id="rsGo">Reset now</button></div>
         <div id="rsLog" style="font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:30vh;overflow:auto;background:#f6f8fc;border-radius:8px;padding:8px 10px" hidden></div>
       </div>
@@ -832,6 +863,8 @@ const fmtD = d => { if (!d) return '—'; const [y, m, dd] = d.slice(0, 10).spli
 const fmtDT = d => d ? new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 const fmtN = (n, dp = 0) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
 const iso = d => d.toISOString().slice(0, 10);
+/* report / invoice number as shown: 0045, or 1-005 after a test reset started series 1 (stored as 1000005) */
+const docNo = n => { n = +n || 0; const sr = Math.floor(n / 1e6), k = n % 1e6; return sr ? `${sr}-${String(k).padStart(3, '0')}` : String(k).padStart(4, '0'); };
 
 /* ---------------- gate ---------------- */
 let setupMode = false;
@@ -880,7 +913,8 @@ async function enter(user) {
   await loadEmps(); view('reports'); updateOrdCount(); updateRqCount(); setInterval(updateRqCount, 60000); setInterval(loadBadges, 60000); setTimeout(loadCounts, 1500);
   try { if ('Notification' in window && Notification.permission === 'default') document.addEventListener('click', () => Notification.requestPermission().catch(() => {}), { once: true }); } catch {}
   const must = sessionStorage.getItem('cher.mustChangePin');   // set by the start page when the server asks for a new PIN
-  if (sessionStorage.getItem('cher.demo')) demoRun();   // this window is the on-screen supervisor of a load test
+  if (sessionStorage.getItem('cher.demo')) demoRun();
+  setTimeout(ivUnsavedCheck, 1000);   // this window is the on-screen supervisor of a load test
   if (must) { sessionStorage.removeItem('cher.mustChangePin'); pinModal('', must === 'master' ? 'You signed in with the master account and its default PIN. Choose a new PIN now so nobody else can use it (at least 6 digits).' : 'Supervisor PINs now need at least 6 digits. Choose a new PIN.'); }
 }
 
@@ -939,7 +973,7 @@ async function loadReports() {
     const tb = $('#repBody');
     if (!j.rows.length) tb.innerHTML = `<tr><td colspan="8" class="empty">${j.total ? '' : 'No reports match these filters.'}</td></tr>`;
     else tb.innerHTML = j.rows.map(r => `<tr data-id="${esc(r.id)}">
-      <td class="inv">#${String(r.invoice_no).padStart(4, '0')}${r.report_type === 'maintenance' ? '<div class="eq" style="font-weight:600">Equipment service</div>' : ''}</td>
+      <td class="inv">#${docNo(r.invoice_no)}${r.report_type === 'maintenance' ? '<div class="eq" style="font-weight:600">Equipment service</div>' : ''}</td>
       <td>${fmtD(r.job_date)}</td>
       <td><b>${esc(r.customer_name || '—')}</b>${r.work_order ? `<div class="eq">WO ${esc(r.work_order)}</div>` : ''}</td>
       <td class="hide-sm eq">${esc([r.make, r.model].filter(Boolean).join(' ') || '—')}${r.serial_no ? `<div>S/N ${esc(r.serial_no)}</div>` : ''}</td>
@@ -966,7 +1000,7 @@ $('#csv').onclick = async () => {
     while (rows.length < j.total && off < 5000) { const k = await api('reports_list', { ...filt(), limit: 200, offset: off }); rows = rows.concat(k.rows); off += 200; }
     const head = ['Invoice', 'Job date', 'Work order', 'Customer', 'Make', 'Model', 'Serial No.', 'Technician', 'Hours', 'Mileage', 'Customer signed', 'Status', 'Type', 'Last update'];
     const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const csv = [head.map(q).join(',')].concat(rows.map(r => [String(r.invoice_no).padStart(4, '0'), r.job_date, r.work_order, r.customer_name, r.make, r.model, r.serial_no, r.tech_name, r.hours, r.mileage, +r.customer_signed ? 'Yes' : 'No', JS_LBL[r.job_status] || r.repair_completed, r.report_type === 'maintenance' ? 'Equipment service' : 'Service report', r.updated_at].map(q).join(','))).join('\r\n');
+    const csv = [head.map(q).join(',')].concat(rows.map(r => [docNo(r.invoice_no), r.job_date, r.work_order, r.customer_name, r.make, r.model, r.serial_no, r.tech_name, r.hours, r.mileage, +r.customer_signed ? 'Yes' : 'No', JS_LBL[r.job_status] || r.repair_completed, r.report_type === 'maintenance' ? 'Equipment service' : 'Service report', r.updated_at].map(q).join(','))).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = `cher-reports-${iso(new Date())}.csv`; a.click();
   } catch (e) { toast(e.message); }
 };
@@ -1080,7 +1114,8 @@ function dbSizeLine(b) {
   el.innerHTML = `Database size: <b>${mb >= 1024 ? (mb / 1024).toFixed(2) + ' GB' : mb.toFixed(1) + ' MB'}</b> of about 3 GB (${pct.toFixed(1)}%)${pct >= 70 ? ' — <b style="color:var(--red)">getting full: archive old reports soon</b>' : ''}`;
 }
 async function loadSettings() {
-  try { const j = await api('settings_get'); $('#nextInv').value = j.nextInvoice; dbSizeLine(j.dbBytes); $('#setTax').value = j.taxRate; $('#setLabor').value = j.laborRate || ''; $('#ivSetErr').textContent = ''; $('#maxInv').textContent = j.maxInvoice ? `Highest invoice used so far: #${String(j.maxInvoice).padStart(4, '0')}` : 'No invoices used yet.'; $('#setErr').textContent = ''; }
+  try { const j = await api('settings_get'); $('#nextInv').value = j.nextInvoice; dbSizeLine(j.dbBytes); $('#setTax').value = j.taxRate; $('#setLabor').value = j.laborRate || ''; $('#ivSetErr').textContent = ''; $('#maxInv').textContent = `${j.series ? `Number series ${j.series} (numbers look like ${j.series}-001). ` : ''}Next number: #${j.nextNo || j.nextInvoice}. ` + (j.maxInvoice ? `Highest used in this series: ${fmtN(j.maxInvoice)}.` : 'None used yet in this series.');
+    const rs = $('#rsSeries'); if (rs) rs.textContent = `${(j.series || 0) + 1}-001`; $('#setErr').textContent = ''; }
   catch (e) { toast(e.message); }
 }
 $('#saveSet').onclick = async () => {
@@ -1277,16 +1312,30 @@ function custModal(c) {
   $('#custTitle').textContent = c ? c.name : 'Add customer';
   $('#cuName').value = c?.name || ''; $('#cuA1').value = c?.address1 || ''; $('#cuA2').value = c?.address2 || ''; $('#cuA3').value = c?.address3 || '';
   $('#cuPhone').value = c?.phone || ''; $('#cuWa').value = c?.whatsapp || ''; $('#cuEmail').value = c?.email || ''; $('#cuNotes').value = c?.notes || '';
+  cuContacts = (c?.contacts || []).map(x => Object.assign({}, x)); cuRenderContacts();
   $('#cuFreq').checked = !!c?.frequent; $('#cuErr').textContent = ''; $('#cuDel').hidden = $('#cuJob').hidden = $('#cuInv').hidden = !c;
   openModal('#custModal');
 }
+let cuContacts = [];
+function cuRenderContacts() {
+  const box = $('#cuContacts'); box.innerHTML = cuContacts.length ? '' : '<div class="sub" style="margin:0">None yet.</div>';
+  cuContacts.forEach((c, i) => {
+    const r = document.createElement('div'); r.className = 'row3'; r.style.cssText = 'grid-template-columns:1fr 1.3fr 1fr auto;margin-bottom:6px';
+    r.innerHTML = `<input placeholder="Name"><input type="email" placeholder="Email"><input type="tel" placeholder="WhatsApp"><button type="button" class="btn s" title="Remove">×</button>`;
+    const [n, e, w] = r.querySelectorAll('input'); n.value = c.name || ''; e.value = c.email || ''; w.value = c.whatsapp || '';
+    n.oninput = () => { c.name = n.value; }; e.oninput = () => { c.email = e.value; }; w.oninput = () => { c.whatsapp = w.value; };
+    r.querySelector('button').onclick = () => { cuContacts.splice(i, 1); cuRenderContacts(); };
+    box.appendChild(r);
+  });
+}
+$('#cuAddContact').onclick = () => { cuContacts.push({ name: '', email: '', whatsapp: '' }); cuRenderContacts(); $('#cuContacts').lastChild?.querySelector('input')?.focus(); };
 $('#addCust').onclick = () => custModal(null);
 $('#custBody').onclick = e => { const tr = e.target.closest('tr[data-id]'); if (tr) custModal(window._custRows.find(x => x.id == tr.dataset.id)); };
 $('#custForm').onsubmit = async e => {
   e.preventDefault(); $('#cuErr').textContent = '';
   try {
     await api('customer_save', { id: custEdit?.id || 0, name: $('#cuName').value, address1: $('#cuA1').value, address2: $('#cuA2').value, address3: $('#cuA3').value,
-      phone: $('#cuPhone').value, whatsapp: $('#cuWa').value, email: $('#cuEmail').value, notes: $('#cuNotes').value, frequent: $('#cuFreq').checked });
+      phone: $('#cuPhone').value, whatsapp: $('#cuWa').value, email: $('#cuEmail').value, notes: $('#cuNotes').value, frequent: $('#cuFreq').checked, contacts: cuContacts });
     closeModal('#custModal'); toast('Customer saved'); custCache = []; loadCustomers();
   } catch (err) { $('#cuErr').textContent = err.message; }
 };
@@ -1488,16 +1537,12 @@ $('#pMoves').onclick = async e => {
   const bl = e.target.closest('[data-bill]'); if (bl) { closeModal('#partModal'); openInvoice(+bl.dataset.bill); return; }
   const rq = e.target.closest('[data-req]'); if (rq) { closeModal('#partModal'); openRequest(+rq.dataset.req); return; }
   const b = e.target.closest('[data-inv]'); if (!b) return;
-  try { const j = await api('reports_list', { q: b.dataset.inv, limit: 5 }); const r = j.rows.find(x => String(x.invoice_no).padStart(4, '0') === b.dataset.inv); if (r) { closeModal('#partModal'); openReport(r.id); } } catch {}
+  try { const j = await api('reports_list', { q: b.dataset.inv, limit: 5 }); const r = j.rows.find(x => docNo(x.invoice_no) === b.dataset.inv); if (r) { closeModal('#partModal'); openReport(r.id); } } catch {}
 };
 
 /* ---------------- report drawer: email + office copy ---------------- */
 async function pdfB64(r) { const d = await buildPdf(withReq(r, openR && openR.id === r.id ? openRReqs : [])); return d.output('datauristring').split(',')[1]; }
-$('#dEmail').onclick = async () => {
-  if (!openR) return;
-  const to = prompt('Send this report by email to:', openR.customerEmail || ''); if (!to) return;
-  try { toast('Sending…'); await api('send_report', { id: openR.id, channel: 'email', to: to.trim(), pdf: await pdfB64(openR) }); toast('Email sent to ' + to); openReport(openR.id); } catch (e) { toast(e.message); }
-};
+$('#dEmail').onclick = () => sendInvoiceModal('email', 'report');
 $('#dBody').addEventListener('click', async e => {
   if (e.target.id === 'resendOffice' && openR) {
     try { toast('Sending…'); await api('send_report', { id: openR.id, channel: 'office', pdf: await pdfB64(openR) }); toast('Office copy sent'); openReport(openR.id); } catch (err) { toast(err.message); }
@@ -1509,7 +1554,21 @@ $('#dBody').addEventListener('click', async e => {
 });
 
 /* ---------------- settings: email ---------------- */
+async function loadWeekly() {
+  try {
+    const w = await api('weekly_status');
+    $('#weeklyStatus').innerHTML = `Every Monday from ${w.hour}:00 (${esc(w.tz)}) last week's service reports go to <b>${esc(w.to.join(', '))}</b>: a summary, a list for Excel and the signed PDFs in a zip.`
+      + `<br>${w.lastWeek ? 'Last one sent: ' + esc(w.lastWeek) + '.' : 'Not sent yet.'}`;
+  } catch (e) { $('#weeklyStatus').textContent = e.message; }
+}
+async function weeklyNow(thisWeek) {
+  const b = thisWeek ? $('#weeklyThis') : $('#weeklyLast'); b.disabled = true; toast('Sending…');
+  try { const r = await api('weekly_send_now', { thisWeek }); toast(`Sent: ${r.reports} reports (${r.pdfs} PDFs) to ${r.to.join(', ')}`); loadWeekly(); }
+  catch (e) { toast(e.message); } finally { b.disabled = false; }
+}
+$('#weeklyLast').onclick = () => weeklyNow(false); $('#weeklyThis').onclick = () => weeklyNow(true);
 async function loadMailStatus() {
+  loadWeekly();
   try {
     const m = await api('mail_status');
     $('#mailStatus').innerHTML = m.configured
@@ -1833,25 +1892,71 @@ async function loadServices() {
 $('#ivdPdf').onclick = () => openIv && saveInvoicePdf(openIv);
 $('#ivdPrint').onclick = () => openIv && printInvoicePdf(openIv);
 async function invB64(v) { const d = await buildInvoicePdf(v); return d.output('datauristring').split(',')[1]; }
-$('#ivdEmail').onclick = async () => {
-  if (!openIv) return;
-  const to = prompt('Send this invoice by email to:', openIv.customer.email || ''); if (!to) return;
-  try { toast('Sending…'); await api('invoice_send', { id: openIv.id, channel: 'email', to: to.trim(), pdf: await invB64(openIv) }); toast('Invoice emailed to ' + to); openInvoice(openIv.id); } catch (e) { toast(e.message); }
+/* send an invoice: pick one of the customer's contacts (main one + extra contacts) or add a new one */
+let sivCh = 'email', sivContacts = [], sivCust = null, sivDoc = 'invoice';
+async function sendInvoiceModal(channel, doc = 'invoice') {
+  const v = doc === 'report' ? (openR && { invoiceNo: openR.invoiceNo, customer: { name: openR.customerName || '', email: openR.customerEmail, whatsapp: openR.customerWhatsapp } }) : openIv;
+  if (!v) return; sivCh = channel; sivDoc = doc;
+  const what = doc === 'report' ? 'service report' : 'invoice';
+  $('#sivTitle').textContent = `Send ${what} by ${channel === 'email' ? 'email' : 'WhatsApp'}`;
+  $('#sivSub').textContent = `${doc === 'report' ? 'Service report' : 'Invoice'} #${v.invoiceNo} · ${v.customer.name}${doc === 'report' ? '' : ' · ' + money(v.total)}. The office gets a blind copy of every email.`;
+  $('#sivToLbl').textContent = channel === 'email' ? 'Email' : 'WhatsApp number (with country code)';
+  $('#sivErr').textContent = ''; $('#sivAdd').open = false; ['#sivName', '#sivEmail', '#sivWa'].forEach(x => $(x).value = '');
+  sivCust = null;
+  try { sivCust = (await api('customers_list', { q: v.customer.name })).customers.find(c => c.name.toLowerCase() === String(v.customer.name).toLowerCase()) || null; } catch {}
+  const c = sivCust || v.customer || {}, list = [], seen = new Set();
+  const add = (name, email, whatsapp, note) => { const k = (email || '').toLowerCase() + '|' + String(whatsapp || '').replace(/\D/g, ''); if (k === '|' || seen.has(k)) return; seen.add(k); list.push({ name, email: email || '', whatsapp: whatsapp || '', note }); };
+  add(c.name || v.customer.name, c.email || v.customer.email, c.whatsapp || c.phone || v.customer.whatsapp || v.customer.phone, 'main contact');
+  (c.contacts || []).forEach(x => add(x.name, x.email, x.whatsapp, ''));
+  sivContacts = list.filter(x => channel === 'email' ? x.email : String(x.whatsapp).replace(/\D/g, ''));
+  $('#sivTo').value = sivContacts[0] ? (channel === 'email' ? sivContacts[0].email : sivContacts[0].whatsapp) : '';
+  sivRender(); openModal('#sivModal'); $('#sivTo').focus();
+}
+function sivRender() {
+  const box = $('#sivList'); box.innerHTML = sivContacts.length ? '' : '<span class="sub" style="margin:0">No contact registered for this channel: write it below or add a contact.</span>';
+  sivContacts.forEach(c => {
+    const val = sivCh === 'email' ? c.email : c.whatsapp, b = document.createElement('button'); b.type = 'button';
+    b.innerHTML = `<b>${esc(c.name || val)}</b>${esc([val, c.note].filter(Boolean).join(' · '))}`; b.classList.toggle('on', $('#sivTo').value === val);
+    b.onclick = () => { $('#sivTo').value = val; sivRender(); }; box.appendChild(b);
+  });
+}
+$('#sivTo').addEventListener('input', sivRender);
+$('#sivSave').onclick = async () => {
+  const c = { name: $('#sivName').value.trim(), email: $('#sivEmail').value.trim(), whatsapp: $('#sivWa').value.trim() };
+  if (!c.email && !c.whatsapp) { $('#sivErr').textContent = 'Write an email or a WhatsApp number.'; return; }
+  try {
+    const name = sivDoc === 'report' ? openR.customerName : openIv.customer.name;
+    const j = await api('customer_contact_add', { customer: name, contact: c });
+    if (sivCust) sivCust.contacts = j.contacts; toast('Contact saved to ' + name);
+  } catch (e) { toast(e.message); }   // not a registered customer: the contact is used for this invoice only
+  const val = sivCh === 'email' ? c.email : c.whatsapp;
+  if (val) { sivContacts.push({ name: c.name, email: c.email, whatsapp: c.whatsapp, note: 'new' }); $('#sivTo').value = val; }
+  $('#sivAdd').open = false; sivRender();
 };
-$('#ivdWa').onclick = async () => {
-  if (!openIv) return; const v = openIv;
-  let to = v.customer.whatsapp || v.customer.phone || '';
-  if (!to) { to = prompt('Customer WhatsApp number (with country code):', ''); if (!to) return; }
-  const win = window.open('', '_blank');
+$('#sivGo').onclick = async () => {
+  const v = openIv, to = $('#sivTo').value.trim(); $('#sivErr').textContent = '';
+  if (sivCh === 'email') {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { $('#sivErr').textContent = 'Write a valid email.'; return; }
+    if (sivDoc === 'report') {
+      try { toast('Sending…'); await api('send_report', { id: openR.id, channel: 'email', to, pdf: await pdfB64(openR) }); closeModal('#sivModal'); toast('Email sent to ' + to); openReport(openR.id); } catch (e) { $('#sivErr').textContent = e.message; }
+      return;
+    }
+    try { toast('Sending…'); await api('invoice_send', { id: v.id, channel: 'email', to, pdf: await invB64(v) }); closeModal('#sivModal'); toast('Invoice emailed to ' + to); openInvoice(v.id); } catch (e) { $('#sivErr').textContent = e.message; }
+    return;
+  }
+  if (!to.replace(/\D/g, '')) { $('#sivErr').textContent = 'Write the WhatsApp number.'; return; }
+  const win = window.open('', '_blank');   // opened right away so the browser doesn't block it
   try {
     toast('Preparing…');
     const j = await api('invoice_send', { id: v.id, channel: 'whatsapp', to, pdf: await invB64(v) });
     const msg = `Hello ${v.customer.name}, here is invoice #${v.invoiceNo} from Cher Services LLC for ${money(v.total)}: ${j.link}`;
     const url = (j.phone ? `https://wa.me/${j.phone}` : 'https://wa.me/') + '?text=' + encodeURIComponent(msg);
     if (win) win.location = url;
-    waShow(url, msg); openInvoice(v.id);
-  } catch (e) { if (win) win.close(); toast(e.message); }
+    closeModal('#sivModal'); waShow(url, msg); openInvoice(v.id);
+  } catch (e) { if (win) win.close(); $('#sivErr').textContent = e.message; }
 };
+$('#ivdEmail').onclick = () => sendInvoiceModal('email');
+$('#ivdWa').onclick = () => sendInvoiceModal('whatsapp');
 
 /* ---- invoice editor ---- */
 let ivEdit = null, ivLines = [], ivOrig = {}, invAll = null, ivReportId = null, ivRequestId = null, pickTab = 'stock';
@@ -1860,7 +1965,61 @@ function termsDue() { const t = $('#ivTerms').value, d = $('#ivDate').value || i
 $('#ivTerms').onchange = termsDue; $('#ivDate').addEventListener('change', termsDue);
 $('#ivDue').addEventListener('change', () => { $('#ivTerms').value = ''; });
 
+/* ---- an invoice that was started but not saved is kept 24 hours (this browser), with reminders to save or delete it ---- */
+const IV_KEEP_H = 24, ivDraftKey = () => 'cher.ivDraft.' + (session?.user?.code || '');
+let ivDraftStart = null, ivResuming = false, ivDraftBase = null;
+const ivSnap = () => { const d = ivDraftCollect(true); return d ? JSON.stringify(d) : ''; };
+const ivDraftGet = () => { try { return JSON.parse(localStorage.getItem(ivDraftKey())); } catch { return null; } };
+function ivDraftClear() { try { localStorage.removeItem(ivDraftKey()); } catch {} ivDraftStart = null; ivUnsavedCheck(); }
+function ivDraftCollect(bare) {
+  const name = $('#ivCust').value.trim(), lines = ivLines.filter(l => String(l.name || '').trim());
+  if (!name && !lines.length) return null;
+  return { startedAt: bare ? '' : ivDraftStart || (ivDraftStart = new Date().toISOString()), editId: ivEdit?.id || 0, editNo: ivEdit?.invoiceNo || '', reportId: ivReportId, requestId: ivRequestId,
+    customer: { name, address1: $('#ivA1').value, address2: $('#ivA2').value, address3: $('#ivA3').value, phone: $('#ivPhone').value, whatsapp: $('#ivWa').value, email: $('#ivEmail').value },
+    date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, notes: $('#ivNotes').value, taxRate: $('#ivTax').value, lines: ivLines };
+}
+setInterval(() => {   // while the invoice window is open, keep a copy of what is typed
+  if ($('#ivModal').hidden || !session) return;
+  if (ivDraftBase !== null && ivSnap() === ivDraftBase) return;   // nothing changed since it was opened
+  const d = ivDraftCollect(); if (d) try { localStorage.setItem(ivDraftKey(), JSON.stringify(d)); } catch {}
+}, 3000);
+function ivUnsavedCheck() {
+  const d = ivDraftGet(), bar = $('#ivUnsaved'), now = Date.now();
+  if (d && now - Date.parse(d.startedAt) > IV_KEEP_H * 3600000) { try { localStorage.removeItem(ivDraftKey()); } catch {} toast('An invoice that was not saved for 24 hours was deleted.'); }
+  const dd = ivDraftGet();
+  if (!dd || !$('#ivModal').hidden || !session) { bar.hidden = true; return; }
+  const h = Math.max(1, Math.ceil((Date.parse(dd.startedAt) + IV_KEEP_H * 3600000 - now) / 3600000));
+  const msg = `⚠ ${dd.editId ? 'Changes to invoice #' + dd.editNo : 'A new invoice'}${dd.customer?.name ? ' for ' + dd.customer.name : ''} ${dd.editId ? 'are' : 'is'} not saved (started ${new Date(dd.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}). Save or delete — deleted automatically in ${h} h.`;
+  $('#ivUnsavedTxt').textContent = msg; bar.hidden = false;
+  const k = 'cher.remind.iv.' + dd.startedAt, last = +(localStorage.getItem(k) || 0);
+  if (now - last > 30 * 60000) {   // a reminder every 30 minutes, also as a notification when the panel is in the background
+    try { localStorage.setItem(k, String(now)); } catch {}
+    toast(msg); try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: msg, icon: 'icons/icon-192.png' }); } catch {}
+  }
+}
+async function ivResume() {
+  const d = ivDraftGet(); if (!d) return;
+  let v = null; if (d.editId) { try { v = (await api('invoice_get', { id: d.editId })).invoice; } catch (e) { toast(e.message); return; } }
+  ivResuming = true; await invoiceModal(v, v ? null : d); ivResuming = false;
+  ivDraftStart = d.startedAt; ivReportId = d.reportId || null; ivRequestId = d.requestId || null;
+  const c = d.customer || {};
+  $('#ivCust').value = c.name || ''; $('#ivA1').value = c.address1 || ''; $('#ivA2').value = c.address2 || ''; $('#ivA3').value = c.address3 || '';
+  $('#ivPhone').value = c.phone || ''; $('#ivWa').value = c.whatsapp || ''; $('#ivEmail').value = c.email || '';
+  $('#ivDate').value = d.date || $('#ivDate').value; $('#ivDue').value = d.dueDate || $('#ivDue').value; $('#ivTerms').value = d.terms ?? ''; $('#ivRef').value = d.reference || '';
+  $('#ivNotes').value = d.notes || ''; $('#ivTax').value = d.taxRate ?? $('#ivTax').value; ivLines = (d.lines || []).map(l => ({ ...l })); custState(); renderLines();
+  ivDraftBase = null;
+}
+$('#ivUnsavedOpen').onclick = ivResume;
+$('#ivUnsavedDel').onclick = () => { if (confirm('Delete this invoice that was never saved?')) { ivDraftClear(); toast('Deleted'); } };
+setInterval(ivUnsavedCheck, 60000);
+new MutationObserver(ivUnsavedCheck).observe($('#ivModal'), { attributes: true, attributeFilter: ['hidden'] });   // the banner appears when the window is closed without saving
+
 async function invoiceModal(v, preset) {
+  if (!ivResuming && ivDraftGet()) {   // only one unsaved invoice at a time
+    if (confirm('There is an invoice that was not saved. Continue with it? (Cancel deletes it and starts this one.)')) return ivResume();
+    ivDraftClear();
+  }
+  ivDraftStart = null;
   ivEdit = v || null; const d = v || preset || {}, c = d.customer || {};
   await ensureCustomers();
   try { ivSettings = await api('settings_get'); } catch {}
@@ -1881,7 +2040,7 @@ async function invoiceModal(v, preset) {
   ivOrig = {}; if (v) v.lines.forEach(l => { if (l.source === 'stock' && l.itemId && !l.noStock) ivOrig[l.itemId] = (ivOrig[l.itemId] || 0) + +l.qty; });
   $('#ivTax').value = d.taxRate ?? ivSettings.taxRate ?? 0;
   $('#ivPick').hidden = true; $('#ivErr').textContent = '';
-  custState(); renderLines(); openModal('#ivModal');
+  custState(); renderLines(); openModal('#ivModal'); ivDraftBase = ivSnap();
 }
 function custMatch() { const n = $('#ivCust').value.trim().toLowerCase(); return n ? custCache.find(x => x.name.toLowerCase() === n) : null; }
 function custState() {
@@ -1999,7 +2158,7 @@ $('#ivSave').onclick = async () => {
       customer: { name, address1: $('#ivA1').value, address2: $('#ivA2').value, address3: $('#ivA3').value, phone: $('#ivPhone').value, whatsapp: $('#ivWa').value, email: $('#ivEmail').value },
       date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, reportId: ivReportId, requestId: ivRequestId,
       lines: ivLines, taxRate: $('#ivTax').value || 0, notes: $('#ivNotes').value } });
-    closeModal('#ivModal'); toast(`Invoice #${j.invoice.invoiceNo} saved`); custCache = []; invAll = null;
+    closeModal('#ivModal'); ivDraftClear(); toast(`Invoice #${j.invoice.invoiceNo} saved`); custCache = []; invAll = null;
     if (current !== 'invoices') view('invoices'); else loadInvoices();
     openInvoice(j.invoice.id);
   } catch (e) { $('#ivErr').textContent = e.message; }
@@ -2030,6 +2189,7 @@ function devRender() {
 }
 function devTab(d) { $$('#devTabs button').forEach(x => x.classList.toggle('on', x.dataset.d === d)); $('#devLoad').hidden = d !== 'load'; $('#devReset').hidden = d !== 'reset'; $('#devExport').hidden = d !== 'export'; $('#devTut').hidden = d !== 'tutorial'; }
 function openDev(tab) {
+  api('settings_get').then(j => { $('#rsSeries').textContent = `${(j.series || 0) + 1}-001`; }).catch(() => {});
   $('#devLock').hidden = !!devPin; $('#devBody').hidden = !devPin; $('#devPin').value = ''; $('#devErr').textContent = '';
   if (tab) devTab(tab); devRender(); openModal('#devModal'); if (!devPin) $('#devPin').focus();
 }
@@ -2091,19 +2251,26 @@ function fakeReport(tech, type) {
     time: [{ date: d, left: '07:30', started: '08:15', completed: '11:40', mileage: '22' }], notes: maint ? 'Next service at 1450 h' : '', customerComment: 'Load test',
     sigs: { serviceman: { img: fakeSignature(), name: tech.code, at: now }, customer: { img: fakeSignature(), name: 'Test Customer', at: now } } };
 }
+/* the journey of every simulated person: when they signed in and out, and which screens ("stations") they went through */
+function ltPerson(code, role) { return LT.people[code] = LT.people[code] || { code, role, in: null, out: null, st: {} }; }
+const ltSt = (p, name) => { p.st[name] = (p.st[name] || 0) + 1; };
+const fmtDur = ms => { const t = Math.max(0, Math.round(ms / 1000)), h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, x = t % 60; return h ? `${h} h ${m} min` : m ? `${m} min ${x} s` : `${x} s`; };
+const fmtT = t => t ? new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }) : '—';
 /* one simulated technician: the same calls the tablet app makes, at the same pace */
 async function ltTech(i) {
   const tech = { code: 'TEST' + String(i).padStart(2, '0'), token: null }, stop = () => LT.stop || Date.now() >= LT.end;
   if (LT.watch === 'tech' && i === 1) return;   // TEST01 is the one on screen, driven by the real app
   await sleepUntil(Math.random() * Math.min(30000, LT.durMs / 4), stop);   // technicians arrive over the first ~30 s
   if (stop()) return;
+  const P = ltPerson(tech.code, 'Technician');
   const j = await ltCall(tech, 'login', { code: tech.code, pin: LT.pin }); if (!j) return;
-  tech.token = j.token; LT.active++;
+  tech.token = j.token; LT.active++; P.in = Date.now(); ltSt(P, 'Sign in');
   // first screen: everything the app downloads after signing in (all its tabs)
   let stock = [];
   for (const a of ['me', 'customers', 'inventory_list', 'service_items', 'jobs_list', 'preq_list', 'my_reports']) {
     if (stop()) break; const r = await ltCall(tech, a); if (a === 'inventory_list' && r?.items) stock = r.items.filter(x => (x.kind || 'stock') === 'stock' && x.active !== false);
   }
+  ltSt(P, 'Download data (all tabs)');
   let nextRep = Date.now() + Math.random() * LT.repMs;
   while (!stop()) {
     await sleepUntil(24000 + Math.random() * 12000, stop); if (stop()) break;   // the app syncs every 24–36 s
@@ -2112,57 +2279,81 @@ async function ltTech(i) {
       let last = null;
       for (const type of ['repair', 'maintenance']) {
         if (stop()) break; const rep = fakeReport(tech, type);
+        await ltCall(tech, 'reserve_number', { reportId: rep.id });   // the app reserves the number when the report is started
+        ltSt(P, type === 'repair' ? 'Fill Service Report' : 'Equipment Service Report');
         if (await ltCall(tech, 'save_report', { report: rep })) { LT.reports++; LT.byType[type]++; if (type === 'repair') last = rep; }
       }
       if (last && !stop()) {
-        await ltCall(tech, 'equipment_history', { serial: last.serialNo, excludeId: last.id });   // the "history of this machine" chip
+        await ltCall(tech, 'equipment_history', { serial: last.serialNo, excludeId: last.id }); ltSt(P, 'Equipment history');   // the "history of this machine" chip
         const it = stock[Math.floor(Math.random() * stock.length)];
         const lines = [{ key: 'a' + Math.random().toString(36).slice(2, 9), name: 'Hydraulic hose 1/2 in (load test)', qty: 2, unit: 'ea', source: 'order', vendor: '' }];
         if (it) lines.unshift({ key: 'b' + Math.random().toString(36).slice(2, 9), itemId: it.id, partNo: it.partNo || '', name: it.name, unit: it.unit || 'ea', qty: 1, source: 'stock' });
-        if (await ltCall(tech, 'preq_save', { request: { reportId: last.id, customer: last.customerName, equipment: `${last.make} ${last.model} S/N ${last.serialNo}`, serialNo: last.serialNo, note: 'Load test', lines } })) LT.requests++;
+        if (await ltCall(tech, 'preq_save', { request: { reportId: last.id, customer: last.customerName, equipment: `${last.make} ${last.model} S/N ${last.serialNo}`, serialNo: last.serialNo, note: 'Load test', lines } })) { LT.requests++; ltSt(P, 'Parts request'); }
       }
       nextRep += LT.repMs;
     }
-    await ltCall(tech, 'preq_list');                                  // Parts requests tab
-    if (Math.random() < 0.35) await ltCall(tech, 'jobs_list');         // Jobs tab
-    if (Math.random() < 0.15) await ltCall(tech, 'my_reports');        // History tab
+    await ltCall(tech, 'preq_list'); ltSt(P, 'Parts Requests tab');
+    if (Math.random() < 0.35) { await ltCall(tech, 'jobs_list'); ltSt(P, 'Jobs tab'); }
+    if (Math.random() < 0.15) { await ltCall(tech, 'my_reports'); ltSt(P, 'History tab'); }
   }
   await sleepUntil(Math.random() * 8000, () => false);   // people don't all sign out in the same second
-  await ltCall(tech, 'logout'); LT.active--;
+  await ltCall(tech, 'logout'); LT.active--; P.out = Date.now(); ltSt(P, 'Sign out');
 }
 /* one simulated supervisor: goes through every tab of this panel, opens records and answers parts requests */
 async function ltSup(i) {
   const sup = { code: 'TESTSUP' + i, token: null }, stop = () => LT.stop || Date.now() >= LT.end;
   if (LT.watch === 'sup' && i === 1) return;   // TESTSUP1 is the one on screen
   await sleepUntil(Math.random() * Math.min(20000, LT.durMs / 4), stop); if (stop()) return;
+  const P = ltPerson(sup.code, 'Supervisor');
   const j = await ltCall(sup, 'login', { code: sup.code, pin: LT.pin, supervisorOnly: true }); if (!j) return;
-  sup.token = j.token; LT.activeSup++;
+  sup.token = j.token; LT.activeSup++; P.in = Date.now(); ltSt(P, 'Sign in');
   await ltCall(sup, 'me'); await ltCall(sup, 'badges');
   const range = () => ({ from: iso(new Date(Date.now() - 30 * 864e5)), to: iso(new Date()) });
   const first = (r, k) => (r && r[k] && r[k].length) ? r[k][Math.floor(Math.random() * Math.min(5, r[k].length))] : null;
   const TABS = [
-    async () => { const r = first(await ltCall(sup, 'reports_list', { limit: 50, offset: 0 }), 'rows'); if (r) await ltCall(sup, 'report_get', { id: r.id });
-      await ltCall(sup, 'jobs_list', { ...range(), status: '', employeeId: '', unassigned: false }); },
-    async () => { const v = first(await ltCall(sup, 'invoices_list', { q: '', status: '', from: '', to: '' }), 'rows'); if (v) await ltCall(sup, 'invoice_get', { id: v.id });
-      await ltCall(sup, 'invoice_stats', range()); },
-    async () => { const l = await ltCall(sup, 'preq_list', { status: '' }), q = (l?.requests || []).find(x => x.status === 'requested' && x.note === 'Load test');
+    ['Reports & Jobs', async () => { const r = first(await ltCall(sup, 'reports_list', { limit: 50, offset: 0 }), 'rows'); if (r) await ltCall(sup, 'report_get', { id: r.id });
+      await ltCall(sup, 'jobs_list', { ...range(), status: '', employeeId: '', unassigned: false }); }],
+    ['Invoices', async () => { const v = first(await ltCall(sup, 'invoices_list', { q: '', status: '', from: '', to: '' }), 'rows'); if (v) await ltCall(sup, 'invoice_get', { id: v.id });
+      await ltCall(sup, 'invoice_stats', range()); }],
+    ['Parts & Orders', async () => { const l = await ltCall(sup, 'preq_list', { status: '' }), q = (l?.requests || []).find(x => x.status === 'requested' && x.note === 'Load test');
       if (q) await ltCall(sup, 'preq_update', { id: q.id, reply: 'Load test: checked, the parts arrive tomorrow', status: 'quoted' });
-      await ltCall(sup, 'orders_list', { status: '' }); },
-    async () => { await ltCall(sup, 'customers_list', {}); },
-    async () => { const p = first(await ltCall(sup, 'inventory_list', { includeArchived: true }), 'items'); if (p) await ltCall(sup, 'inventory_moves', { id: p.id }); },
-    async () => { const e = first(await ltCall(sup, 'equipment_list', { q: '' }), 'equipment'); if (e?.serial_no) await ltCall(sup, 'equipment_history', { serial: e.serial_no }); },
-    async () => { await ltCall(sup, 'stats', { ...range(), employeeId: '' }); },
-    async () => { await ltCall(sup, 'employees_list'); },
-    async () => { await ltCall(sup, 'settings_get'); await ltCall(sup, 'mail_status'); await ltCall(sup, 'audit_list'); }
+      await ltCall(sup, 'orders_list', { status: '' }); }],
+    ['Customers', async () => { await ltCall(sup, 'customers_list', {}); }],
+    ['Inventory', async () => { const p = first(await ltCall(sup, 'inventory_list', { includeArchived: true }), 'items'); if (p) await ltCall(sup, 'inventory_moves', { id: p.id }); }],
+    ['Equipment', async () => { const e = first(await ltCall(sup, 'equipment_list', { q: '' }), 'equipment'); if (e?.serial_no) await ltCall(sup, 'equipment_history', { serial: e.serial_no }); }],
+    ['Statistics', async () => { await ltCall(sup, 'stats', { ...range(), employeeId: '' }); }],
+    ['Employees', async () => { await ltCall(sup, 'employees_list'); }],
+    ['Settings', async () => { await ltCall(sup, 'settings_get'); await ltCall(sup, 'mail_status'); await ltCall(sup, 'audit_list'); }]
   ];
   let k = Math.floor(Math.random() * TABS.length), lastBadge = Date.now();
   while (!stop()) {
-    await TABS[k++ % TABS.length]();
+    const [tab, go] = TABS[k++ % TABS.length]; ltSt(P, tab); await go();
     if (Date.now() - lastBadge > 60000) { await ltCall(sup, 'badges'); lastBadge = Date.now(); }   // the panel refreshes its badges every minute
     await sleepUntil(15000 + Math.random() * 15000, stop);    // a person reads the screen before moving on
   }
   await sleepUntil(Math.random() * 8000, () => false);
-  await ltCall(sup, 'logout'); LT.activeSup--;
+  await ltCall(sup, 'logout'); LT.activeSup--; P.out = Date.now(); ltSt(P, 'Sign out');
+}
+/* who was online, for how long, and where they went */
+function ltJourneyHtml() {
+  const now = Date.now(), J = LT.journey, people = Object.values(LT.people).filter(p => p.in);
+  let h = '';
+  if (LT.watch !== 'none' && (J.in || J.stations.length)) {
+    const who = LT.watch === 'sup' ? 'TESTSUP1 (supervisor)' : 'TEST01 (technician)', st = J.stations;
+    const rounds = st.filter(x => /^(Fill Service Report: new report|Reports & Jobs)$/.test(x.name)).length;
+    h += `<details class="fbox" id="ltJourneyD"${$('#ltJourneyD')?.open ? ' open' : ''}><summary style="cursor:pointer;font-weight:700">On screen: ${esc(who)} — ${J.in ? `session opened at ${fmtT(J.in)}${J.out ? `, closed at ${fmtT(J.out)}` : ''}, online ${fmtDur((J.out || now) - J.in)}` : 'not signed in yet'} · ${fmtN(st.length)} stations · ${fmtN(J.taps)} taps (moves of the cursor) · ${fmtN(rounds)} round${rounds === 1 ? '' : 's'}</summary>
+      <div class="tablewrap" style="max-height:320px;overflow:auto;margin-top:8px"><table class="t"><thead><tr><th>Time</th><th>Station</th><th class="num">Time there</th></tr></thead><tbody>
+      ${st.map((x, i) => `<tr><td>${fmtT(x.at)}</td><td>${esc(x.name)}</td><td class="num">${fmtDur((st[i + 1]?.at || J.out || now) - x.at)}</td></tr>`).reverse().join('')}</tbody></table></div></details>`;
+  }
+  if (people.length) {
+    const online = p => (p.out || now) - p.in, avg = people.reduce((a, p) => a + online(p), 0) / people.length;
+    const visits = people.reduce((a, p) => a + Object.values(p.st).reduce((x, y) => x + y, 0), 0);
+    h += `<details class="fbox" id="ltPeopleD"${$('#ltPeopleD')?.open ? ' open' : ''}><summary style="cursor:pointer;font-weight:700">Simulated people: ${fmtN(people.length)} signed in · average time online ${fmtDur(avg)} · ${fmtN(visits)} station visits</summary>
+      <div class="tablewrap" style="max-height:360px;overflow:auto;margin-top:8px"><table class="t"><thead><tr><th>Person</th><th>Role</th><th>Signed in</th><th>Signed out</th><th class="num">Time online</th><th>Stations visited (times)</th></tr></thead><tbody>
+      ${people.sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true })).map(p => `<tr><td><b>${esc(p.code)}</b></td><td>${esc(p.role)}</td><td>${fmtT(p.in)}</td><td>${p.out ? fmtT(p.out) : 'still online'}</td><td class="num">${fmtDur(online(p))}</td>
+        <td style="font-size:12px">${Object.entries(p.st).map(([k, v]) => `${esc(k)} ×${v}`).join(' · ')}</td></tr>`).join('')}</tbody></table></div></details>`;
+  }
+  return h;
 }
 const pct = (a, p) => { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
 function ltRender(final) {
@@ -2174,6 +2365,7 @@ function ltRender(final) {
     : ['ok', `✓ Fine: ${fmtN(n)} requests, ${e ? fmtN(e) + ' errors' : 'no errors'}, 95% answered in under ${(p95 / 1000).toFixed(2)} s.${LT.retries ? ` ${fmtN(LT.retries)} had to wait a few seconds because the server was busy, then went through (the tablets do the same by themselves).` : ''}`];
   $('#ltOut').innerHTML = `<div class="kpis k4">${[['People online', `${fmtN(LT.active + LT.activeSup)} / ${fmtN(LT.n + LT.ns)}`, LT.stop || Date.now() >= LT.end ? 'test finished' : `${fmtN(LT.active)} technicians · ${fmtN(LT.activeSup)} supervisors`],
       ['Requests', fmtN(n), `${(n / secs * 60).toFixed(0)} per minute`], ['Errors', fmtN(e), (n ? (e / n * 100).toFixed(1) + '% of requests' : '') + (LT.retries ? ` · ${fmtN(LT.retries)} retried when busy` : '')], ['Reports saved', fmtN(LT.reports), `${fmtN(LT.byType.repair)} service · ${fmtN(LT.byType.maintenance)} equipment${LT.demoReports ? ` · ${fmtN(LT.demoReports)} on screen` : ''} · ${fmtN(LT.requests)} parts requests`]].map(kpi).join('')}</div>
+    ${ltJourneyHtml()}
     ${verdict && (final || n > 50) ? `<p style="font-weight:700;color:var(--${verdict[0] === 'ok' ? 'ok' : verdict[0] === 'warn' ? 'warn' : 'red'})">${esc(verdict[1])}</p>` : ''}
     <div class="tablewrap"><table class="t"><thead><tr><th>Action</th><th class="num">Requests</th><th class="num">Errors</th><th class="num">Average</th><th class="num">95% under</th><th class="num">Slowest</th></tr></thead><tbody>
     ${Object.entries(LT.stats).map(([a, x]) => `<tr><td>${esc(a)}</td><td class="num">${fmtN(x.n)}</td><td class="num" style="${x.err ? 'color:var(--red);font-weight:700' : ''}">${fmtN(x.err)}</td>
@@ -2186,7 +2378,12 @@ function demoStart() { if (LT && LT.watch !== 'none' && LT.start && !LT.done) de
 if (demoChan) demoChan.onmessage = e => {
   const m = e.data || {}; if (!LT) return;
   if (m.type === 'ready') { LT.demoSeen = true; demoStart(); }
-  if (m.type === 'status') { LT.demoSeen = true; $('#ltDemo').hidden = false; $('#ltDemo').textContent = `On screen (${m.who === 'sup' ? 'TESTSUP1' : 'TEST01'}): ${m.text}`; }
+  if (m.type === 'status') {
+    LT.demoSeen = true; $('#ltDemo').hidden = false; $('#ltDemo').textContent = `On screen (${m.who === 'sup' ? 'TESTSUP1' : 'TEST01'}): ${m.text}`;
+    if (m.station && LT.journey.stations.at(-1)?.name !== m.text) LT.journey.stations.push({ name: m.text, at: Date.now() });
+  }
+  if (m.type === 'tap') LT.journey.taps++;
+  if (m.type === 'session') { if (m.on) LT.journey.in = LT.journey.in || Date.now(); else LT.journey.out = Date.now(); }
   if (m.type === 'report') { LT.reports++; LT.demoReports++; }
   if (m.type === 'request') LT.requests++;
 };
@@ -2197,7 +2394,7 @@ $('#ltStart').onclick = async () => {
   if (!n && !ns) { toast('Choose at least one technician or supervisor'); return; }
   if (!confirm(`Simulate ${n} technicians and ${ns} supervisors for ${min} minutes? It creates real reports and parts requests on the server (delete them afterwards with “Reset data”).`)) return;
   if (watch !== 'none') window.open('index.html#demo', 'cherDemo', 'noopener');   // opened now: browsers only allow pop-ups right after a click
-  LT = { n, ns, watch, stop: false, done: false, active: 0, activeSup: 0, reports: 0, demoReports: 0, requests: 0, byType: { repair: 0, maintenance: 0 }, retries: 0, stats: {}, errors: {},
+  LT = { n, ns, watch, stop: false, done: false, active: 0, activeSup: 0, reports: 0, demoReports: 0, requests: 0, byType: { repair: 0, maintenance: 0 }, retries: 0, stats: {}, errors: {}, people: {}, journey: { in: null, out: null, taps: 0, stations: [] },
     pin: String(100000 + Math.floor(Math.random() * 900000)), repMs: rep * 60000, durMs: min * 60000 };
   $('#ltStart').hidden = true; $('#ltStop').hidden = false; $('#ltOut').innerHTML = ''; $('#ltDemo').hidden = true;
   const accounts = [...Array.from({ length: n }, (_, i) => ({ code: 'TEST' + String(i + 1).padStart(2, '0'), name: 'Test Tech ' + String(i + 1).padStart(2, '0'), role: 'tech' })),
@@ -2363,7 +2560,7 @@ $('#tutStopBar').onclick = tutStop;
 /* ---- reset (one step on the server) ---- */
 const rsLog = m => { const b = $('#rsLog'); b.hidden = false; b.insertAdjacentHTML('beforeend', `<div>${esc(new Date().toLocaleTimeString())} · ${esc(m)}</div>`); b.scrollTop = b.scrollHeight; };
 const RS_LBL = { reports: 'Service reports', testReports: 'Load-test reports', invoices: 'Invoices', partsRequests: 'Parts requests', vendorOrders: 'Vendor orders', jobs: 'Jobs', customers: 'Customers',
-  testCustomers: 'Load-test customers', partsArchived: 'Parts archived', testTechs: 'Test technicians', testTechsDeactivated: 'Test technicians deactivated', techsDeactivated: 'Technicians deactivated', nextInvoice: 'Next invoice number' };
+  testCustomers: 'Load-test customers', partsArchived: 'Parts archived', testTechs: 'Test technicians', testTechsDeactivated: 'Test technicians deactivated', techsDeactivated: 'Technicians deactivated', nextInvoice: 'Next invoice number', series: 'New number series', nextNo: 'Next report / invoice number' };
 $('#rsBackup').onclick = $('#exSql').onclick = () => $('#bkBtn').click();
 $('#rsGo').onclick = async () => {
   const w = {}; $$('#devReset [data-w]').forEach(c => { w[c.dataset.w] = c.checked; });
@@ -2375,7 +2572,7 @@ $('#rsGo').onclick = async () => {
   try {
     const j = await api('dev_reset', { pin: devPin, wipe: w, nextInvoice: next || null });
     const d = Object.entries(j.deleted || {});
-    d.length ? d.forEach(([k, v]) => rsLog(`${RS_LBL[k] || k}: ${fmtN(v)}`)) : rsLog('Nothing to delete');
+    d.length ? d.forEach(([k, v]) => rsLog(`${RS_LBL[k] || k}: ${typeof v === 'number' ? fmtN(v) : v}`)) : rsLog('Nothing to delete');
     rsLog('Done.'); toast('Reset done');
   } catch (e) { rsLog('Not done: ' + e.message); }
   finally { btn.disabled = false; $('#rsConfirm').value = ''; loadEmps(); loadCounts(); view(current); }
@@ -2698,14 +2895,14 @@ async function demoRun() {
   moveTo(innerWidth / 2, innerHeight / 2);
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const check = () => { if (stopped) throw new Error('stopped'); };
-  const say = m => { bar.textContent = '▶ ' + m; ch.postMessage({ type: 'status', who: 'sup', text: m }); };
+  const say = m => { bar.textContent = '▶ ' + m; ch.postMessage({ type: 'status', who: 'sup', text: m, station: !/^(Round|Finished)/.test(m) }); };
   const vis = s => $$(s).find(e => e.offsetParent !== null);
   async function until(f, ms = 8000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { check(); const v = f(); if (v) return v; await wait(150); } return null; }
   async function tap(s, pause = 900) {
     check(); const e = typeof s === 'string' ? vis(s) : s; if (!e) return false;
     e.scrollIntoView({ block: 'center', behavior: 'smooth' }); await wait(400);
     const r = e.getBoundingClientRect(), x = r.left + Math.min(r.width / 2, 70), y = r.top + r.height / 2; moveTo(x, y); await wait(550);
-    cur.classList.add('tap'); e.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y }));
+    cur.classList.add('tap'); ch.postMessage({ type: 'tap', who: 'sup' }); e.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: x, clientY: y }));
     await wait(180); cur.classList.remove('tap'); await wait(pause); return true;
   }
   async function type(s, text) {
@@ -2715,6 +2912,7 @@ async function demoRun() {
   }
   const close = async () => { await wait(1800); document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); await wait(700); };
   async function openFirst(body, what) { const tr = await until(() => $(`${body} tr[data-id], ${body} tr[data-i]`), 5000); if (!tr) return false; say(what); await tap(tr, 1500); return true; }
+  ch.postMessage({ type: 'session', who: 'sup', on: true });   // signed in (the start page did it a moment ago)
   try {
     await wait(1500);
     for (let n = 0; Date.now() < cfg.until; n++) {
@@ -2746,7 +2944,7 @@ async function demoRun() {
     }
   } catch (e) { if (e.message !== 'stopped') say('Stopped: ' + e.message); }
   sessionStorage.removeItem('cher.demo'); ch.postMessage({ type: 'done', who: 'sup' });
-  say('Finished — signing out'); await wait(1200); logout(false);
+  say('Finished — signing out'); await wait(1200); ch.postMessage({ type: 'session', who: 'sup', on: false }); logout(false);
 }
 
 boot();

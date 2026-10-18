@@ -36,6 +36,8 @@ header.top .t span{font-size:12px;color:var(--muted)}
 .tabs button{background:#eef2f8;border:0;color:var(--navy);padding:9px 14px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer}
 .tabs button.on{background:var(--navy);color:#fff}
 main{max-width:980px;margin:0 auto;padding:16px 16px calc(110px + env(safe-area-inset-bottom))}
+.unsaved{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff4e5;border:1.5px solid #f0a54a;color:#7a3e00;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:600}
+.unsaved span{flex:1;min-width:220px}.unsaved .btn{padding:7px 12px;font-size:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
 .card h2{margin:0 0 12px;color:var(--navy);font-size:15px;letter-spacing:.6px;text-transform:uppercase}
 .brand{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
@@ -216,6 +218,10 @@ table.parts .x{background:none;border:0;color:var(--red);font-size:22px;cursor:p
 .pick .pr{font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums}
 .pick[disabled]{opacity:.55}
 .sendrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+.contacts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.contacts button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:7px 11px;text-align:left;cursor:pointer;font:inherit;font-size:13px;line-height:1.3}
+.contacts button b{display:block;font-size:14px}.contacts button.on{border-color:var(--navy);background:#eef3ff}
+.addc{border:1.5px dashed var(--line);border-radius:10px;padding:8px 12px;margin:6px 0 12px}.addc summary{cursor:pointer;font-weight:700;color:var(--navy)}
 .btn.wa{background:#1fa855;color:#fff}
 .btn.em{background:var(--navy);color:#fff}
 .btn.full{width:100%;justify-content:center}
@@ -291,6 +297,8 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
 </header>
 
 <main>
+  <div class="unsaved" id="unsavedBar" hidden><span id="unsavedTxt"></span>
+    <button class="btn s" type="button" id="unsavedOpen" data-t="unsavedOpen">Open</button><button class="btn p" type="button" id="unsavedSave" data-t="save">Save</button><button class="btn d" type="button" id="unsavedDel" data-t="delete">Delete</button></div>
   <div class="install" id="installBox"><span id="installText" data-t="installText">Install this app on your tablet for full-screen, offline use.</span><button class="btn p" id="installBtn" type="button" data-t="install">Install</button><button class="btn s" id="installClose" type="button">✕</button></div>
 
   <!-- ============ JOBS VIEW ============ -->
@@ -494,6 +502,16 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
   <div class="pn">
     <div class="hd"><h3 data-t="sendTitle">Send report to customer</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
     <p class="sub" id="sendSub"></p>
+    <div class="f"><label data-t="sendToWho">Send to</label><div class="contacts" id="contactList"></div></div>
+    <details class="addc" id="addContact"><summary data-t="addContact">+ Add a contact</summary>
+      <div class="grid g3" style="margin-top:10px">
+        <div class="f"><label data-t="contactName">Name</label><input id="ncName" autocomplete="off"></div>
+        <div class="f"><label data-t="email">Email</label><input id="ncEmail" type="email" inputmode="email" autocapitalize="off" placeholder="name@company.com"></div>
+        <div class="f"><label>WhatsApp</label><input id="ncWa" type="tel" inputmode="tel" placeholder="+1 786 555 0101"></div>
+      </div>
+      <button class="btn s" type="button" id="ncAdd" style="margin-top:10px" data-t="addContactBtn">Add and use this contact</button>
+      <div class="hint" id="ncHint" style="margin-top:6px"></div>
+    </details>
     <div class="f" style="margin-bottom:10px"><label data-t="msgLang">Message language</label>
       <div class="seg2" id="msgLang"><button type="button" data-l="en">English</button><button type="button" data-l="es">Español</button></div></div>
     <div class="sendrow"><div class="f"><label data-t="email">Email</label><input id="sendEmail" type="email" inputmode="email" autocapitalize="off" placeholder="name@company.com"></div>
@@ -578,7 +596,10 @@ const I18N = {
     installText: 'Install this app on your tablet for full-screen, offline use.', install: 'Install',
     installIos: 'Install on iPad/iPhone: tap Share ⬆ then "Add to Home Screen".', installSafari: 'In Safari: tap Share ⬆, then "Add to Home Screen"',
     myJobs: 'My jobs', refresh: 'Refresh', newJob: '+ New job', jobsHint: 'Jobs assigned to you by the office. Tap “Start report” to open the service report already filled in.',
-    invoiceNo: 'INVOICE NO.', customer: 'Customer', workOrder: 'Work order #', customerName: 'Customer name', address: 'Address', street: 'Street',
+    numReserved: 'Number #{n} reserved for this report', unsavedOpen: 'Open', delete: 'Delete',
+    unsavedBar: '⚠ {what} is not saved (started {since}). Save it or delete it — it is deleted automatically in {h} h.', unsavedDelQ: 'Delete this report that was never saved? This cannot be undone.',
+    unsavedGone: '{what}: a report that was not saved for 24 hours was deleted.', sendToWho: 'Send to', addContact: '+ Add a contact', contactName: 'Name', addContactBtn: 'Add and use this contact',
+    mainContact: 'Main contact', thisReport: 'Written on this report', contactSaved: 'Contact saved to {c}', contactNotSaved: 'The contact will be used for this report only (the customer is not registered yet).', needContact: 'Write an email or a WhatsApp number', noContacts: 'No contact registered yet: write one below or add a contact.', invoiceNo: 'INVOICE NO.', customer: 'Customer', workOrder: 'Work order #', customerName: 'Customer name', address: 'Address', street: 'Street',
     cityState: 'City, State / Parish', zipCountry: 'ZIP / Country / Phone', email: 'Email', job: 'Job', employeeId: 'Employee ID #', instructions: 'Instructions',
     serials: 'Related serial numbers', model: 'Model', serialNo: 'Serial No.', make: 'Make', hour: 'Hour', location: 'Location', deliveryDate: 'Delivery date',
     timeRecord: 'Daily time record', addDay: '+ Add day', date: 'Date', time: 'Time', leftShop: 'Left W/Shop', started: 'Started job', completed: 'Completed', mileage: 'Mileage', removeDay: 'Remove day',
@@ -647,7 +668,10 @@ const I18N = {
     installText: 'Instala esta app en la tablet para usarla a pantalla completa y sin internet.', install: 'Instalar',
     installIos: 'Para instalar en iPad/iPhone: toca Compartir ⬆ y luego "Agregar a inicio".', installSafari: 'En Safari: toca Compartir ⬆ y luego "Agregar a inicio"',
     myJobs: 'Mis trabajos', refresh: 'Actualizar', newJob: '+ Nuevo trabajo', jobsHint: 'Trabajos que te asignó la oficina. Toca “Iniciar reporte” para abrir el reporte ya lleno.',
-    invoiceNo: 'FACTURA NO.', customer: 'Cliente', workOrder: 'Orden de trabajo #', customerName: 'Nombre del cliente', address: 'Dirección', street: 'Calle',
+    numReserved: 'Número #{n} reservado para este reporte', unsavedOpen: 'Abrir', delete: 'Borrar',
+    unsavedBar: '⚠ {what} no está guardado (empezado {since}). Guárdalo o bórralo: se borra solo en {h} h.', unsavedDelQ: '¿Borrar este reporte que nunca se guardó? No se puede deshacer.',
+    unsavedGone: '{what}: se borró un reporte que estuvo 24 horas sin guardar.', sendToWho: 'Enviar a', addContact: '+ Agregar un contacto', contactName: 'Nombre', addContactBtn: 'Agregar y usar este contacto',
+    mainContact: 'Contacto principal', thisReport: 'Escrito en este reporte', contactSaved: 'Contacto guardado en {c}', contactNotSaved: 'El contacto se usará solo para este reporte (el cliente aún no está registrado).', needContact: 'Escribe un correo o un número de WhatsApp', noContacts: 'Aún no hay contactos registrados: escríbelo abajo o agrega un contacto.', invoiceNo: 'FACTURA NO.', customer: 'Cliente', workOrder: 'Orden de trabajo #', customerName: 'Nombre del cliente', address: 'Dirección', street: 'Calle',
     cityState: 'Ciudad, Estado / Parroquia', zipCountry: 'Código postal / País / Teléfono', email: 'Correo', job: 'Trabajo', employeeId: 'ID de empleado #', instructions: 'Instrucciones',
     serials: 'Números de serie relacionados', model: 'Modelo', serialNo: 'No. de serie', make: 'Marca', hour: 'Horómetro', location: 'Ubicación', deliveryDate: 'Fecha de entrega',
     timeRecord: 'Registro de tiempo diario', addDay: '+ Agregar día', date: 'Fecha', time: 'Hora', leftShop: 'Salió del taller', started: 'Inició trabajo', completed: 'Terminó', mileage: 'Millaje', removeDay: 'Quitar día',
@@ -800,8 +824,24 @@ function render() {
   histState = { serial: null, list: [] }; $('#histChip').hidden = true; checkHistory();
 }
 let dirty = false, autosaveT;
+/* the report number is reserved on the server as soon as the report is started (when there is internet), so it is
+   known from the start, never changes and is never given to anyone else. Without internet it is given when it syncs. */
+let reserving = null, reserveTry = 0;
+function reserveNumber() {
+  const r = report;
+  if (!session || !r || r.invoiceNo || r.synced || reserving || Date.now() - reserveTry < 20000) return;
+  reserveTry = Date.now();
+  reserving = api('reserve_number', { reportId: r.id }).then(j => {
+    if (!j.invoiceNo || r.invoiceNo) return;
+    reserveTry = 0;   // the 20-second pause is only for retries without internet
+    r.invoiceNo = j.invoiceNo; r.reservedAt = new Date().toISOString();
+    if (report === r) { $('#invoiceNo').value = r.invoiceNo; updateStatus(); saveDraft(); toast(t('numReserved', { n: r.invoiceNo })); }
+    else { const d = LS.get(draftKey(r.type), null); if (d && d.id === r.id) LS.set(draftKey(r.type), r); }
+  }).catch(() => {}).finally(() => { reserving = null; });
+}
 function markDirty() {
-  dirty = true; saveDraft();
+  dirty = true; if (!report.startedAt) report.startedAt = new Date().toISOString();   // for the 24-hour reminder of unsaved reports
+  saveDraft(); reserveNumber();
   clearTimeout(autosaveT);
   if (report.updatedAt) autosaveT = setTimeout(() => save(true), 1200);
 }
@@ -1241,14 +1281,14 @@ async function syncAll(manual) {
       if (pend.length) setDot('wait');
       let newInv = 0;
       for (const r of pend) {
-        const sentAt = r.updatedAt, hadInv = !!r.invoiceNo;
+        const sentAt = r.updatedAt, hadInv = !!r.invoiceNo && !r.reservedAt;
         const j = await api('save_report', { report: r });
         const latest = normalize((await DB.get(r.id)) || r);
-        latest.invoiceNo = j.invoiceNo; latest.officeSentAt = j.officeSentAt || latest.officeSentAt || null;
+        latest.invoiceNo = j.invoiceNo; latest.officeSentAt = j.officeSentAt || latest.officeSentAt || null; delete latest.reservedAt;
         if (latest.updatedAt === sentAt) latest.synced = true;
         await DB.put(latest);
         if (!hadInv) newInv++;
-        if (report.id === r.id) { report.invoiceNo = j.invoiceNo; report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
+        if (report.id === r.id) { report.invoiceNo = j.invoiceNo; delete report.reservedAt; report.synced = latest.synced; report.officeSentAt = latest.officeSentAt; $('#invoiceNo').value = j.invoiceNo; saveDraft(); updateStatus(); renderOffice(); }
       }
       // office copy: every synced, customer-signed report is emailed to the office once
       for (const r of (await DB.all()).filter(r => r.employeeId === me() && r.synced && r.sigs?.customer?.img && !r.officeSentAt)) await sendOffice(r);
@@ -1354,7 +1394,49 @@ $('[data-k="customerName"]').addEventListener('change', e => {
 
 /* ---------------- buttons ---------------- */
 $('#btnSave').onclick = () => save();
-function newReport() { report = blankReport(report?.type); report.employeeId = me(); saveDraft(); dirty = false; render(); }
+function newReport() { releaseIfUnsaved(report); report = blankReport(report?.type); report.employeeId = me(); saveDraft(); dirty = false; render(); checkUnsaved(); }
+/* a report that was started but never saved gives its reserved number back (the next report gets it, so none is skipped) */
+function releaseIfUnsaved(r) { if (r && !r.updatedAt && r.reservedAt && r.id) api('release_number', { reportId: r.id }).catch(() => {}); }
+
+/* ---------------- unsaved reports: kept 24 hours on the tablet, with reminders to save or delete them ---------------- */
+const KEEP_HOURS = 24, REMIND_MIN = 30;
+function unsavedDrafts() {
+  if (!session) return [];
+  return ['repair', 'maintenance'].map(type => {
+    const d = report && report.type === type ? report : LS.get(draftKey(type), null);
+    return d && d.employeeId === me() && !d.updatedAt && d.startedAt ? d : null;
+  }).filter(Boolean).sort((a, b) => a.startedAt.localeCompare(b.startedAt));
+}
+function discardDraft(d) {
+  releaseIfUnsaved(d);
+  if (report && report.id === d.id) { report = blankReport(d.type); report.employeeId = me(); dirty = false; saveDraft(); render(); }
+  else LS.set(draftKey(d.type), null);
+}
+function checkUnsaved() {
+  const list = unsavedDrafts(), now = Date.now();
+  for (const d of list) if (now - Date.parse(d.startedAt) > KEEP_HOURS * 3600000) { discardDraft(d); toast(t('unsavedGone', { what: t(d.type === 'maintenance' ? 'tabMaint' : 'tabReport') })); }
+  const left = unsavedDrafts().filter(d => now - Date.parse(d.startedAt) > 5 * 60000), bar = $('#unsavedBar');
+  if (!left.length || $('#login').hidden === false) { bar.hidden = true; return; }
+  const d = left[0], hrs = Math.max(1, Math.ceil((Date.parse(d.startedAt) + KEEP_HOURS * 3600000 - now) / 3600000));
+  const what = `${t(d.type === 'maintenance' ? 'tabMaint' : 'tabReport')}${d.invoiceNo ? ' #' + d.invoiceNo : ''}${d.customerName ? ' · ' + d.customerName : ''}`;
+  $('#unsavedTxt').textContent = t('unsavedBar', { what, since: new Date(d.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), h: hrs });
+  bar.hidden = false; bar.dataset.id = d.id; bar.dataset.type = d.type;
+  // a reminder every 30 minutes: on screen and as a notification when the app is in the background
+  const k = 'cher.remind.' + d.id, last = +(localStorage.getItem(k) || 0);
+  if (now - last > REMIND_MIN * 60000) {
+    try { localStorage.setItem(k, String(now)); } catch {}
+    toast($('#unsavedTxt').textContent);
+    try { if (document.hidden && 'Notification' in window && Notification.permission === 'granted') new Notification('Cher Services', { body: $('#unsavedTxt').textContent, tag: 'unsaved-' + d.id }); } catch {}
+  }
+}
+const unsavedOf = () => unsavedDrafts().find(d => d.id === $('#unsavedBar').dataset.id);
+$('#unsavedOpen').onclick = () => { const d = unsavedOf(); if (d) show(d.type === 'maintenance' ? 'maint' : 'form'); };
+$('#unsavedSave').onclick = async () => { const d = unsavedOf(); if (!d) return; show(d.type === 'maintenance' ? 'maint' : 'form'); if (report.id === d.id) { await save(false); checkUnsaved(); } };
+$('#unsavedDel').onclick = () => { const d = unsavedOf(); if (!d || !confirm(t('unsavedDelQ'))) return; discardDraft(d); toast(t('removed')); checkUnsaved(); };
+setInterval(() => { if (session) checkUnsaved(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && session) checkUnsaved(); });
+// ask once for permission to show reminders while the app is in the background
+document.addEventListener('pointerdown', () => { try { if ('Notification' in window && Notification.permission === 'default' && unsavedDrafts().length) Notification.requestPermission().catch(() => {}); } catch {} }, { passive: true });
 $('#btnNew').onclick = () => {
   if (dirty && !confirm(t('newConfirm'))) return;
   newReport(); scrollTo(0, 0); toast(t('newReport'));
@@ -1368,8 +1450,48 @@ $('#btnSend').onclick = async () => {
   if (!report.sigs.customer?.img && !confirm(t('noSigConfirm'))) return;
   await save(true);
   $('#sendEmail').value = report.customerEmail || ''; $('#sendWa').value = report.customerWhatsapp || '';
+  renderContacts(); $('#addContact').open = false; ['#ncName', '#ncEmail', '#ncWa'].forEach(x => $(x).value = ''); $('#ncHint').textContent = '';
   $('#sendSub').textContent = t('sendSub', { inv: report.invoiceNo || '—', cust: report.customerName || t('noCustomer') });
   setMsgLang(LANG); renderOffice(); $('#waBox').hidden = true; openSheet('#sendSheet');
+};
+/* who to send to: the registered customer's main contact and extra contacts, plus what was written on this report */
+function sendContacts() {
+  const f = findCustomer(report.customerName), d = f?.data || {}, list = [], seen = new Set();
+  const add = (name, email, whatsapp, note) => {
+    const k = String(email || '').toLowerCase() + '|' + String(whatsapp || '').replace(/\D/g, '');
+    if ((!email && !String(whatsapp || '').replace(/\D/g, '')) || seen.has(k)) return; seen.add(k); list.push({ name, email: email || '', whatsapp: whatsapp || '', note });
+  };
+  add(f?.key || report.customerName, d.email, d.whatsapp || d.phone, t('mainContact'));
+  (d.contacts || []).forEach(c => add(c.name, c.email, c.whatsapp, ''));
+  add(report.customerName, report.customerEmail, report.customerWhatsapp, t('thisReport'));
+  return list;
+}
+function renderContacts() {
+  const list = sendContacts(), box = $('#contactList');
+  box.innerHTML = list.length ? '' : `<div class="hint">${esc(t('noContacts'))}</div>`;
+  list.forEach(c => {
+    const b = document.createElement('button'); b.type = 'button';
+    b.innerHTML = `<b></b><span></span>`; b.querySelector('b').textContent = c.name || c.email || c.whatsapp;
+    b.querySelector('span').textContent = [c.email, c.whatsapp, c.note].filter(Boolean).join(' · ');
+    b.classList.toggle('on', $('#sendEmail').value === c.email && $('#sendWa').value === c.whatsapp);
+    b.onclick = () => { $('#sendEmail').value = c.email; $('#sendWa').value = c.whatsapp; $$('#contactList button').forEach(x => x.classList.toggle('on', x === b)); };
+    box.appendChild(b);
+  });
+}
+$('#ncAdd').onclick = async () => {
+  const c = { name: $('#ncName').value.trim(), email: $('#ncEmail').value.trim(), whatsapp: $('#ncWa').value.trim() };
+  if (c.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) { toast(t('badEmail')); return; }
+  if (!c.email && !c.whatsapp.replace(/\D/g, '')) { toast(t('needContact')); return; }
+  $('#sendEmail').value = c.email; $('#sendWa').value = c.whatsapp;
+  const f = findCustomer(report.customerName);
+  if (f && !f.data.pending) {
+    try {
+      const j = await api('customer_contact_add', { customer: f.key, contact: c });
+      const all = LS.get('cher.customers', {}); if (all[f.key]) { all[f.key].contacts = j.contacts; LS.set('cher.customers', all); }
+      toast(t('contactSaved', { c: f.key })); $('#addContact').open = false;
+    } catch (e) { $('#ncHint').textContent = e.message; }
+  } else $('#ncHint').textContent = t('contactNotSaved');
+  renderContacts();
 };
 async function ensureOnServer() {
   if (!report.synced || !report.invoiceNo) await syncAll();
@@ -1379,7 +1501,7 @@ function busy(btn, on) { btn.disabled = on; btn.style.opacity = on ? .6 : 1; }
 $('#sendEmailBtn').onclick = async () => {
   const to = $('#sendEmail').value.trim(), btn = $('#sendEmailBtn');
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { toast(t('badEmail')); return; }
-  if (report.customerEmail !== to) { report.customerEmail = to; markDirty(); }
+  if (!report.customerEmail) { report.customerEmail = to; markDirty(); }   // another contact does not replace the customer's email
   busy(btn, true); toast(t('sending'));
   try {
     await ensureOnServer();
@@ -1389,7 +1511,7 @@ $('#sendEmailBtn').onclick = async () => {
 };
 $('#sendWaBtn').onclick = async () => {
   const phone = $('#sendWa').value.trim(), btn = $('#sendWaBtn');
-  if (phone && report.customerWhatsapp !== phone) { report.customerWhatsapp = phone; markDirty(); }
+  if (phone && !report.customerWhatsapp) { report.customerWhatsapp = phone; markDirty(); }
   const win = window.open('', '_blank');   // open synchronously so the tablet doesn't block the pop-up
   if (win) win.opener = null;              // the new tab must not be able to control this one
   busy(btn, true); toast(t('sending'));
@@ -1496,7 +1618,8 @@ async function startJob(j, type) {
   const cur = getDraft(type);
   if (cur && cur.jobId === j.id && cur.employeeId === me()) { report = normalize(cur); render(); show(view); return; }
   if (cur && cur.employeeId === me() && cur.updatedAt === null && JSON.stringify(cur).length > 900 && !confirm(t('replaceDraft'))) return;
-  const r = blankReport(type); r.employeeId = me(); r.jobId = j.id;
+  if (cur && cur.employeeId === me()) releaseIfUnsaved(cur);
+  const r = blankReport(type); r.employeeId = me(); r.jobId = j.id; r.startedAt = new Date().toISOString();
   Object.assign(r, { customerName: j.customerName, address1: j.address1, address2: j.address2, address3: j.address3, customerWhatsapp: j.whatsapp, customerEmail: j.email,
     workOrder: j.workOrder, make: j.make, model: j.model, serialNo: j.serialNo, location: j.location, instructions: j.instructions });
   if (j.date) r.time[0].date = j.date <= todayISO() ? todayISO() : j.date;
@@ -1649,7 +1772,7 @@ async function signOut(expired) {
   // shared tablets: drop the previous technician's office data (it is downloaded again on the next sign-in);
   // unsent reports (IndexedDB) and queued requests are kept so nothing is lost
   ['cher.jobs', 'cher.requests', 'cher.reqSeen'].forEach(k => { try { localStorage.removeItem(k); } catch {} });
-  jobsCache = []; requests = [];
+  jobsCache = []; requests = []; $('#unsavedBar').hidden = true;
   $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false;
   if (expired) $('#lgErr').textContent = t(expired === 'idle' ? 'sessionIdle' : 'sessionEnded');
 }
@@ -1664,7 +1787,7 @@ function startSession() {
   show(v0);
   pullCustomers(); pullInventory(); pullServices(); pullRequests();
   pullJobs().then(() => { if (!LS.get('cher.view', null) && jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled')) show('jobs'); });
-  syncAll();
+  syncAll(); checkUnsaved();
   api('me').then(j => { if (j.idleMinutes) idleMin = j.idleMinutes; }).catch(() => {});
 }
 
@@ -1737,7 +1860,8 @@ if (DEMO) (() => {
   const moveTo = (x, y) => { cur.style.transform = `translate(${x}px,${y}px)`; };
   moveTo(innerWidth / 2, innerHeight / 2);
   const wait = ms => new Promise(r => setTimeout(r, ms));
-  const say = m => { bar.textContent = '▶ ' + m; ch.postMessage({ type: 'status', who: 'tech', text: m }); };
+  // every new step is reported to the panel as a "station" (the countdown between rounds is not)
+  const say = m => { bar.textContent = '▶ ' + m; ch.postMessage({ type: 'status', who: 'tech', text: m, station: !/^(Round|Waiting|Finished)/.test(m) }); };
   say('Waiting for the load test to start…');
   const check = () => { if (stopped) throw new Error('stopped'); };
   async function until(f, ms = 15000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { check(); const v = f(); if (v) return v; await wait(150); } return null; }
@@ -1747,7 +1871,7 @@ if (DEMO) (() => {
     const r = e.getBoundingClientRect(); e._x = r.left + Math.min(r.width / 2, 70); e._y = r.top + r.height / 2; moveTo(e._x, e._y); await wait(550); return e;
   }
   async function tap(s, pause = 700) {
-    const e = await point(s); if (!e) return false; cur.classList.add('tap');
+    const e = await point(s); if (!e) return false; cur.classList.add('tap'); ch.postMessage({ type: 'tap', who: 'tech' });
     e.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window, clientX: e._x, clientY: e._y }));   // a click at that spot, so a tutorial marks the right place
     await wait(180); cur.classList.remove('tap'); await wait(pause); return true;
   }
@@ -1778,6 +1902,7 @@ if (DEMO) (() => {
     await type('#lgCode', code); await type('#lgPin', pin);
     await tap('#lgBtn', 300);
     if (!await until(() => session && $('#login').hidden, 25000)) throw new Error($('#lgErr').textContent || 'could not sign in');
+    ch.postMessage({ type: 'session', who: 'tech', on: true });
     await wait(1200);
   }
   async function fillReport(maint, n) {
@@ -1830,6 +1955,7 @@ if (DEMO) (() => {
     } catch (e) { if (e.message !== 'stopped') say('Stopped: ' + e.message); }
     stopped = false;
     try { if (session) { say('Signing out'); await tap('#btnLogout', 1200); } } catch {}
+    ch.postMessage({ type: 'session', who: 'tech', on: false });
     say('Finished — you can close this window.'); running = false; ch.postMessage({ type: 'done', who: 'tech' });
   }
   async function runSup(m) {   // the supervisor demo continues in the panel (admin.html reads cher.demo from this window)
