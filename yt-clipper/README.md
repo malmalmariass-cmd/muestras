@@ -1,4 +1,4 @@
-# ✂️ YT Clipper
+# YT Clipper
 
 Web app para **descargar videos de YouTube** y **cortarlos** en:
 

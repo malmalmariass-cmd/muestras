@@ -77,7 +77,7 @@ function loadJob(job) {
   $("#editor").classList.remove("hidden");
   $("#clips-card").classList.remove("hidden");
   $("#hl-info").textContent = job.heatmap.length
-    ? "✔ Este video tiene datos de “Lo más visto”."
+    ? "Este video tiene datos de “Lo más visto”."
     : "Este video no tiene “Lo más visto”; se usará la intensidad del audio.";
   resetExport(); renderClips();
 }
@@ -97,7 +97,7 @@ function drawTimeline() {
   // "Lo más visto"
   const hm = state.job.heatmap;
   if (hm.length) {
-    ctx.fillStyle = "rgba(255,176,32,.25)";
+    ctx.fillStyle = "rgba(208,255,163,.30)";
     ctx.beginPath(); ctx.moveTo(0, h);
     hm.forEach((p) => ctx.lineTo(x((p.start_time + p.end_time) / 2), h - p.value * (h - 10)));
     ctx.lineTo(w, h); ctx.fill();
@@ -107,17 +107,17 @@ function drawTimeline() {
   state.job.chapters.forEach((c) => ctx.fillRect(x(c.start_time), 0, 1, h));
   // clips
   state.clips.forEach((c, i) => {
-    ctx.fillStyle = c.end - c.start > MAX_CLIP ? "rgba(255,0,0,.7)" : i % 2 ? "rgba(255,59,92,.35)" : "rgba(255,59,92,.55)";
+    ctx.fillStyle = c.end - c.start > MAX_CLIP ? "#ff5d8f" : i % 2 ? "rgba(231,160,254,.55)" : "rgba(231,160,254,.85)";
     ctx.fillRect(x(c.start), 14, Math.max(2, x(c.end) - x(c.start)), h - 28);
   });
   // marcas in/out
   if (state.markIn != null) {
     const end = state.markOut ?? player.currentTime;
-    ctx.fillStyle = "rgba(46,204,113,.35)";
+    ctx.fillStyle = "rgba(208,255,163,.40)";
     ctx.fillRect(x(state.markIn), 0, Math.max(2, x(end) - x(state.markIn)), h);
   }
   // cabezal
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#d0ffa3";
   ctx.fillRect(x(player.currentTime) - 1, 0, 2, h);
 }
 canvas.addEventListener("click", (e) => {
@@ -215,10 +215,10 @@ function renderClips() {
       <td class="t"><input value="${fmt(c.end)}" aria-label="Fin"></td>
       <td class="d mono">${fmt(len)}</td>
       <td class="actions">
-        <button class="icon" title="Previsualizar">▶</button>
-        <button class="icon" title="Usar posición actual como inicio">⟦</button>
-        <button class="icon" title="Usar posición actual como fin">⟧</button>
-        <button class="icon" title="Eliminar">🗑</button>
+        <button class="icon" title="Previsualizar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+        <button class="icon" title="Usar posición actual como inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h2v16H7zM11 11h8v2h-8z"/></svg></button>
+        <button class="icon" title="Usar posición actual como fin"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h2v16h-2zM5 11h8v2H5z"/></svg></button>
+        <button class="icon del" title="Eliminar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l1 2h4v2H4V5h4zM6 9h12l-1 12H7z"/></svg></button>
       </td>`;
     const [nameIn, startIn, endIn] = tr.querySelectorAll("input");
     nameIn.value = c.name;

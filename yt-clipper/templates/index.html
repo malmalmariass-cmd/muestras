@@ -4,11 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>YT Clipper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <header>
-  <h1>✂️ YT Clipper</h1>
+  <h1>YT Clipper</h1>
   <p>Descarga un video de YouTube y córtalo en <b>highlights</b> o en <b>partes de máximo 10 minutos</b>.</p>
 </header>
 
@@ -41,10 +43,10 @@
     <video id="player" controls preload="metadata"></video>
     <canvas id="timeline" height="56" title="Haz clic para saltar"></canvas>
     <div class="row">
-      <button id="mark-in" class="ghost">⟦ Inicio <kbd>I</kbd></button>
+      <button id="mark-in" class="ghost">Marcar inicio <kbd>I</kbd></button>
       <span id="in-out" class="mono">— → —</span>
-      <button id="mark-out" class="ghost">Fin <kbd>O</kbd> ⟧</button>
-      <button id="add-clip">+ Añadir clip <kbd>A</kbd></button>
+      <button id="mark-out" class="ghost">Marcar fin <kbd>O</kbd></button>
+      <button id="add-clip">Añadir clip <kbd>A</kbd></button>
     </div>
 
     <div class="tabs">
@@ -106,19 +108,19 @@
           <option value="0">Rápido (sin re-codificar, ±segundos)</option>
         </select>
       </label>
-      <button id="export">Exportar clips</button>
+      <button id="export" class="alt">Exportar clips</button>
     </div>
     <div id="exp-status" class="status hidden">
       <div class="bar"><div id="exp-bar"></div></div>
       <span id="exp-msg"></span>
     </div>
     <ul id="results"></ul>
-    <a id="zip" class="button hidden" href="#">⬇ Descargar todo (ZIP)</a>
+    <a id="zip" class="button alt hidden" href="#">Descargar todo (ZIP)</a>
   </section>
 </main>
 
-<footer class="muted small">
-  Usa esta herramienta solo con videos propios o con permiso del autor y respeta los Términos de YouTube.
+<footer class="small">
+  <p>Usa esta herramienta solo con videos propios o con permiso del autor y respeta los Términos de YouTube.</p>
 </footer>
 
 <script>window.MAX_CLIP = {{ max_clip }};</script>
