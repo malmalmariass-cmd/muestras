@@ -9,10 +9,14 @@ import subprocess
 import threading
 import uuid
 import zipfile
+from datetime import date
 
-from flask import Flask, abort, jsonify, render_template, request, send_file, send_from_directory
+from flask import (Flask, Response, abort, jsonify, render_template, request, send_file,
+                   send_from_directory, url_for)
 
 import yt_dlp
+
+from pages import FEATURES, GENERAL_FAQ, NAV, PAGES, PAGES_BY_SLUG, PLATFORMS, SITE_NAME
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("YTCLIPPER_DATA", os.path.join(BASE_DIR, "data"))
@@ -22,6 +26,9 @@ QUALITY_FORMATS = {
     "1080": "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4]/bv*[height<=1080]+ba/b[height<=1080]",
     "best": "bv*+ba/b",
 }
+# URL pública del sitio (p. ej. https://ytclipper.com). Se usa en canonical, sitemap y Open Graph.
+SITE_URL = os.environ.get("SITE_URL", "").rstrip("/")
+LAST_UPDATE = os.environ.get("SITE_LAST_UPDATE", date.today().isoformat())
 ALLOWED_UPLOAD_EXT = {".mp4", ".mov", ".mkv", ".webm", ".m4v"}
 
 app = Flask(__name__)
@@ -311,9 +318,97 @@ def api_export_zip(export_id):
     return send_file(buf, mimetype="application/zip", as_attachment=True, download_name=f"{title}_clips.zip")
 
 
+# ---------------------------------------------------------------- páginas y SEO
+
+def site_url():
+    return SITE_URL or request.url_root.rstrip("/")
+
+
+def page_url(slug):
+    return f"{site_url()}/{slug}" if slug else f"{site_url()}/"
+
+
 @app.get("/")
-def index():
-    return render_template("index.html", max_clip=MAX_CLIP_SECONDS)
+@app.get("/<slug>")
+def page(slug=""):
+    p = PAGES_BY_SLUG.get(slug) or abort(404)
+    faq = p["faq"] + GENERAL_FAQ
+    breadcrumbs = [{"@type": "ListItem", "position": 1, "name": SITE_NAME, "item": page_url("")}]
+    if slug:
+        breadcrumbs.append({"@type": "ListItem", "position": 2, "name": p["h1"], "item": page_url(slug)})
+    return render_template(
+        "index.html", page={**p, "steps_ld": [
+            {"@type": "HowToStep", "position": i + 1, "name": n, "text": t} for i, (n, t) in enumerate(p["steps"])
+        ]},
+        max_clip=MAX_CLIP_SECONDS, canonical=page_url(slug), site_url=site_url(), site_name=SITE_NAME,
+        features=FEATURES, platforms=PLATFORMS, faq=faq, pages_home_about=PAGES_BY_SLUG[""]["about"],
+        faq_ld=[{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq],
+        breadcrumbs=breadcrumbs, nav=[(s, label, page_url(s)) for s, label in NAV], last_update=LAST_UPDATE,
+    )
+
+
+@app.get("/robots.txt")
+def robots():
+    body = (
+        "User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /media/\n\n"
+        # Permitir explícitamente los rastreadores de buscadores con IA (GEO).
+        + "".join(f"User-agent: {bot}\nAllow: /\nDisallow: /api/\nDisallow: /media/\n\n" for bot in (
+            "Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot",
+            "Claude-User", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended",
+            "DuckDuckBot", "YandexBot",
+        ))
+        + f"Sitemap: {site_url()}/sitemap.xml\n"
+    )
+    return Response(body, mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    urls = "".join(
+        f"<url><loc>{page_url(p['slug'])}</loc><lastmod>{LAST_UPDATE}</lastmod>"
+        f"<changefreq>weekly</changefreq><priority>{'1.0' if not p['slug'] else '0.8'}</priority></url>"
+        for p in PAGES
+    )
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
+    return Response(xml, mimetype="application/xml")
+
+
+@app.get("/llms.txt")
+def llms_txt():
+    """Resumen para modelos de lenguaje (ChatGPT, Claude, Perplexity, Gemini). Ver https://llmstxt.org"""
+    home = PAGES_BY_SLUG[""]
+    lines = [f"# {SITE_NAME}", "", f"> {home['about']}", "", "## Funciones", ""]
+    lines += [f"- {t}: {d}" for t, d in FEATURES]
+    lines += ["", "## Sitios compatibles", "", ", ".join(PLATFORMS) + ".", "", "## Guías", ""]
+    lines += [f"- [{p['h1']}]({page_url(p['slug'])}): {p['description']}" for p in PAGES]
+    lines += ["", "## Preguntas frecuentes", ""]
+    lines += [f"### {q}\n{a}\n" for q, a in GENERAL_FAQ]
+    return Response("\n".join(lines), mimetype="text/plain")
+
+
+@app.get("/manifest.webmanifest")
+def manifest():
+    return jsonify(
+        name=f"{SITE_NAME}: descargar y cortar videos", short_name=SITE_NAME, lang="es",
+        description=PAGES_BY_SLUG[""]["description"], start_url="/", display="standalone",
+        background_color="#000180", theme_color="#000180",
+        icons=[{"src": url_for("static", filename=f"icons/icon-{n}.png"), "sizes": f"{n}x{n}", "type": "image/png"}
+               for n in (192, 512)],
+    )
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return send_from_directory(os.path.join(BASE_DIR, "static", "icons"), "favicon.ico")
+
+
+@app.after_request
+def headers(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if request.path.startswith("/static/"):
+        resp.headers["Cache-Control"] = "public, max-age=604800"
+    return resp
 
 
 if __name__ == "__main__":

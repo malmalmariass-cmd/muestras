@@ -3,23 +3,89 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>YT Clipper</title>
+  <title>{{ page.title }}</title>
+  <meta name="description" content="{{ page.description }}">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="{{ canonical }}">
+  <link rel="alternate" hreflang="es" href="{{ canonical }}">
+  <link rel="alternate" hreflang="x-default" href="{{ canonical }}">
+  <meta name="application-name" content="{{ site_name }}">
+  <meta name="theme-color" content="#000180">
+
+  <!-- Open Graph / redes sociales -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ site_name }}">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:title" content="{{ page.title }}">
+  <meta property="og:description" content="{{ page.description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="{{ site_url }}{{ url_for('static', filename='icons/og-image.png') }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ site_name }}: descarga videos de YouTube y córtalos en clips">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page.title }}">
+  <meta name="twitter:description" content="{{ page.description }}">
+  <meta name="twitter:image" content="{{ site_url }}{{ url_for('static', filename='icons/og-image.png') }}">
+
+  <!-- Íconos / PWA -->
+  <link rel="icon" href="{{ url_for('static', filename='icons/favicon.svg') }}" type="image/svg+xml">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="alternate" type="text/plain" title="Resumen para IA" href="/llms.txt">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Datos estructurados (Google, Bing y buscadores con IA) -->
+  {% set ld = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {"@type": "WebSite", "@id": site_url ~ "/#website", "url": site_url ~ "/", "name": site_name,
+       "inLanguage": "es", "publisher": {"@id": site_url ~ "/#org"}},
+      {"@type": "Organization", "@id": site_url ~ "/#org", "name": site_name, "url": site_url ~ "/",
+       "logo": site_url ~ url_for('static', filename='icons/icon-512.png')},
+      {"@type": "WebApplication", "@id": site_url ~ "/#app", "name": site_name, "url": site_url ~ "/",
+       "description": pages_home_about, "applicationCategory": "MultimediaApplication",
+       "applicationSubCategory": "Descargador y editor de video", "operatingSystem": "Web, Windows, macOS, Linux, Android, iOS",
+       "browserRequirements": "Requiere JavaScript y un navegador moderno", "inLanguage": "es",
+       "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+       "featureList": features | map(attribute=0) | list,
+       "image": site_url ~ url_for('static', filename='icons/og-image.png')},
+      {"@type": "WebPage", "@id": canonical ~ "#webpage", "url": canonical, "name": page.title,
+       "description": page.description, "inLanguage": "es", "isPartOf": {"@id": site_url ~ "/#website"},
+       "about": {"@id": site_url ~ "/#app"}, "dateModified": last_update,
+       "primaryImageOfPage": site_url ~ url_for('static', filename='icons/og-image.png')},
+      {"@type": "HowTo", "name": page.h1, "description": page.description, "totalTime": "PT2M",
+       "tool": {"@type": "HowToTool", "name": site_name},
+       "step": page.steps_ld},
+      {"@type": "FAQPage", "mainEntity": faq_ld},
+      {"@type": "BreadcrumbList", "itemListElement": breadcrumbs}
+    ]
+  } %}
+  <script type="application/ld+json">{{ ld | tojson }}</script>
 </head>
 <body>
 <header>
-  <h1>YT Clipper</h1>
-  <p>Descarga un video de YouTube y córtalo en <b>highlights</b> o en <b>partes de máximo 10 minutos</b>.</p>
+  <nav class="topnav" aria-label="Principal">
+    <a class="brand" href="{{ nav[0][2] }}"><img src="{{ url_for('static', filename='icons/favicon.svg') }}" alt="" width="32" height="32"> {{ site_name }}</a>
+    <div class="links">
+      {% for slug, label, href in nav[1:6] %}<a href="{{ href }}"{% if slug == page.slug %} aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+    </div>
+  </nav>
+  <h1>{{ page.h1 }}</h1>
+  <p class="lead">{{ page.lead | safe }}</p>
 </header>
 
 <main>
   <!-- 1. Fuente -->
   <section class="card" id="source">
-    <h2>1. Video</h2>
+    <h2>1. Pega el enlace del video</h2>
     <form id="dl-form" class="row">
-      <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=…" required>
+      <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=…" aria-label="Enlace del video" required>
       <select id="quality" title="Calidad">
         <option value="720">720p</option>
         <option value="1080" selected>1080p</option>
@@ -29,7 +95,7 @@
     </form>
     <div class="row muted small">
       <span>…o sube un archivo:</span>
-      <input id="file" type="file" accept="video/*">
+      <input id="file" type="file" accept="video/*" aria-label="Subir archivo de video">
     </div>
     <div id="dl-status" class="status hidden">
       <div class="bar"><div id="dl-bar"></div></div>
@@ -117,13 +183,53 @@
     <ul id="results"></ul>
     <a id="zip" class="button alt hidden" href="#">Descargar todo (ZIP)</a>
   </section>
+
+  <!-- Contenido para buscadores y personas -->
+  <section class="card content" aria-labelledby="about-h">
+    <h2 id="about-h">{% if page.slug %}Cómo lo hace {{ site_name }}{% else %}Qué es {{ site_name }}{% endif %}</h2>
+    <p>{{ page.about }}</p>
+  </section>
+
+  <section class="card content" aria-labelledby="how-h">
+    <h2 id="how-h">Cómo funciona</h2>
+    <ol class="steps">
+      {% for name, text in page.steps %}<li><h3>{{ name }}</h3><p>{{ text }}</p></li>{% endfor %}
+    </ol>
+  </section>
+
+  <section class="card content" aria-labelledby="feat-h">
+    <h2 id="feat-h">Funciones</h2>
+    <ul class="grid">
+      {% for name, text in features %}<li><h3>{{ name }}</h3><p>{{ text }}</p></li>{% endfor %}
+    </ul>
+    <h3>Sitios compatibles</h3>
+    <ul class="chips">{% for p in platforms %}<li>{{ p }}</li>{% endfor %}</ul>
+  </section>
+
+  <section class="card content" aria-labelledby="faq-h">
+    <h2 id="faq-h">Preguntas frecuentes</h2>
+    {% for q, a in faq %}
+    <details{% if loop.first %} open{% endif %}><summary>{{ q }}</summary><p>{{ a }}</p></details>
+    {% endfor %}
+  </section>
+
+  <section class="card content" aria-labelledby="more-h">
+    <h2 id="more-h">Más herramientas</h2>
+    <ul class="linkgrid">
+      {% for slug, label, href in nav if slug != page.slug %}<li><a href="{{ href }}">{{ label }}</a></li>{% endfor %}
+    </ul>
+  </section>
 </main>
 
 <footer class="small">
-  <p>Usa esta herramienta solo con videos propios o con permiso del autor y respeta los Términos de YouTube.</p>
+  <nav class="footnav" aria-label="Guías">
+    {% for slug, label, href in nav %}<a href="{{ href }}">{{ label }}</a>{% endfor %}
+  </nav>
+  <p>Usa esta herramienta solo con videos propios, con licencia libre o con permiso del autor, y respeta los Términos de Servicio de cada plataforma. {{ site_name }} no está afiliado a YouTube ni a Google.</p>
+  <p class="updated">Actualizado: <time datetime="{{ last_update }}">{{ last_update }}</time></p>
 </footer>
 
 <script>window.MAX_CLIP = {{ max_clip }};</script>
-<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script src="{{ url_for('static', filename='app.js') }}" defer></script>
 </body>
 </html>

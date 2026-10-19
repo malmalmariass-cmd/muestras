@@ -59,3 +59,36 @@ Abre http://127.0.0.1:5000
 > Si la descarga de YouTube falla, actualiza yt-dlp: `pip install -U yt-dlp`.
 
 Usa esta herramienta solo con videos propios o con permiso del autor, respetando los Términos de Servicio de YouTube.
+
+## SEO, GEO y AEO (posicionamiento en Google y buscadores con IA)
+
+La app ya incluye:
+
+| Qué | Dónde |
+|---|---|
+| 11 páginas de aterrizaje, una por búsqueda (descargar de YouTube, cortar, partes de 10 min, highlights, Shorts, TikTok, Instagram, Facebook, X, internet en general) | `pages.py` |
+| `<title>`, meta description, canonical, hreflang, Open Graph y Twitter Card por página | `templates/index.html` |
+| Datos estructurados JSON-LD: WebSite, Organization, WebApplication, WebPage, HowTo, FAQPage, BreadcrumbList | `templates/index.html` |
+| Contenido visible: qué es, cómo funciona, funciones, sitios compatibles, preguntas frecuentes, enlaces internos | `templates/index.html` |
+| `robots.txt` que permite Google, Bing y rastreadores de IA (GPTBot, ClaudeBot, PerplexityBot, Google-Extended…) | `/robots.txt` |
+| `sitemap.xml` con todas las páginas | `/sitemap.xml` |
+| `llms.txt`: resumen para ChatGPT, Claude, Perplexity y Gemini | `/llms.txt` |
+| Manifest PWA, favicon, íconos e imagen para compartir 1200×630 | `/manifest.webmanifest`, `static/icons/` |
+
+Para editar textos o agregar una página nueva, añade un elemento a `PAGES` y a `NAV` en `pages.py`.
+
+### Al publicarla en tu dominio
+
+1. Define la URL pública: `SITE_URL=https://tudominio.com python app.py` (se usa en canonical, sitemap y Open Graph).
+2. Sírvela con HTTPS detrás de un servidor (Nginx, Caddy) o en un hosting con Python (Railway, Render, un VPS).
+   Activa compresión gzip/brotli en el servidor.
+3. Registra el sitio en **Google Search Console** y **Bing Webmaster Tools** y envía `https://tudominio.com/sitemap.xml`
+   (Bing alimenta a ChatGPT y Copilot).
+4. Valida los datos estructurados en https://search.google.com/test/rich-results.
+5. Consigue enlaces y menciones: publica la herramienta en Reddit, foros, Product Hunt, directorios de herramientas
+   y videos propios. Para GEO, las IA citan más los sitios mencionados en otras páginas.
+6. Revisa en Search Console qué búsquedas traen visitas y crea páginas nuevas para las que falten.
+
+> Nota: los descargadores de YouTube compiten con miles de sitios, y Google puede bajarlos de posición si
+> reciben reclamos de derechos de autor (DMCA). Mantén el aviso legal y no promociones la descarga de
+> contenido protegido. Evita usar “YouTube” o “YT” en el dominio para no tener problemas de marca.
