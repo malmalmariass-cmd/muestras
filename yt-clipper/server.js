@@ -26,6 +26,17 @@ const ALLOWED_UPLOAD_EXT = new Set([".mp4", ".mov", ".mkv", ".webm", ".m4v"]);
 const SITE_URL = (process.env.SITE_URL || "").replace(/\/+$/, "");
 const LAST_UPDATE = process.env.SITE_LAST_UPDATE || new Date().toISOString().slice(0, 10);
 const ID_RE = /^[0-9a-f]{32}$/;
+
+/** Huella de todos los archivos estáticos: cambia en cada versión que modifique alguno. */
+function staticFingerprint(dir) {
+  const hash = crypto.createHash("sha1");
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))
+    .forEach((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : hash.update(e.name).update(fs.readFileSync(path.join(d, e.name)))));
+  walk(dir);
+  return hash.digest("hex").slice(0, 10);
+}
+const STATIC_VERSION = staticFingerprint(path.join(__dirname, "static"));
+const asset = (p) => `/static/v-${STATIC_VERSION}/${p}`;
 const EXPORT_ID_RE = /^[0-9a-f]{64}$/; // id del video (32) + id de la exportación (32)
 // Si una descarga no avanza en este tiempo, el proceso que la hacía se reinició.
 const STALE_MS = 3 * 60 * 1000;
@@ -643,7 +654,22 @@ app.use((req, res, next) => {
   res.set("Referrer-Policy", "strict-origin-when-cross-origin");
   next();
 });
-app.use("/static", express.static(path.join(__dirname, "static"), { maxAge: "7d" }));
+// Los archivos se sirven bajo /static/v-<huella>/…: cada versión nueva tiene otra dirección, así ni el
+// navegador ni el CDN de Hostinger mezclan HTML nuevo con CSS o JS viejos.
+app.use((req, res, next) => {
+  const m = req.url.match(/^\/static\/v-[0-9a-f]+\/(.*)$/);
+  if (m) {
+    req.url = `/static/${m[1]}`;
+    res.locals.immutable = true;
+  }
+  next();
+});
+app.use("/static", express.static(path.join(__dirname, "static"), {
+  maxAge: "1h",
+  setHeaders: (res) => {
+    if (res.locals.immutable) res.set("Cache-Control", "public, max-age=31536000, immutable");
+  },
+}));
 
 app.get(["/", "/:slug"], (req, res, next) => {
   const slug = req.params.slug || "";
@@ -654,7 +680,7 @@ app.get(["/", "/:slug"], (req, res, next) => {
   res.render("index", {
     page, faq, canonical, site_url: siteUrl(req), site_name: SITE_NAME, features: FEATURES, platforms: PLATFORMS,
     nav: NAV.map(([s, label]) => [s, label, pageUrl(req, s)]), last_update: LAST_UPDATE,
-    max_clip: MAX_CLIP_SECONDS, ld: structuredData(req, page, canonical, faq),
+    max_clip: MAX_CLIP_SECONDS, asset, ld: structuredData(req, page, canonical, faq),
   });
 });
 

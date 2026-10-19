@@ -38,14 +38,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap">
-  <link rel="preload" href="/static/fonts/Marquisette.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preload" href="<%= asset('fonts/Marquisette.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="<%= asset('style.css') %>">
 
   <!-- Datos estructurados (Google, Bing y buscadores con IA) -->
   <script type="application/ld+json"><%- ld %></script>
 </head>
 <body>
-<canvas id="bg" aria-hidden="true"></canvas>
+<canvas id="bg" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none"></canvas>
 <header>
   <nav class="topnav" aria-label="Principal">
     <a class="brand" href="<%= nav[0][2] %>"><img src="/static/icons/favicon.svg" alt="" width="32" height="32"> <%= site_name %></a>
@@ -57,8 +57,8 @@
     <h1><%= page.h1 %></h1>
     <p class="lead"><%- page.lead %></p>
     <a class="scroll-hint" href="#source" aria-label="Desliza hacia abajo para empezar">
-      <svg viewBox="0 0 48 28" aria-hidden="true"><path d="M4 4l20 20L44 4"/></svg>
-      <svg viewBox="0 0 48 28" aria-hidden="true"><path d="M4 4l20 20L44 4"/></svg>
+      <svg viewBox="0 0 48 28" width="64" height="38" aria-hidden="true"><path d="M4 4l20 20L44 4" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 48 28" width="64" height="38" aria-hidden="true"><path d="M4 4l20 20L44 4" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span>Desliza hacia abajo</span>
     </a>
   </div>
@@ -222,7 +222,7 @@
 </footer>
 
 <script>window.MAX_CLIP = <%= max_clip %>;</script>
-<script src="/static/app.js" defer></script>
-<script src="/static/bg.js" defer></script>
+<script src="<%= asset('app.js') %>" defer></script>
+<script src="<%= asset('bg.js') %>" defer></script>
 </body>
 </html>
