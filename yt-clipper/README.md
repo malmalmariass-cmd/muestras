@@ -14,23 +14,46 @@ Ningún clip puede superar los 10 minutos.
 
 ## Requisitos
 
-- Python 3.10+
-- [ffmpeg](https://ffmpeg.org/) instalado y en el PATH
+- Node.js 18 o superior (recomendado 20 o 22)
 
-## Instalación y uso
+No necesitas instalar Python, ffmpeg ni yt-dlp: `npm install` instala ffmpeg (`ffmpeg-static`)
+y descarga el ejecutable de yt-dlp en `bin/`.
+
+## Instalación y uso local
 
 ```bash
 cd yt-clipper
-python3 -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
+npm install
+npm start
 ```
 
-Abre http://127.0.0.1:5000
+Abre http://localhost:3000
 
 1. Pega el enlace de YouTube y pulsa **Descargar** (o sube un archivo de video).
 2. Elige **Dividir en partes** o **Highlights automáticos**, o marca clips a mano.
 3. Revisa la lista de clips y pulsa **Exportar clips**.
+
+## Publicar en Hostinger (Node.js Web Apps)
+
+Requiere un plan con aplicaciones Node.js (Business, Cloud o VPS).
+
+1. En hPanel: **Sitios web → Agregar sitio web → Node.js Apps**.
+2. Elige **Importar desde GitHub** (este repositorio) o **Subir archivos** (el ZIP).
+   Si subes el ZIP o el repositorio completo, indica `yt-clipper` como carpeta raíz de la app.
+3. Configuración de compilación:
+   - Framework: **Express** (u **Other** si no aparece)
+   - Versión de Node: **20.x** o **22.x**
+   - Comando de compilación: `npm install`
+   - Archivo de entrada: `server.js` (comando de inicio: `npm start`)
+4. Variables de entorno: `SITE_URL=https://tudominio.com` (y opcionales de la tabla de abajo).
+5. Despliega y abre tu dominio.
+
+En un VPS: `npm install`, `npm start` y mantenla viva con `pm2 start server.js --name yt-clipper`
+detrás de Nginx con HTTPS.
+
+> Si YouTube cambia algo y la descarga falla, actualiza yt-dlp: `npm run update-yt-dlp` (o vuelve a desplegar).
+> YouTube a veces bloquea las IP de servidores ("Sign in to confirm you're not a bot"). Si pasa en tu hosting,
+> la subida de archivos y los demás sitios siguen funcionando; para YouTube puede hacer falta un VPS con otra IP.
 
 ### Atajos de teclado (en el editor)
 
@@ -52,11 +75,11 @@ Abre http://127.0.0.1:5000
 
 | Variable | Por defecto | Uso |
 |---|---|---|
-| `PORT` | `5000` | Puerto |
-| `HOST` | `127.0.0.1` | Usa `0.0.0.0` para abrirla en tu red local |
+| `PORT` | `3000` | Puerto (Hostinger lo define solo) |
+| `SITE_URL` | URL de la petición | URL pública para canonical, sitemap y Open Graph |
 | `YTCLIPPER_DATA` | `./data` | Carpeta de videos y clips |
-
-> Si la descarga de YouTube falla, actualiza yt-dlp: `pip install -U yt-dlp`.
+| `KEEP_HOURS` | `6` | Horas que se guardan los videos y clips antes de borrarse |
+| `YTDLP_PATH` | `bin/yt-dlp` | Ruta a otro yt-dlp, si prefieres uno instalado en el sistema |
 
 Usa esta herramienta solo con videos propios o con permiso del autor, respetando los Términos de Servicio de YouTube.
 
@@ -66,22 +89,21 @@ La app ya incluye:
 
 | Qué | Dónde |
 |---|---|
-| 11 páginas de aterrizaje, una por búsqueda (descargar de YouTube, cortar, partes de 10 min, highlights, Shorts, TikTok, Instagram, Facebook, X, internet en general) | `pages.py` |
-| `<title>`, meta description, canonical, hreflang, Open Graph y Twitter Card por página | `templates/index.html` |
-| Datos estructurados JSON-LD: WebSite, Organization, WebApplication, WebPage, HowTo, FAQPage, BreadcrumbList | `templates/index.html` |
-| Contenido visible: qué es, cómo funciona, funciones, sitios compatibles, preguntas frecuentes, enlaces internos | `templates/index.html` |
+| 11 páginas de aterrizaje, una por búsqueda (descargar de YouTube, cortar, partes de 10 min, highlights, Shorts, TikTok, Instagram, Facebook, X, internet en general) | `pages.js` |
+| `<title>`, meta description, canonical, hreflang, Open Graph y Twitter Card por página | `views/index.ejs` + `server.js` |
+| Datos estructurados JSON-LD: WebSite, Organization, WebApplication, WebPage, HowTo, FAQPage, BreadcrumbList | `views/index.ejs` + `server.js` |
+| Contenido visible: qué es, cómo funciona, funciones, sitios compatibles, preguntas frecuentes, enlaces internos | `views/index.ejs` + `server.js` |
 | `robots.txt` que permite Google, Bing y rastreadores de IA (GPTBot, ClaudeBot, PerplexityBot, Google-Extended…) | `/robots.txt` |
 | `sitemap.xml` con todas las páginas | `/sitemap.xml` |
 | `llms.txt`: resumen para ChatGPT, Claude, Perplexity y Gemini | `/llms.txt` |
 | Manifest PWA, favicon, íconos e imagen para compartir 1200×630 | `/manifest.webmanifest`, `static/icons/` |
 
-Para editar textos o agregar una página nueva, añade un elemento a `PAGES` y a `NAV` en `pages.py`.
+Para editar textos o agregar una página nueva, añade un elemento a `PAGES` y a `NAV` en `pages.js`.
 
 ### Al publicarla en tu dominio
 
-1. Define la URL pública: `SITE_URL=https://tudominio.com python app.py` (se usa en canonical, sitemap y Open Graph).
-2. Sírvela con HTTPS detrás de un servidor (Nginx, Caddy) o en un hosting con Python (Railway, Render, un VPS).
-   Activa compresión gzip/brotli en el servidor.
+1. Define la variable de entorno `SITE_URL=https://tudominio.com` (se usa en canonical, sitemap y Open Graph).
+2. Sírvela con HTTPS (Hostinger lo activa con SSL gratis) y activa la compresión gzip/brotli si tu hosting lo permite.
 3. Registra el sitio en **Google Search Console** y **Bing Webmaster Tools** y envía `https://tudominio.com/sitemap.xml`
    (Bing alimenta a ChatGPT y Copilot).
 4. Valida los datos estructurados en https://search.google.com/test/rich-results.

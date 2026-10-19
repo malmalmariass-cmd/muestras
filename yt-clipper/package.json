@@ -1,0 +1,23 @@
+{
+  "name": "yt-clipper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Descarga videos de YouTube y córtalos en highlights o en partes de máximo 10 minutos.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "node scripts/install-yt-dlp.js",
+    "update-yt-dlp": "node scripts/install-yt-dlp.js --force"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "multer": "^2.0.2"
+  }
+}
