@@ -71,6 +71,8 @@ ${combined || "(no se pudo leer el contenido, solo el título)"}
 
 Saca la receta completa: ingredientes con cantidad y unidad (normaliza a unidades métricas o de cocina comunes), pasos claros y numerables, porciones y tiempo.
 Si el contenido no trae la receta completa, complétala con la versión más probable del platillo y marca "inferida": true; si viene completa marca false.
+En "emoji" pon un solo emoji que represente el platillo.
+En "secretos" da de 2 a 4 secretos de chef: técnicas o trucos que expliquen POR QUÉ algo funciona (ej. "seca bien el pollo antes de dorarlo: la humedad impide que se forme costra"), escritos con cariño, como una amiga chef que te enseña.
 Asigna a cada ingrediente una categoría de supermercado: Frutas y verduras, Carnes y pescados, Lácteos y huevo, Panadería y tortillas, Granos y pastas, Enlatados y conservas, Especias y condimentos, Aceites y salsas, Congelados, Otros.
 ${SCORING_RULES}`,
       schema: RECIPE_SCHEMA,
@@ -95,6 +97,45 @@ app.post("/api/score", async (req, res) => {
       effort: "low",
     });
     res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(502).json({ error: errorMessage(err) });
+  }
+});
+
+// Chat with the friend-chef persona. History comes from the client.
+app.post("/api/chef", async (req, res) => {
+  const { messages = [], recipe = null, goal = "rico", country = "", userName = "", chefName = "Canela" } = req.body ?? {};
+  const history = messages
+    .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
+    .slice(-16);
+  if (!history.length || history[history.length - 1].role !== "user") {
+    return res.status(400).json({ error: "Falta tu mensaje." });
+  }
+  if (!client) {
+    return res.status(503).json({ error: "Para platicar conmigo hace falta configurar la IA (ANTHROPIC_API_KEY)." });
+  }
+  // The API requires the conversation to start with a user turn.
+  while (history[0]?.role !== "user") history.shift();
+  try {
+    const response = await client.beta.messages.create({
+      model: MODEL,
+      max_tokens: 4000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default",
+      output_config: { effort: "low" },
+      system: `Eres ${chefName}, la mejor amiga chef de ${userName || "la persona"}. Eres cálida, cercana, divertida y paciente; hablas en español latino natural, de tú, como amiga (sin exagerar con los diminutivos).
+Sabes muchísimo de cocina y de nutrición. Te encanta enseñar el porqué de las técnicas para que tu amiga aprenda, no solo que siga instrucciones.
+Su objetivo ahora es: ${goalLabel(goal)}. Cuando venga al caso, sugiere cómo hacer el platillo más rico y más saludable para ese objetivo, sin regañar ni juzgar.
+Compra en: ${country || "Latinoamérica"}; usa nombres de ingredientes de ese país.
+Responde breve (2 a 6 frases o una lista corta), práctico y con un toque de cariño. No uses encabezados. Puedes usar algún emoji.
+Si te preguntan algo de salud delicado (enfermedades, alergias graves, trastornos alimentarios), responde con cuidado y sugiere consultar a un profesional.
+${recipe ? `Están viendo esta receta:\n${JSON.stringify(recipe).slice(0, 8000)}` : ""}`,
+      messages: history.map((m) => ({ role: m.role, content: m.content.slice(0, 4000) })),
+    });
+    if (response.stop_reason === "refusal") throw new Error("Uy, de eso mejor no puedo opinar. ¿Te ayudo con otra cosa de la cocina?");
+    const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
+    res.json({ reply: text });
   } catch (err) {
     console.error(err);
     res.status(502).json({ error: errorMessage(err) });

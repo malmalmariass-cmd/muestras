@@ -3,104 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Recetario al Súper</title>
-  <meta name="theme-color" content="#1f7a4d" />
+  <title>Mi Recetario</title>
+  <meta name="theme-color" content="#fbf6ee" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <h1>Recetario al Súper</h1>
+    <button class="brand" data-go="hoy" type="button">
+      <span class="brand-mark" aria-hidden="true">📔</span>
+      <span class="brand-name">Mi Recetario</span>
+    </button>
     <button id="goal-chip" class="goal-chip" type="button" aria-label="Cambiar objetivo"></button>
   </header>
 
-  <main>
-    <!-- Recetas -->
-    <section id="view-recetas" class="view">
-      <div class="toolbar">
-        <input id="search" type="search" placeholder="Buscar receta o ingrediente…" />
-        <div class="segmented" role="tablist" id="filter">
-          <button data-filter="todas" class="active">Todas</button>
-          <button data-filter="mia">Mías</button>
-          <button data-filter="app">Del app</button>
-        </div>
-      </div>
-      <p class="hint" id="rank-hint"></p>
-      <ul id="recipe-list" class="cards"></ul>
-    </section>
-
-    <!-- Agregar -->
-    <section id="view-agregar" class="view" hidden>
-      <h2>Agregar receta desde un link</h2>
-      <p class="hint">Pega el link de Instagram, YouTube o TikTok. También puedes compartir el video directo a esta app desde tu celular.</p>
-      <form id="extract-form" class="stack">
-        <label>Link
-          <input id="extract-url" type="url" inputmode="url" placeholder="https://www.instagram.com/reel/…" />
-        </label>
-        <details>
-          <summary>¿El post no trae la receta? Pega el caption o lo que dice el video</summary>
-          <textarea id="extract-text" rows="6" placeholder="Ingredientes: 2 huevos, 1 taza de avena…"></textarea>
-        </details>
-        <button class="primary" type="submit" id="extract-btn">Sacar receta</button>
-      </form>
-      <div id="extract-status" class="status" hidden></div>
-      <div id="ai-off" class="notice" hidden>
-        La IA no está configurada en el servidor (falta <code>ANTHROPIC_API_KEY</code>). Puedes usar las recetas del app y la lista del súper; para extraer recetas de links configura la llave.
-      </div>
-    </section>
-
-    <!-- Súper -->
-    <section id="view-super" class="view" hidden>
-      <div id="super-select">
-        <h2>¿Qué vas a cocinar?</h2>
-        <p class="hint">Elige tus recetas y cuántas porciones. Te armo la lista.</p>
-        <ul id="select-list" class="select-list"></ul>
-        <button class="primary block" id="build-list" type="button">Armar lista del súper</button>
-      </div>
-      <div id="super-list" hidden>
-        <div class="list-head">
-          <h2>Lista del súper</h2>
-          <button class="ghost" id="edit-selection" type="button">Cambiar recetas</button>
-        </div>
-        <div class="progress"><div id="progress-bar"></div></div>
-        <p class="hint" id="progress-text"></p>
-        <div id="grocery"></div>
-        <div class="row">
-          <button class="ghost" id="share-list" type="button">Compartir lista</button>
-          <button class="ghost danger" id="clear-list" type="button">Terminar compra</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Perfil -->
-    <section id="view-perfil" class="view" hidden>
-      <h2>Tu objetivo</h2>
-      <div class="goals" id="goal-options">
-        <label class="goal"><input type="radio" name="goal" value="rico" /><span>😋<b>Comer rico</b><small>Lo más sabroso primero</small></span></label>
-        <label class="goal"><input type="radio" name="goal" value="bajar" /><span>🥗<b>Bajar de peso</b><small>Ligero, saciante, alto en proteína</small></span></label>
-        <label class="goal"><input type="radio" name="goal" value="subir" /><span>💪<b>Subir de peso</b><small>Calorías y proteína para ganar masa</small></span></label>
-      </div>
-      <h2>¿En qué país compras?</h2>
-      <p class="hint">Así te digo cómo se llama cada producto en tu súper.</p>
-      <select id="country">
-        <option>México</option><option>Argentina</option><option>Chile</option><option>Colombia</option>
-        <option>Perú</option><option>Venezuela</option><option>Ecuador</option><option>Uruguay</option>
-        <option>Guatemala</option><option>Costa Rica</option><option>República Dominicana</option>
-        <option>España</option><option>Estados Unidos</option>
-      </select>
-    </section>
+  <main id="main">
+    <section id="view-hoy" class="view"></section>
+    <section id="view-recetario" class="view" hidden></section>
+    <section id="view-super" class="view" hidden></section>
+    <section id="view-diario" class="view" hidden></section>
+    <section id="view-perfil" class="view" hidden></section>
   </main>
 
-  <nav class="tabs">
-    <button data-view="recetas" class="active"><span>📖</span>Recetas</button>
-    <button data-view="agregar"><span>➕</span>Agregar</button>
-    <button data-view="super"><span>🛒</span>Súper</button>
-    <button data-view="perfil"><span>🎯</span>Objetivo</button>
+  <button id="chef-fab" class="chef-fab" type="button" aria-label="Platicar con tu chef">
+    <span class="chef-face" aria-hidden="true">👩‍🍳</span>
+    <span class="chef-fab-label">¿Te ayudo?</span>
+  </button>
+
+  <nav class="tabs" aria-label="Secciones">
+    <button data-view="hoy" type="button"><span aria-hidden="true">🏡</span>Hoy</button>
+    <button data-view="recetario" type="button"><span aria-hidden="true">📖</span>Recetario</button>
+    <button data-view="super" type="button"><span aria-hidden="true">🧺</span>Súper</button>
+    <button data-view="diario" type="button"><span aria-hidden="true">📔</span>Diario</button>
   </nav>
 
-  <dialog id="recipe-dialog"></dialog>
-  <dialog id="alt-dialog"></dialog>
+  <dialog id="sheet" class="sheet"></dialog>
+  <dialog id="sheet2" class="sheet"></dialog>
+  <dialog id="cook" class="cook"></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
 
   <script type="module" src="app.js"></script>
 </body>

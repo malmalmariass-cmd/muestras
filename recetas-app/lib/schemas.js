@@ -39,6 +39,8 @@ export const RECIPE_SCHEMA = obj({
   },
   pasos: { type: "array", items: str },
   etiquetas: { type: "array", items: str },
+  emoji: str,
+  secretos: { type: "array", items: str },
   ...SCORE_PROPS,
 });
 

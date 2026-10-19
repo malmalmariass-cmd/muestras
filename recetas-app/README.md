@@ -1,6 +1,6 @@
-# Recetario al Súper
+# Mi Recetario
 
-Web app para guardar recetas de Instagram, YouTube y TikTok y convertirlas en tu lista del súper.
+Tu diario y libro de cocina, con una amiga chef (Canela) que te ayuda a guardar las recetas que ves en Instagram, YouTube y TikTok, hacer el súper y cocinar cada vez más rico y más sano.
 
 ## Qué hace
 
@@ -9,6 +9,12 @@ Web app para guardar recetas de Instagram, YouTube y TikTok y convertirlas en tu
 - **Lista del súper**: eliges las recetas que vas a cocinar y las porciones; la app suma los ingredientes repetidos, redondea a lo que realmente compras (piezas, latas) y los agrupa por pasillo.
 - **"No lo encuentro"**: te dice cómo se llama el producto en tu país, qué debe decir la etiqueta y en qué pasillo buscarlo, y te da alternativas (marcando las mejores para tu objetivo). Puedes cambiar el ingrediente por el sustituto en la lista.
 - Compartir la lista por WhatsApp o mensaje.
+- **Cocinar conmigo**: modo cocina paso a paso a pantalla completa, con temporizadores que detecta en cada paso, la pantalla siempre encendida y una lección de técnica de Canela en cada paso.
+- **Mi diario**: al terminar calificas con estrellas, eliges cómo te quedó y escribes una nota; se guarda como página de tu diario con tu racha de días cocinando.
+- **Platicar con Canela**: chat para preguntar técnicas, sustitutos o qué cocinar con lo que tienes (usa la IA).
+- **Secretos de chef** en cada receta: trucos que explican por qué funcionan.
+
+La paleta está definida como variables CSS al inicio de `public/styles.css` (papel crema, terracota, salvia, mantequilla, rosa y ciruela); el color principal cambia según tu objetivo.
 
 Tus recetas, tu objetivo y tu lista se guardan en el navegador del dispositivo.
 
@@ -27,8 +33,9 @@ Para poder "compartir a la app" desde Instagram, TikTok o YouTube en Android, á
 
 ## Estructura
 
-- `server.js` – API Express: `/api/extract`, `/api/alternatives`, `/api/score`, `/api/status`.
+- `server.js` – API Express: `/api/extract`, `/api/chef`, `/api/alternatives`, `/api/score`, `/api/status`.
 - `lib/sources.js` – lee el título, caption o descripción públicos del post (oEmbed de YouTube/TikTok, metadatos de Instagram y sitios web).
 - `lib/schemas.js` – esquemas JSON de salida estructurada para Claude.
 - `lib/fallback.js` – nombres regionales y sustitutos sin IA.
+- `public/chef.js` – la voz de la amiga chef: lecciones de técnica por paso, tip del día, frases.
 - `public/` – la app (HTML/CSS/JS sin build), recetas base y manifest PWA con share target.

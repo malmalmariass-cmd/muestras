@@ -4,7 +4,7 @@
 const s = (score, razon, tip) => ({ score, razon, tip });
 const i = (nombre, cantidad, unidad, categoria, nota = "") => ({ nombre, cantidad, unidad, categoria, nota });
 
-export const RECETAS_BASE = [
+const BASE = [
   {
     id: "app-bowl-pollo",
     origen: "app",
@@ -329,3 +329,84 @@ export const RECETAS_BASE = [
     },
   },
 ];
+
+// Emoji and chef secrets: the "why" behind each recipe's technique.
+const EXTRA = {
+  "app-bowl-pollo": {
+    emoji: "🍚",
+    secretos: [
+      "Seca el pollo con papel antes de dorarlo: la humedad hace que se cueza en vez de dorarse.",
+      "No muevas el pollo los primeros 3 minutos; así se forma la costrita dorada que da sabor.",
+      "El limón al final despierta todos los sabores sin sumar calorías.",
+    ],
+  },
+  "app-tacos-pastor": {
+    emoji: "🌮",
+    secretos: [
+      "La piña no es solo de adorno: sus enzimas suavizan la carne mientras se marina.",
+      "Corta los filetes muy delgados para que la marinada penetre y se doren rápido.",
+      "Calienta las tortillas en comal seco hasta que se inflen un poquito: saben a taquería.",
+    ],
+  },
+  "app-avena-overnight": {
+    emoji: "🥣",
+    secretos: [
+      "La chía absorbe hasta 10 veces su peso en líquido: es lo que le da textura de pudín.",
+      "Prepara 3 frascos el domingo y tienes desayuno resuelto hasta el miércoles.",
+    ],
+  },
+  "app-pasta-alfredo": {
+    emoji: "🍝",
+    secretos: [
+      "El agua de la pasta tiene almidón: es el pegamento que hace la salsa sedosa sin cortarse.",
+      "Agrega el parmesano fuera del fuego alto; si hierve, el queso se hace grumos.",
+      "Para una versión ligera: leche evaporada + yogur griego queda cremosísima.",
+    ],
+  },
+  "app-ensalada-atun": {
+    emoji: "🥗",
+    secretos: [
+      "Sala el pepino y el jitomate justo antes de servir; si no, sueltan agua y se aguada.",
+      "La cebolla morada remojada 5 minutos en agua con limón pierde lo picante.",
+    ],
+  },
+  "app-smoothie-masa": {
+    emoji: "🥤",
+    secretos: [
+      "Congela los plátanos en rodajas: el licuado queda espeso como helado sin hielo.",
+      "Licúa primero el líquido y la avena, luego lo demás: así no quedan grumos.",
+    ],
+  },
+  "app-salmon-esparragos": {
+    emoji: "🐟",
+    secretos: [
+      "El salmón está listo cuando se separa en láminas con un tenedor y el centro sigue rosado.",
+      "Las papas van primero porque tardan más; todo termina al mismo tiempo en la charola.",
+      "Dobla un espárrago: se rompe solo donde termina la parte dura.",
+    ],
+  },
+  "app-chilaquiles": {
+    emoji: "🍳",
+    secretos: [
+      "Agrega los totopos a la salsa justo antes de servir si te gustan crujientes.",
+      "Freír la salsa unos minutos concentra el sabor y quita lo crudo del tomate.",
+    ],
+  },
+  "app-lentejas": {
+    emoji: "🍲",
+    secretos: [
+      "Sofreír cebolla, zanahoria y apio (el sofrito) es la base de sabor de casi toda sopa.",
+      "Sala las lentejas al final: si las salas al inicio pueden quedar duras.",
+      "Un chorrito de vinagre o limón al servir hace que sepa mucho más.",
+    ],
+  },
+  "app-hamburguesa": {
+    emoji: "🍔",
+    secretos: [
+      "Aplasta la carne en los primeros 30 segundos; después ya no, o pierde sus jugos.",
+      "La plancha debe estar muy caliente: el secreto de la smash burger es la costra.",
+    ],
+  },
+};
+
+export const RECETAS_BASE = BASE.map((r) => ({ ...r, ...EXTRA[r.id] }));

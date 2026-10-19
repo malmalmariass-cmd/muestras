@@ -1,10 +1,10 @@
 {
-  "name": "Recetario al Súper",
+  "name": "Mi Recetario",
   "short_name": "Recetario",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f5f0",
-  "theme_color": "#1f7a4d",
+  "background_color": "#fbf6ee",
+  "theme_color": "#c8553d",
   "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }],
   "share_target": {
     "action": "/",
