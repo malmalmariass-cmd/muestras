@@ -308,7 +308,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
   </div>
   <nav class="tabs">
     <button id="tabJobs" type="button"><span data-t="tabJobs">Jobs</span><span class="tot" id="jobsTot" hidden></span><span class="cnt" id="jobsCnt" hidden></span></button>
-    <button id="tabForm" class="on" type="button"><span data-t="tabReport">Fill Service Report</span><span class="cnt" id="formCnt" hidden></span></button>
+    <button id="tabForm" class="on" type="button"><span data-t="tabReport">Field Service Report</span><span class="cnt" id="formCnt" hidden></span></button>
     <button id="tabMaint" type="button"><span data-t="tabMaint">Equipment Service Report</span><span class="cnt" id="maintCnt" hidden></span></button>
     <button id="tabReqs" type="button"><span data-t="tabReqs">Parts Requests</span><span class="tot" id="reqTot" hidden></span><span class="cnt" id="reqCnt" hidden></span></button>
     <button id="tabHist" type="button"><span data-t="tabHistory">History</span><span class="tot" id="histTot" hidden></span><span class="cnt" id="histCnt" hidden></span></button>
@@ -663,7 +663,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
 /* ---------------- i18n ---------------- */
 const I18N = {
   en: {
-    appTitle: 'Service Report', signOut: 'Sign out', tabJobs: 'Jobs', tabReport: 'Fill Service Report', tabMaint: 'Equipment Service Report', tabReqs: 'Parts Requests', tabHistory: 'History',
+    appTitle: 'Service Report', signOut: 'Sign out', tabJobs: 'Jobs', tabReport: 'Field Service Report', tabMaint: 'Equipment Service Report', tabReqs: 'Parts Requests', tabHistory: 'History',
     titleRepair: 'SERVICE REPORT · REPAIRS & FIXES', titleMaint: 'EQUIPMENT SERVICE REPORT', faults: 'Faults', addFault: '+ Add', faultN: 'Fault {n}', faultPh: 'Describe the fault',
     addCorrection: '+ Add correction', correction: 'Correction', correctionPh: 'How was it corrected?', removeFault: 'Remove this fault?',
     servicesDone: 'Services performed', addService: '+ Other service', servicesHint: 'Check every service you did. Add a note when needed.', techNotes: 'Technician notes',
@@ -741,7 +741,7 @@ const I18N = {
     custChanged: 'This customer is already registered. Only the supervisor can change its data: your change goes with this report so the supervisor can approve it.',
       },
   es: {
-    appTitle: 'Reporte de servicio', signOut: 'Salir', tabJobs: 'Trabajos', tabReport: 'Reporte de servicio', tabMaint: 'Servicio a equipo', tabReqs: 'Solicitud de partes', tabHistory: 'Historial',
+    appTitle: 'Reporte de servicio', signOut: 'Salir', tabJobs: 'Trabajos', tabReport: 'Reporte de servicio en campo', tabMaint: 'Servicio a equipo', tabReqs: 'Solicitud de partes', tabHistory: 'Historial',
     titleRepair: 'REPORTE DE SERVICIO · REPARACIONES', titleMaint: 'REPORTE DE SERVICIO A EQUIPO', faults: 'Fallas', addFault: '+ Agregar', faultN: 'Falla {n}', faultPh: 'Describe la falla',
     addCorrection: '+ Agregar corrección', correction: 'Corrección', correctionPh: '¿Cómo se corrigió?', removeFault: '¿Quitar esta falla?',
     servicesDone: 'Servicios realizados', addService: '+ Otro servicio', servicesHint: 'Marca cada servicio que hiciste. Agrega una nota si hace falta.', techNotes: 'Notas del técnico',
@@ -2307,7 +2307,7 @@ if (DEMO) (() => {
     await wait(1200);
   }
   async function fillReport(maint, n) {
-    say(maint ? 'Equipment Service Report: new report' : 'Fill Service Report: new report');
+    say(maint ? 'Equipment Service Report: new report' : 'Field Service Report: new report');
     await tap(maint ? '#tabMaint' : '#tabForm', 800); await tap('#btnNew', 800);
     await type('[data-k="customerName"]', 'LOAD TEST CUSTOMER ' + (1 + n % 5));
     await type('[data-k="address1"]', '1 Test Street'); await type('[data-k="address2"]', 'Homestead, FL');

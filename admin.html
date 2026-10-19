@@ -787,7 +787,7 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
       <div id="devTools">
       <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button><button type="button" data-d="export">Export data</button><button type="button" data-d="tutorial">Tutorials</button></div>
       <div id="devLoad" class="form">
-        <div class="sub" style="margin:0">Simulates people using the app at the same time, from this browser. <b>Technicians</b> sign in, download everything, sync every ~30 s, go through Jobs / Parts requests / History, and every period send a <b>Fill Service Report</b> and an <b>Equipment Service Report</b> (with signatures) and a <b>parts request</b>. <b>Supervisors</b> go through every tab of this panel, open reports, invoices, customers, parts and equipment, and answer the parts requests. Test accounts <b>TEST01…</b> and <b>TESTSUP1…</b> are created automatically. No emails are sent.</div>
+        <div class="sub" style="margin:0">Simulates people using the app at the same time, from this browser. <b>Technicians</b> sign in, download everything, sync every ~30 s, go through Jobs / Parts requests / History, and every period send a <b>Field Service Report</b> and an <b>Equipment Service Report</b> (with signatures) and a <b>parts request</b>. <b>Supervisors</b> go through every tab of this panel, open reports, invoices, customers, parts and equipment, and answer the parts requests. Test accounts <b>TEST01…</b> and <b>TESTSUP1…</b> are created automatically. No emails are sent.</div>
         <div class="row3"><div><label>Technicians</label><input id="ltN" type="number" min="0" max="100" value="50"></div><div><label>Supervisors</label><input id="ltS" type="number" min="0" max="10" value="3"></div><div><label>Duration (minutes)</label><input id="ltMin" type="number" min="1" max="60" value="5"></div></div>
         <div class="row3"><div><label>2 reports + 1 parts request every … minutes (per technician)</label><input id="ltRep" type="number" min="1" max="60" value="3"></div>
           <div><label>Show on screen (new window)</label><select id="ltWatch"><option value="tech">A technician (TEST01)</option><option value="sup">A supervisor (TESTSUP1)</option><option value="none">Nobody</option></select></div>
@@ -2655,12 +2655,12 @@ async function ltTech(i) {
   while (!stop()) {
     await sleepUntil(24000 + Math.random() * 12000, stop); if (stop()) break;   // the app syncs every 24–36 s
     if (Date.now() >= nextRep) {
-      // every period: a Fill Service Report (repair) and an Equipment Service Report (maintenance), then parts for the job
+      // every period: a Field Service Report (repair) and an Equipment Service Report (maintenance), then parts for the job
       let last = null;
       for (const type of ['repair', 'maintenance']) {
         if (stop()) break; const rep = fakeReport(tech, type);
         await ltCall(tech, 'reserve_number', { reportId: rep.id });   // the app reserves the number when the report is started
-        ltSt(P, type === 'repair' ? 'Fill Service Report' : 'Equipment Service Report');
+        ltSt(P, type === 'repair' ? 'Field Service Report' : 'Equipment Service Report');
         if (await ltCall(tech, 'save_report', { report: rep })) { LT.reports++; LT.byType[type]++; if (type === 'repair') last = rep; }
       }
       if (last && !stop()) {
@@ -2720,7 +2720,7 @@ function ltJourneyHtml() {
   let h = '';
   if (LT.watch !== 'none' && (J.in || J.stations.length)) {
     const who = LT.watch === 'sup' ? 'TESTSUP1 (supervisor)' : 'TEST01 (technician)', st = J.stations;
-    const rounds = st.filter(x => /^(Fill Service Report: new report|Reports & Jobs)$/.test(x.name)).length;
+    const rounds = st.filter(x => /^(Field Service Report: new report|Reports & Jobs)$/.test(x.name)).length;
     h += `<details class="fbox" id="ltJourneyD"${$('#ltJourneyD')?.open ? ' open' : ''}><summary style="cursor:pointer;font-weight:700">On screen: ${esc(who)} — ${J.in ? `session opened at ${fmtT(J.in)}${J.out ? `, closed at ${fmtT(J.out)}` : ''}, online ${fmtDur((J.out || now) - J.in)}` : 'not signed in yet'} · ${fmtN(st.length)} stations · ${fmtN(J.taps)} taps (moves of the cursor) · ${fmtN(rounds)} round${rounds === 1 ? '' : 's'}</summary>
       <div class="tablewrap" style="max-height:320px;overflow:auto;margin-top:8px"><table class="t"><thead><tr><th>Time</th><th>Station</th><th class="num">Time there</th></tr></thead><tbody>
       ${st.map((x, i) => `<tr><td>${fmtT(x.at)}</td><td>${esc(x.name)}</td><td class="num">${fmtDur((st[i + 1]?.at || J.out || now) - x.at)}</td></tr>`).reverse().join('')}</tbody></table></div></details>`;

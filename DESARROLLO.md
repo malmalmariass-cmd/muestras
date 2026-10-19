@@ -29,7 +29,7 @@ Escribe tu PIN entre las dos comillas (sin borrar las comillas ni el `;`) y guar
 Simula personas usando la app a la vez desde tu navegador:
 - **Técnicos (TEST01…)**: entran, descargan todo (clientes, inventario, servicios, trabajos, solicitudes,
   historial), sincronizan cada ~30 s y recorren Jobs / Parts requests / History. **Cada periodo** (por defecto
-  3 min) envían un **Fill Service Report** y un **Equipment Service Report** con dos firmas, consultan el
+  3 min) envían un **Field Service Report** y un **Equipment Service Report** con dos firmas, consultan el
   historial del equipo y mandan una **solicitud de partes** (una parte del stock y una a pedir).
 - **Supervisores (TESTSUP1…)**: recorren todas las pestañas del panel (reportes, trabajos, facturas,
   solicitudes y pedidos, clientes, inventario, equipos, estadísticas, empleados, ajustes), abren registros y
