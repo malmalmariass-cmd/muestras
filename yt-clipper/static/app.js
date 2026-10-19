@@ -262,6 +262,7 @@ $("#export").onclick = async (e) => {
   try {
     const { id } = await api(`/api/jobs/${state.job.id}/export`, {
       clips: state.clips, vertical: $("#fmt").value === "vertical", precise: $("#precise").value === "1",
+      enhance: $("#enhance").value,
     });
     let shown = 0;
     for (;;) {
@@ -287,3 +288,10 @@ $("#export").onclick = async (e) => {
     setStatus("exp", 0, err.message, true);
   } finally { btn.disabled = false; }
 };
+
+// Mejorar la calidad siempre re-codifica: el corte rápido (sin re-codificar) no aplica.
+$("#enhance").addEventListener("change", () => {
+  const improve = $("#enhance").value !== "original";
+  if (improve) $("#precise").value = "1";
+  $("#precise").disabled = improve;
+});

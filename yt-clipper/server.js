@@ -384,21 +384,41 @@ app.post("/api/jobs/:id/highlights", async (req, res) => {
 
 // ---------------------------------------------------------------- exportar
 
-async function runExport(exportId, job, clips, vertical, precise) {
+// Mejora de calidad con ffmpeg: reduce ruido, aumenta nitidez y color, y opcionalmente escala con
+// lanczos. No inventa detalle como un escalador con IA, pero se ve más nítido en pantallas grandes.
+const ENHANCE_LEVELS = new Set(["original", "enhance", "1080", "2160"]);
+const ENHANCE_FILTER = "hqdn3d=1.5:1.5:6:6,unsharp=5:5:0.8:5:5:0,eq=contrast=1.03:saturation=1.08";
+
+function videoFilters(vertical, enhance) {
+  const filters = [];
+  if (vertical) {
+    const [w, h] = enhance === "2160" ? [2160, 3840] : [1080, 1920];
+    filters.push("crop='min(iw,ih*9/16)':ih", `scale=${w}:${h}:flags=lanczos`, "setsar=1");
+  } else if (enhance === "1080" || enhance === "2160") {
+    // Solo sube la resolución: si el video ya es más grande, se queda igual.
+    filters.push(`scale=-2:'max(${enhance},ih)':flags=lanczos`, "setsar=1");
+  }
+  if (enhance !== "original") filters.push(ENHANCE_FILTER);
+  return filters.join(",");
+}
+
+async function runExport(exportId, job, clips, vertical, precise, enhance = "original") {
   const exp = exports_.get(exportId);
   const src = path.join(jobDir(job.id), job.file);
   const outDir = path.dirname(exportFile(exportId));
   const save = () => writeJson(exportFile(exportId), exp);
   fs.mkdirSync(outDir, { recursive: true });
   save();
-  const encode = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-c:a", "aac", "-b:a", "160k"];
+  const crf = enhance === "original" ? "20" : "18"; // más calidad de imagen al mejorar
+  const encode = ["-c:v", "libx264", "-preset", "veryfast", "-crf", crf, "-c:a", "aac", "-b:a", "160k"];
+  const vf = videoFilters(vertical, enhance);
   try {
     for (const [n, c] of clips.entries()) {
       exp.message = `Cortando ${n + 1} de ${clips.length}: ${c.name}`;
       save();
       const outName = `${String(n + 1).padStart(2, "0")}_${c.name}.mp4`;
       const args = ["-y", "-v", "error", "-ss", c.start.toFixed(3), "-i", src, "-t", (c.end - c.start).toFixed(3)];
-      if (vertical) args.push("-vf", "crop='min(iw,ih*9/16)':ih,scale=1080:1920,setsar=1", ...encode);
+      if (vf) args.push("-vf", vf, ...encode);
       else if (precise) args.push(...encode);
       else args.push("-c", "copy", "-avoid_negative_ts", "make_zero");
       args.push("-movflags", "+faststart", path.join(outDir, outName));
@@ -430,7 +450,8 @@ app.post("/api/jobs/:id/export", (req, res) => {
   if (!clips.length) return res.status(400).json({ error: "No hay clips para exportar" });
   const exportId = job.id + newId();
   exports_.set(exportId, { id: exportId, job: job.id, status: "working", progress: 0, message: "Preparando…", files: [] });
-  runExport(exportId, job, clips, Boolean(req.body.vertical), req.body.precise !== false);
+  const enhance = ENHANCE_LEVELS.has(req.body.enhance) ? req.body.enhance : "original";
+  runExport(exportId, job, clips, Boolean(req.body.vertical), req.body.precise !== false, enhance);
   res.json({ id: exportId });
 });
 

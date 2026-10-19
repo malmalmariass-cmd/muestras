@@ -25,6 +25,10 @@ const FEATURES = [
     "Exporta en 1080×1920 listo para YouTube Shorts, Instagram Reels y TikTok."
   ],
   [
+    "Mejorar calidad",
+    "Sube tus clips a Full HD 1080p o 4K con más nitidez, menos ruido y colores más vivos."
+  ],
+  [
     "Descarga en ZIP",
     "Baja cada clip por separado o todos juntos en un solo archivo ZIP."
   ]
@@ -46,6 +50,10 @@ const PLATFORMS = [
 ];
 
 const GENERAL_FAQ = [
+  [
+    "¿Puedo mejorar la calidad de un video?",
+    "Sí. Al exportar elige “Mejorar nitidez y color”, “Subir a Full HD 1080p” o “Subir a 4K”. YT Clipper reduce el ruido, aumenta la nitidez y escala la imagen. No puede recuperar detalles que el video original no tiene, pero se ve más nítido en pantallas grandes."
+  ],
   [
     "¿YT Clipper es gratis?",
     "Sí. YT Clipper es gratis y de código abierto. No necesitas cuenta ni registro."

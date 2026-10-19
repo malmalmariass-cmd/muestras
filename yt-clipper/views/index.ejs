@@ -45,6 +45,7 @@
   <script type="application/ld+json"><%- ld %></script>
 </head>
 <body>
+<canvas id="bg" aria-hidden="true"></canvas>
 <header>
   <nav class="topnav" aria-label="Principal">
     <a class="brand" href="<%= nav[0][2] %>"><img src="/static/icons/favicon.svg" alt="" width="32" height="32"> <%= site_name %></a>
@@ -144,6 +145,14 @@
           <option value="vertical">Vertical 9:16 (Shorts / Reels / TikTok)</option>
         </select>
       </label>
+      <label>Calidad
+        <select id="enhance">
+          <option value="original">Igual al original</option>
+          <option value="enhance">Mejorar nitidez y color</option>
+          <option value="1080">Subir a Full HD 1080p</option>
+          <option value="2160">Subir a 4K 2160p (lento)</option>
+        </select>
+      </label>
       <label>Corte
         <select id="precise">
           <option value="1">Preciso (re-codifica)</option>
@@ -207,5 +216,6 @@
 
 <script>window.MAX_CLIP = <%= max_clip %>;</script>
 <script src="/static/app.js" defer></script>
+<script src="/static/bg.js" defer></script>
 </body>
 </html>
