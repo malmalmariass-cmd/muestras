@@ -51,6 +51,18 @@ Requiere un plan con aplicaciones Node.js (Business, Cloud o VPS).
 En un VPS: `npm install`, `npm start` y mantenla viva con `pm2 start server.js --name yt-clipper`
 detrás de Nginx con HTTPS.
 
+### Si aparece `spawn … yt-dlp EACCES` (permiso denegado)
+
+Hostinger copia la app a otra carpeta después de `npm install` y se pierde el permiso de ejecución.
+La app lo arregla sola al arrancar, en este orden:
+
+1. Devuelve el permiso de ejecución a yt-dlp y ffmpeg (`chmod 755`).
+2. Si el servidor no deja ejecutar programas en esa carpeta, los copia a `data/.bin`, `~/.cache` o `/tmp` y los usa desde ahí.
+3. Para yt-dlp, si nada de lo anterior funciona, usa la versión de Python (`python3`, 3.9 o superior).
+
+En los registros de la app (Runtime logs) verás qué ruta usó: `ffmpeg: …` y `yt-dlp: …`.
+Si aparece `Aviso: Este servidor no permite ejecutar…`, tu plan no deja ejecutar programas y hace falta un VPS.
+
 > Si YouTube cambia algo y la descarga falla, actualiza yt-dlp: `npm run update-yt-dlp` (o vuelve a desplegar).
 > YouTube a veces bloquea las IP de servidores ("Sign in to confirm you're not a bot"). Si pasa en tu hosting,
 > la subida de archivos y los demás sitios siguen funcionando; para YouTube puede hacer falta un VPS con otra IP.

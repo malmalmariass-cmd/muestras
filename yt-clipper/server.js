@@ -9,10 +9,8 @@ const { spawn } = require("child_process");
 const archiver = require("archiver");
 const express = require("express");
 const multer = require("multer");
-const ffmpegPath = require("ffmpeg-static");
-const ffprobePath = require("ffprobe-static").path;
 
-const { installYtDlp, BIN_PATH } = require("./scripts/install-yt-dlp");
+const { binaries } = require("./scripts/binaries");
 const { FEATURES, GENERAL_FAQ, NAV, PAGES, PAGES_BY_SLUG, PLATFORMS, SITE_NAME } = require("./pages");
 
 const DATA_DIR = process.env.YTCLIPPER_DATA || path.join(__dirname, "data");
@@ -52,9 +50,9 @@ function safeName(name, fallback) {
 }
 
 /** Ejecuta un comando; resuelve con { stdout, stderr } o rechaza con el final de stderr. */
-function run(cmd, args, { onStdoutLine } = {}) {
+function run(cmd, args, { onStdoutLine, env } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"], env: env || process.env });
     let stdout = "";
     let stderr = "";
     let buf = "";
@@ -72,7 +70,8 @@ function run(cmd, args, { onStdoutLine } = {}) {
       stderr += d.toString();
       if (stderr.length > 20000) stderr = stderr.slice(-10000);
     });
-    child.on("error", reject);
+    child.on("error", (err) => reject(err.code === "EACCES"
+      ? new Error(`El servidor no permite ejecutar ${path.basename(cmd)} (permiso denegado)`) : err));
     child.on("close", (code) => {
       if (code === 0) resolve({ stdout, stderr });
       else reject(new Error(stderr.trim().split("\n").slice(-3).join("\n") || `${path.basename(cmd)} terminó con código ${code}`));
@@ -81,14 +80,15 @@ function run(cmd, args, { onStdoutLine } = {}) {
 }
 
 async function probeDuration(file) {
-  const { stdout } = await run(ffprobePath, ["-v", "error", "-show_entries", "format=duration", "-of", "json", file]);
+  const { ffprobe } = await binaries(DATA_DIR);
+  const { stdout } = await run(ffprobe, ["-v", "error", "-show_entries", "format=duration", "-of", "json", file]);
   return parseFloat(JSON.parse(stdout).format.duration);
 }
 
-async function ytDlpPath() {
-  if (process.env.YTDLP_PATH) return process.env.YTDLP_PATH;
-  if (fs.existsSync(BIN_PATH)) return BIN_PATH;
-  return installYtDlp();
+/** Ejecuta ffmpeg con los argumentos dados. */
+async function ffmpeg(args) {
+  const bins = await binaries(DATA_DIR);
+  return run(bins.ffmpeg, args);
 }
 
 // ---------------------------------------------------------------- descarga
@@ -98,16 +98,19 @@ async function runDownload(id, url, quality) {
   const dir = jobDir(id);
   try {
     job.message = "Preparando descargador…";
-    const ytdlp = await ytDlpPath();
+    const bins = await binaries(DATA_DIR);
+    const yt = await bins.ytdlp();
     job.message = "Descargando…";
-    await run(ytdlp, [
+    await run(yt.cmd, [
+      ...yt.pre,
       "-f", QUALITY_FORMATS[quality] || QUALITY_FORMATS[1080],
       "--merge-output-format", "mp4",
-      "--ffmpeg-location", ffmpegPath,
+      "--ffmpeg-location", bins.ffmpeg,
       "-o", path.join(dir, "video.%(ext)s"),
       "--write-info-json", "--no-playlist", "--newline", "--no-warnings",
       url,
     ], {
+      env: yt.env,
       onStdoutLine: (line) => {
         const m = line.match(/\[download\]\s+([\d.]+)%(?:.*?at\s+(\S+))?/);
         if (m) {
@@ -122,7 +125,7 @@ async function runDownload(id, url, quality) {
     let file = fs.readdirSync(dir).find((f) => f.startsWith("video.") && !f.endsWith(".json") && !f.endsWith(".part"));
     if (!file) throw new Error("No se encontró el video descargado");
     if (!file.endsWith(".mp4")) {
-      await run(ffmpegPath, ["-y", "-v", "error", "-i", path.join(dir, file), "-c", "copy", path.join(dir, "video.mp4")]);
+      await ffmpeg(["-y", "-v", "error", "-i", path.join(dir, file), "-c", "copy", path.join(dir, "video.mp4")]);
       fs.unlinkSync(path.join(dir, file));
       file = "video.mp4";
     }
@@ -175,7 +178,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
     if (path.extname(req.file.path) === ".mp4") {
       fs.renameSync(req.file.path, out);
     } else {
-      await run(ffmpegPath, ["-y", "-v", "error", "-i", req.file.path, "-c:v", "libx264", "-preset", "veryfast",
+      await ffmpeg(["-y", "-v", "error", "-i", req.file.path, "-c:v", "libx264", "-preset", "veryfast",
         "-c:a", "aac", "-movflags", "+faststart", out]);
       fs.unlinkSync(req.file.path);
     }
@@ -212,7 +215,7 @@ app.get("/media/:id/*", (req, res) => {
 
 /** Volumen RMS (dB) por segundo usando ffmpeg astats. */
 async function audioEnergy(file) {
-  const { stdout } = await run(ffmpegPath, [
+  const { stdout } = await ffmpeg([
     "-v", "error", "-i", file, "-vn", "-af",
     "aresample=8000,asetnsamples=8000,astats=metadata=1:reset=1," +
       "ametadata=print:key=lavfi.astats.Overall.RMS_level:file=-",
@@ -289,7 +292,7 @@ async function runExport(exportId, job, clips, vertical, precise) {
       else if (precise) args.push(...encode);
       else args.push("-c", "copy", "-avoid_negative_ts", "make_zero");
       args.push("-movflags", "+faststart", path.join(outDir, outName));
-      await run(ffmpegPath, args);
+      await ffmpeg(args);
       exp.files.push({ name: outName, url: `/media/${job.id}/clips/${exportId}/${encodeURIComponent(outName)}` });
       exp.progress = Math.round(((n + 1) * 100) / clips.length);
     }
@@ -455,4 +458,8 @@ setInterval(() => {
 const PORT = Number(process.env.PORT) || 3000;
 app.listen(PORT, process.env.HOST, () => {
   console.log(`YT Clipper listo en http://localhost:${PORT}`);
+  // Prepara ffmpeg y yt-dlp al arrancar para que la primera descarga no espere (y avisar si fallan).
+  binaries(DATA_DIR)
+    .then((b) => b.ytdlp().then((yt) => console.log(`ffmpeg: ${b.ffmpeg}\nyt-dlp: ${[yt.cmd, ...yt.pre].join(" ")}`)))
+    .catch((err) => console.error(`Aviso: ${err.message}`));
 });
