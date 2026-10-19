@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Administración · YT Clipper</title>
+  <link rel="icon" href="/static/icons/favicon.svg" type="image/svg+xml">
+  <style>
+    :root { --abyss: #000180; --deep: #000050; --orchid: #e7a0fe; --orchid-deep: #c66cf0; --meadow: #d0ffa3;
+      --meadow-deep: #a6f25f; --text: #f6eeff; --muted: #b8b4ec; --line: rgba(231,160,254,.28); --danger: #ff6b9a; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, var(--meadow) 0%, var(--orchid) 40%, #3a1bb5 75%, var(--abyss) 100%); }
+    main { max-width: 720px; margin: 0 auto; padding: 32px 16px 48px; }
+    h1 { color: var(--abyss); margin: 0 0 18px; font-size: 28px; }
+    h2 { color: var(--orchid); margin: 0 0 10px; font-size: 19px; }
+    .card { background: var(--abyss); border-radius: 22px; padding: 20px; margin-bottom: 18px; box-shadow: 0 8px 0 var(--deep); }
+    p, li { color: var(--text); } .muted { color: var(--muted); font-size: 13px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; }
+    input, button { font: inherit; color: var(--text); background: var(--deep); border: 1.5px solid var(--line); border-radius: 12px; padding: 9px 13px; }
+    input[type=password], input[type=url] { flex: 1 1 260px; min-width: 0; }
+    input[type=file] { border: none; padding: 0; background: none; }
+    button { background: var(--orchid); color: var(--abyss); border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 var(--orchid-deep); }
+    button.alt { background: var(--meadow); box-shadow: 0 4px 0 var(--meadow-deep); }
+    button.ghost { background: transparent; color: var(--danger); border: 1.5px solid var(--line); box-shadow: none; }
+    button:disabled { opacity: .5; cursor: wait; }
+    .msg { margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: var(--deep); white-space: pre-wrap; }
+    .ok { color: var(--meadow); } .bad { color: var(--danger); }
+    ol { padding-left: 20px; } code { color: var(--meadow); }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Administración de YT Clipper</h1>
+
+  <section class="card">
+    <h2>1. Contraseña</h2>
+    <div class="row">
+      <input id="token" type="password" placeholder="Valor de ADMIN_TOKEN" autocomplete="current-password">
+      <button id="login">Entrar</button>
+    </div>
+    <div id="status" class="msg hidden"></div>
+  </section>
+
+  <section class="card">
+    <h2>2. Subir cookies de YouTube</h2>
+    <ol>
+      <li>Usa una cuenta de Google <b>secundaria</b>, no la principal.</li>
+      <li>Abre una <b>ventana de incógnito</b> y entra a youtube.com con esa cuenta.</li>
+      <li>Exporta las cookies con una extensión como “Get cookies.txt LOCALLY” (formato Netscape).</li>
+      <li><b>Cierra la ventana de incógnito</b> y sube aquí el archivo.</li>
+    </ol>
+    <div class="row">
+      <input id="file" type="file" accept=".txt,text/plain">
+      <button id="upload" class="alt">Guardar cookies</button>
+      <button id="remove" class="ghost">Borrar cookies</button>
+    </div>
+    <p class="muted">Se guardan en tu carpeta personal del servidor (no en la app ni en GitHub) con permisos solo para ti.</p>
+    <div id="upload-msg" class="msg hidden"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. Probar un enlace</h2>
+    <div class="row">
+      <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=…">
+      <button id="test">Probar</button>
+    </div>
+    <p class="muted">Solo comprueba que YouTube responde; no descarga el video.</p>
+    <div id="test-msg" class="msg hidden"></div>
+  </section>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const getToken = () => $("#token").value || sessionStorage.getItem("ytc-admin") || "";
+
+function show(el, text, ok) {
+  el.classList.remove("hidden");
+  el.className = `msg ${ok ? "ok" : "bad"}`;
+  el.textContent = text;
+}
+
+async function call(url, opts = {}) {
+  const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), "X-Admin-Token": getToken() } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+  return data;
+}
+
+function describe(c) {
+  if (!c.configured) return "Cookies: no configuradas. YouTube probablemente bloqueará las descargas.";
+  const when = c.updated ? new Date(c.updated).toLocaleString() : "—";
+  return `Cookies: ${c.source}, actualizadas ${when}, ${c.youtubeCookies} cookies de YouTube/Google.`;
+}
+
+async function refresh() {
+  try {
+    const s = await call("/admin/status");
+    sessionStorage.setItem("ytc-admin", getToken());
+    show($("#status"), `${describe(s.cookies)}\nProxy: ${s.proxy ? "configurado" : "no"}\nyt-dlp: ${s.ytdlp}`, s.cookies.configured);
+  } catch (e) {
+    show($("#status"), e.message, false);
+  }
+}
+
+$("#login").onclick = refresh;
+$("#token").addEventListener("keydown", (e) => e.key === "Enter" && refresh());
+
+$("#upload").onclick = async (e) => {
+  const file = $("#file").files[0];
+  if (!file) return show($("#upload-msg"), "Elige el archivo cookies.txt", false);
+  const form = new FormData();
+  form.append("file", file);
+  e.target.disabled = true;
+  try {
+    const r = await call("/admin/cookies", { method: "POST", body: form });
+    show($("#upload-msg"), `Listo. ${describe(r.cookies)}\nAhora prueba un enlace abajo.`, true);
+    refresh();
+  } catch (err) {
+    show($("#upload-msg"), err.message, false);
+  } finally { e.target.disabled = false; }
+};
+
+$("#remove").onclick = async () => {
+  if (!confirm("¿Borrar las cookies guardadas?")) return;
+  try {
+    await call("/admin/cookies", { method: "DELETE" });
+    show($("#upload-msg"), "Cookies borradas.", true);
+    refresh();
+  } catch (err) {
+    show($("#upload-msg"), err.message, false);
+  }
+};
+
+$("#test").onclick = async (e) => {
+  e.target.disabled = true;
+  show($("#test-msg"), "Probando…", true);
+  try {
+    const r = await call("/admin/test", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url: $("#url").value }),
+    });
+    if (r.ok) show($("#test-msg"), `Funciona: ${r.result}`, true);
+    else show($("#test-msg"), `${r.error}\n\nDetalle: ${r.detail}`, false);
+  } catch (err) {
+    show($("#test-msg"), err.message, false);
+  } finally { e.target.disabled = false; }
+};
+
+if (sessionStorage.getItem("ytc-admin")) refresh();
+</script>
+</body>
+</html>

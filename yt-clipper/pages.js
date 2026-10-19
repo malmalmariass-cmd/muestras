@@ -81,7 +81,7 @@ const PAGES = [
     "slug": "",
     "title": "Descargar videos de YouTube y cortarlos en clips gratis | YT Clipper",
     "description": "Descarga videos de YouTube gratis y córtalos en highlights o en partes de máximo 10 minutos. Exporta en MP4 o vertical 9:16 para Shorts, Reels y TikTok.",
-    "h1": "Descarga videos de YouTube y córtalos en clips",
+    "h1": "Descargar videos de YouTube",
     "lead": "Pega el enlace, descarga el video y divídelo en <b>highlights</b> o en <b>partes de máximo 10 minutos</b>. Gratis, sin registro y en MP4.",
     "about": "YT Clipper es una herramienta web gratuita para descargar videos de YouTube y otros sitios, y cortarlos en clips cortos. Detecta los mejores momentos de forma automática, divide videos largos en partes de hasta 10 minutos y exporta en formato horizontal o vertical 9:16.",
     "steps": [

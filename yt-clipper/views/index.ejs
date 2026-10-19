@@ -53,8 +53,15 @@
       <% nav.slice(1, 6).forEach(([slug, label, href]) => { %><a href="<%= href %>"<% if (slug === page.slug) { %> aria-current="page"<% } %>><%= label %></a><% }) %>
     </div>
   </nav>
-  <h1><%= page.h1 %></h1>
-  <p class="lead"><%- page.lead %></p>
+  <div class="hero">
+    <h1><%= page.h1 %></h1>
+    <p class="lead"><%- page.lead %></p>
+    <a class="scroll-hint" href="#source" aria-label="Desliza hacia abajo para empezar">
+      <svg viewBox="0 0 48 28" aria-hidden="true"><path d="M4 4l20 20L44 4"/></svg>
+      <svg viewBox="0 0 48 28" aria-hidden="true"><path d="M4 4l20 20L44 4"/></svg>
+      <span>Desliza hacia abajo</span>
+    </a>
+  </div>
 </header>
 
 <main>

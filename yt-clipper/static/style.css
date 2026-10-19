@@ -177,3 +177,22 @@ header b { color: #5a1fb0; }
 
 /* ---------------------------------------------------------------- decoración animada del fondo */
 #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+/* ---------------------------------------------------------------- portada a pantalla completa */
+.hero {
+  min-height: calc(100vh - 100px); min-height: calc(100svh - 100px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding-bottom: 24px;
+}
+header .hero h1 { font-size: clamp(52px, 9vw, 116px); line-height: 1.02; margin: 0 0 18px; max-width: 12ch; }
+header .hero .lead { font-size: clamp(16px, 2vw, 20px); max-width: 640px; margin: 0 0 40px; }
+.scroll-hint { display: inline-flex; flex-direction: column; align-items: center; gap: 0; color: var(--abyss); text-decoration: none; }
+.scroll-hint svg { width: 64px; height: 38px; fill: none; stroke: currentColor; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round;
+  animation: hint 1.8s ease-in-out infinite; }
+.scroll-hint svg + svg { margin-top: -14px; animation-delay: .2s; opacity: .55; }
+.scroll-hint span { margin-top: 6px; font-size: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.scroll-hint:hover { color: #5a1fb0; }
+@keyframes hint { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .scroll-hint svg { animation: none; } }
+html { scroll-behavior: smooth; }
+#source { scroll-margin-top: 24px; }

@@ -68,7 +68,14 @@ Si aparece `Aviso: Este servidor no permite ejecutar…`, tu plan no deja ejecut
 YouTube bloquea muchas IP de servidores (Hostinger, AWS, etc.). No es un error de la app: hay que darle
 a yt-dlp **cookies de una cuenta de YouTube** o usar un **proxy residencial**.
 
-**Opción A: cookies (gratis)**
+**Opción A: cookies (gratis), desde el navegador**
+
+1. En Hostinger agrega la variable de entorno `ADMIN_TOKEN` con una contraseña larga que solo tú sepas
+   y vuelve a desplegar. (Sin `ADMIN_TOKEN`, la página de administración no existe.)
+2. Abre `https://tudominio.com/admin`, escribe esa contraseña y sigue los pasos:
+   sube `cookies.txt` y pega un enlace de YouTube en **Probar** para confirmar que funciona.
+
+**Opción A bis: cookies a mano**
 
 1. Usa una cuenta de Google **secundaria** (YouTube puede limitar la cuenta que se usa para descargar).
 2. En tu computadora abre una **ventana de incógnito**, entra a youtube.com con esa cuenta.
@@ -117,6 +124,7 @@ Mientras tanto, la **subida de archivos** y los demás sitios (TikTok, Instagram
 | `YTDLP_PATH` | `bin/yt-dlp` | Ruta a otro yt-dlp, si prefieres uno instalado en el sistema |
 | `YTDLP_COOKIES_FILE` | `~/yt-clipper/cookies.txt` | Archivo de cookies de YouTube (formato Netscape) |
 | `YTDLP_COOKIES` | — | Alternativa: contenido de cookies.txt (usa `\n` para los saltos de línea) |
+| `ADMIN_TOKEN` | — | Contraseña de la página `/admin` para subir cookies y probar enlaces (sin ella, `/admin` no existe) |
 | `YTDLP_PROXY` | — | Proxy para las descargas, p. ej. `http://usuario:clave@host:puerto` |
 
 Usa esta herramienta solo con videos propios o con permiso del autor, respetando los Términos de Servicio de YouTube.

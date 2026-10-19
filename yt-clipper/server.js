@@ -129,6 +129,15 @@ function cookiesFile() {
   return dest;
 }
 
+/** Argumentos de yt-dlp para cookies y proxy, si están configurados. */
+function ytdlpAccessArgs() {
+  const cookies = cookiesFile();
+  return [
+    ...(cookies ? ["--cookies", cookies] : []),
+    ...(process.env.YTDLP_PROXY ? ["--proxy", process.env.YTDLP_PROXY] : []),
+  ];
+}
+
 function friendlyDownloadError(message) {
   if (/confirm you.?re not a bot|Sign in to confirm/i.test(message)) {
     return "YouTube bloqueó la descarga desde este servidor (pide confirmar que no eres un robot). " +
@@ -200,11 +209,9 @@ async function runDownload(id, url, quality) {
     const bins = await binaries(DATA_DIR);
     const yt = await bins.ytdlp();
     job.message = "Descargando…";
-    const cookies = cookiesFile();
     await run(yt.cmd, [
       ...yt.pre,
-      ...(cookies ? ["--cookies", cookies] : []),
-      ...(process.env.YTDLP_PROXY ? ["--proxy", process.env.YTDLP_PROXY] : []),
+      ...ytdlpAccessArgs(),
       "-f", QUALITY_FORMATS[quality] || QUALITY_FORMATS[1080],
       "--merge-output-format", "mp4",
       "--ffmpeg-location", bins.ffmpeg,
@@ -512,8 +519,86 @@ function structuredData(req, page, canonical, faq) {
   return JSON.stringify(ld).replace(/</g, "\\u003c");
 }
 
+// ---------------------------------------------------------------- administración (cookies de YouTube)
+// Solo existe si se define ADMIN_TOKEN. Permite subir cookies.txt y probar un enlace de YouTube.
+
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "";
+// Fuera de la carpeta de la app, para que no se borre al volver a desplegar.
+const ADMIN_COOKIES_PATH = path.join(os.homedir(), "yt-clipper", "cookies.txt");
+const sha = (v) => crypto.createHash("sha256").update(String(v)).digest();
+
+function requireAdmin(req, res, next) {
+  if (!ADMIN_TOKEN) return res.status(404).type("text/plain").send("Página no encontrada");
+  res.set("X-Robots-Tag", "noindex, nofollow");
+  res.set("Cache-Control", "no-store");
+  if (req.method === "GET" && req.path === "/admin") return next();
+  if (crypto.timingSafeEqual(sha(req.get("x-admin-token") || ""), sha(ADMIN_TOKEN))) return next();
+  setTimeout(() => res.status(401).json({ error: "Contraseña incorrecta" }), 1000); // frena los intentos
+}
+
+function cookiesStatus() {
+  const src = COOKIE_CANDIDATES.find((f) => fs.existsSync(f));
+  if (!src && !process.env.YTDLP_COOKIES) return { configured: false };
+  const text = src ? fs.readFileSync(src, "utf8") : process.env.YTDLP_COOKIES;
+  const youtube = text.split(/\r?\n/).filter((l) => /(^|\t)\.?(youtube|google)\.com\t/.test(l)).length;
+  return {
+    configured: true,
+    source: src ? (src === ADMIN_COOKIES_PATH ? "subidas desde esta página" : "archivo en el servidor") : "variable YTDLP_COOKIES",
+    updated: src ? fs.statSync(src).mtime.toISOString() : null,
+    youtubeCookies: youtube,
+  };
+}
+
+app.get("/admin", requireAdmin, (req, res) => res.sendFile(path.join(__dirname, "views", "admin.html")));
+
+app.get("/admin/status", requireAdmin, async (req, res) => {
+  let ytdlp = null;
+  try {
+    const yt = await (await binaries(DATA_DIR)).ytdlp();
+    ytdlp = (await run(yt.cmd, [...yt.pre, "--version"], { env: yt.env })).stdout.trim();
+  } catch (err) {
+    ytdlp = `error: ${err.message}`;
+  }
+  res.json({ cookies: cookiesStatus(), proxy: Boolean(process.env.YTDLP_PROXY), ytdlp });
+});
+
+const cookieUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 1024 * 1024 } });
+app.post("/admin/cookies", requireAdmin, cookieUpload.single("file"), (req, res) => {
+  const text = req.file ? req.file.buffer.toString("utf8") : "";
+  const lines = text.split(/\r?\n/).filter((l) => l.split("\t").length >= 7);
+  if (!lines.length) {
+    return res.status(400).json({ error: "El archivo no parece un cookies.txt en formato Netscape (líneas separadas por tabulaciones)." });
+  }
+  if (!lines.some((l) => /youtube\.com\t/.test(l))) {
+    return res.status(400).json({ error: "El archivo no tiene cookies de youtube.com. Expórtalas estando en youtube.com." });
+  }
+  fs.mkdirSync(path.dirname(ADMIN_COOKIES_PATH), { recursive: true, mode: 0o700 });
+  fs.writeFileSync(ADMIN_COOKIES_PATH, text, { mode: 0o600 });
+  fs.rmSync(path.join(DATA_DIR, ".cookies.txt"), { force: true }); // la próxima descarga usa las nuevas
+  res.json({ ok: true, cookies: cookiesStatus() });
+});
+
+app.delete("/admin/cookies", requireAdmin, (req, res) => {
+  fs.rmSync(ADMIN_COOKIES_PATH, { force: true });
+  fs.rmSync(path.join(DATA_DIR, ".cookies.txt"), { force: true });
+  res.json({ ok: true, cookies: cookiesStatus() });
+});
+
+app.post("/admin/test", requireAdmin, async (req, res) => {
+  const url = String(req.body.url || "").trim();
+  if (!/^https?:\/\//i.test(url)) return res.status(400).json({ error: "Pega un enlace válido (https://…)" });
+  try {
+    const yt = await (await binaries(DATA_DIR)).ytdlp();
+    const { stdout } = await run(yt.cmd, [...yt.pre, ...ytdlpAccessArgs(), "--simulate", "--no-playlist",
+      "--no-warnings", "--print", "%(title)s · %(duration_string)s", url], { env: yt.env });
+    res.json({ ok: true, result: stdout.trim() });
+  } catch (err) {
+    res.json({ ok: false, error: friendlyDownloadError(err.message), detail: err.message.slice(-400) });
+  }
+});
+
 app.get("/robots.txt", (req, res) => {
-  const rules = "Allow: /\nDisallow: /api/\nDisallow: /media/\n\n";
+  const rules = "Allow: /\nDisallow: /api/\nDisallow: /media/\nDisallow: /admin\n\n";
   // Permitir explícitamente los rastreadores de buscadores con IA (GEO).
   const bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot",
     "Claude-User", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended",
