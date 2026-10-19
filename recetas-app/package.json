@@ -1,0 +1,17 @@
+{
+  "name": "recetas-app",
+  "version": "1.0.0",
+  "description": "Recetas de redes sociales a lista del súper",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "express": "^5.3.0"
+  },
+  "type": "module"
+}
