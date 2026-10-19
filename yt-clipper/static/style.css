@@ -1,4 +1,9 @@
 /* Paleta: Midnight Abyss #000180 · Orchid Glaze #E7A0FE · Meadow Light #D0FFA3 */
+@font-face {
+  font-family: "Marquisette";
+  src: url("fonts/Marquisette.woff2") format("woff2"), url("fonts/Marquisette.ttf") format("truetype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
 :root {
   --abyss: #000180;
   --abyss-deep: #000050;
@@ -11,17 +16,13 @@
   --muted: #b8b4ec;
   --line: rgba(231, 160, 254, .28);
   --danger: #ff6b9a;
+  --font-title: "Marquisette", Georgia, "Times New Roman", serif;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0; color: var(--text); min-height: 100vh;
   font: 15px/1.5 "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: var(--abyss);
-}
-/* Degradado fijo de fondo (pseudo-elemento: funciona también en iOS, que ignora background-attachment: fixed) */
-body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1;
-  background: linear-gradient(172deg, var(--abyss) 0%, #3a1bb5 30%, var(--orchid) 62%, var(--meadow) 100%);
+  background: linear-gradient(180deg, var(--abyss) 0%, #3a1bb5 30%, var(--orchid) 65%, var(--meadow) 100%);
 }
 header, main, footer { max-width: 980px; margin: 0 auto; padding: 0 16px; }
 header { padding-top: 32px; }
@@ -152,3 +153,16 @@ footer p { max-width: 100%; }
 .footnav { display: flex; flex-wrap: wrap; gap: 6px 14px; background: var(--abyss); padding: 10px 14px; border-radius: 12px; }
 .footnav a { color: var(--orchid); text-decoration: none; }
 .footnav a:hover { color: var(--meadow); }
+
+/* ---------------------------------------------------------------- tipografía de títulos */
+h1, h2, h3, .brand, summary {
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-synthesis: none; /* la fuente tiene un solo peso: evita negritas falsas */
+  letter-spacing: 0;
+}
+header h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.15; }
+h2 { font-size: 26px; }
+h3 { font-size: 19px; }
+.brand { font-size: 28px; }
+summary { font-size: 18px; }
