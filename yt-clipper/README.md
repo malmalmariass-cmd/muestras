@@ -63,9 +63,32 @@ La app lo arregla sola al arrancar, en este orden:
 En los registros de la app (Runtime logs) verás qué ruta usó: `ffmpeg: …` y `yt-dlp: …`.
 Si aparece `Aviso: Este servidor no permite ejecutar…`, tu plan no deja ejecutar programas y hace falta un VPS.
 
+### Si YouTube dice "Sign in to confirm you're not a bot"
+
+YouTube bloquea muchas IP de servidores (Hostinger, AWS, etc.). No es un error de la app: hay que darle
+a yt-dlp **cookies de una cuenta de YouTube** o usar un **proxy residencial**.
+
+**Opción A: cookies (gratis)**
+
+1. Usa una cuenta de Google **secundaria** (YouTube puede limitar la cuenta que se usa para descargar).
+2. En tu computadora abre una **ventana de incógnito**, entra a youtube.com con esa cuenta.
+3. Exporta las cookies en formato Netscape (`cookies.txt`) con una extensión como
+   “Get cookies.txt LOCALLY” y **cierra la ventana de incógnito** (si sigues navegando, YouTube las cambia).
+4. Súbelas al servidor con el Administrador de archivos de Hostinger a una de estas rutas
+   (fuera de la carpeta de la app, para que no se borren al volver a desplegar):
+   - `~/yt-clipper/cookies.txt` (recomendado), o
+   - `~/cookies.txt`, o la ruta que pongas en la variable `YTDLP_COOKIES_FILE`.
+5. Reinicia la app. Cuando las cookies caduquen (semanas o meses), repite los pasos.
+
+**Nunca subas `cookies.txt` a GitHub**: da acceso a esa cuenta. Ya está en `.gitignore`.
+
+**Opción B: proxy residencial (de pago)**
+
+Define `YTDLP_PROXY=http://usuario:clave@host:puerto` con un proveedor de proxies residenciales.
+
+Mientras tanto, la **subida de archivos** y los demás sitios (TikTok, Instagram, etc.) siguen funcionando.
+
 > Si YouTube cambia algo y la descarga falla, actualiza yt-dlp: `npm run update-yt-dlp` (o vuelve a desplegar).
-> YouTube a veces bloquea las IP de servidores ("Sign in to confirm you're not a bot"). Si pasa en tu hosting,
-> la subida de archivos y los demás sitios siguen funcionando; para YouTube puede hacer falta un VPS con otra IP.
 
 ### Atajos de teclado (en el editor)
 
@@ -92,6 +115,9 @@ Si aparece `Aviso: Este servidor no permite ejecutar…`, tu plan no deja ejecut
 | `YTCLIPPER_DATA` | `./data` | Carpeta de videos y clips |
 | `KEEP_HOURS` | `6` | Horas que se guardan los videos y clips antes de borrarse |
 | `YTDLP_PATH` | `bin/yt-dlp` | Ruta a otro yt-dlp, si prefieres uno instalado en el sistema |
+| `YTDLP_COOKIES_FILE` | `~/yt-clipper/cookies.txt` | Archivo de cookies de YouTube (formato Netscape) |
+| `YTDLP_COOKIES` | — | Alternativa: contenido de cookies.txt (usa `\n` para los saltos de línea) |
+| `YTDLP_PROXY` | — | Proxy para las descargas, p. ej. `http://usuario:clave@host:puerto` |
 
 Usa esta herramienta solo con videos propios o con permiso del autor, respetando los Términos de Servicio de YouTube.
 

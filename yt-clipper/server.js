@@ -3,6 +3,7 @@
 
 const crypto = require("crypto");
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
 
@@ -25,6 +26,9 @@ const ALLOWED_UPLOAD_EXT = new Set([".mp4", ".mov", ".mkv", ".webm", ".m4v"]);
 const SITE_URL = (process.env.SITE_URL || "").replace(/\/+$/, "");
 const LAST_UPDATE = process.env.SITE_LAST_UPDATE || new Date().toISOString().slice(0, 10);
 const ID_RE = /^[0-9a-f]{32}$/;
+const EXPORT_ID_RE = /^[0-9a-f]{64}$/; // id del video (32) + id de la exportación (32)
+// Si una descarga no avanza en este tiempo, el proceso que la hacía se reinició.
+const STALE_MS = 3 * 60 * 1000;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const jobs = new Map();
@@ -42,6 +46,100 @@ const newId = () => crypto.randomBytes(16).toString("hex");
 function jobDir(id) {
   if (!ID_RE.test(id)) return null;
   return path.join(DATA_DIR, id);
+}
+
+// ---------------------------------------------------------------- estado en disco
+// Hostinger puede reiniciar la app o repartir las peticiones entre varias instancias, así que el
+// estado de cada video y exportación se guarda en disco y cualquier instancia puede leerlo.
+
+function writeJson(file, data) {
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(data));
+  fs.renameSync(tmp, file);
+}
+
+function readJson(file) {
+  try {
+    return { data: JSON.parse(fs.readFileSync(file, "utf8")), mtime: fs.statSync(file).mtimeMs };
+  } catch {
+    return null;
+  }
+}
+
+const saveJob = (job) => writeJson(path.join(jobDir(job.id), "job.json"), job);
+const pendingSaves = new Set();
+function saveJobSoon(job) {
+  if (pendingSaves.has(job.id)) return;
+  pendingSaves.add(job.id);
+  setTimeout(() => { pendingSaves.delete(job.id); saveJob(job); }, 1000);
+}
+
+function loadJob(id) {
+  if (jobs.has(id)) return jobs.get(id);
+  const dir = jobDir(id);
+  const saved = dir && readJson(path.join(dir, "job.json"));
+  if (!saved) return null;
+  const job = saved.data;
+  if (job.status === "downloading" && Date.now() - saved.mtime > STALE_MS) {
+    Object.assign(job, { status: "error", message: "La descarga se interrumpió (el servidor se reinició). Inténtalo de nuevo." });
+  }
+  return job;
+}
+
+function exportFile(exportId) {
+  return path.join(DATA_DIR, exportId.slice(0, 32), "clips", exportId.slice(32), "export.json");
+}
+
+function loadExport(exportId) {
+  if (!EXPORT_ID_RE.test(exportId)) return null;
+  if (exports_.has(exportId)) return exports_.get(exportId);
+  const saved = readJson(exportFile(exportId));
+  if (!saved) return null;
+  const exp = saved.data;
+  if (exp.status === "working" && Date.now() - saved.mtime > STALE_MS) {
+    Object.assign(exp, { status: "error", message: "La exportación se interrumpió (el servidor se reinició). Inténtalo de nuevo." });
+  }
+  return exp;
+}
+
+// ---------------------------------------------------------------- cookies y proxy de YouTube
+// YouTube bloquea muchas IP de servidores ("Sign in to confirm you're not a bot"). Con cookies de
+// una cuenta de YouTube (archivo cookies.txt) o un proxy residencial, la descarga vuelve a funcionar.
+
+const COOKIE_CANDIDATES = [
+  process.env.YTDLP_COOKIES_FILE,
+  path.join(os.homedir(), "yt-clipper", "cookies.txt"),
+  path.join(os.homedir(), "cookies.txt"),
+  path.join(__dirname, "cookies.txt"),
+].filter(Boolean);
+
+/** Devuelve la ruta a una copia escribible de las cookies (yt-dlp las actualiza), o null. */
+function cookiesFile() {
+  const dest = path.join(DATA_DIR, ".cookies.txt");
+  let content = null;
+  if (process.env.YTDLP_COOKIES) {
+    content = process.env.YTDLP_COOKIES.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+  } else {
+    const src = COOKIE_CANDIDATES.find((f) => fs.existsSync(f));
+    if (!src) return null;
+    if (fs.existsSync(dest) && fs.statSync(dest).mtimeMs >= fs.statSync(src).mtimeMs) return dest;
+    content = fs.readFileSync(src, "utf8");
+  }
+  fs.writeFileSync(dest, content, { mode: 0o600 });
+  return dest;
+}
+
+function friendlyDownloadError(message) {
+  if (/confirm you.?re not a bot|Sign in to confirm/i.test(message)) {
+    return "YouTube bloqueó la descarga desde este servidor (pide confirmar que no eres un robot). " +
+      "El administrador debe configurar cookies de YouTube o un proxy (ver README). " +
+      "Mientras tanto, puedes subir el archivo de video desde tu dispositivo.";
+  }
+  if (/Private video|Video unavailable|This video is unavailable/i.test(message)) {
+    return "El video es privado o no está disponible.";
+  }
+  if (/Unsupported URL/i.test(message)) return "Ese enlace no es compatible. Pega el enlace directo del video.";
+  return message.replace(/^ERROR:\s*/, "");
 }
 
 function safeName(name, fallback) {
@@ -98,11 +196,15 @@ async function runDownload(id, url, quality) {
   const dir = jobDir(id);
   try {
     job.message = "Preparando descargador…";
+    saveJobSoon(job);
     const bins = await binaries(DATA_DIR);
     const yt = await bins.ytdlp();
     job.message = "Descargando…";
+    const cookies = cookiesFile();
     await run(yt.cmd, [
       ...yt.pre,
+      ...(cookies ? ["--cookies", cookies] : []),
+      ...(process.env.YTDLP_PROXY ? ["--proxy", process.env.YTDLP_PROXY] : []),
       "-f", QUALITY_FORMATS[quality] || QUALITY_FORMATS[1080],
       "--merge-output-format", "mp4",
       "--ffmpeg-location", bins.ffmpeg,
@@ -119,6 +221,7 @@ async function runDownload(id, url, quality) {
         } else if (/\[Merger\]|\[ffmpeg\]/.test(line)) {
           job.message = "Uniendo audio y video…";
         }
+        saveJobSoon(job);
       },
     });
 
@@ -141,8 +244,10 @@ async function runDownload(id, url, quality) {
       file,
     });
   } catch (err) {
-    Object.assign(job, { status: "error", message: err.message });
+    Object.assign(job, { status: "error", message: friendlyDownloadError(err.message) });
   }
+  saveJob(job);
+  jobs.delete(id); // a partir de aquí se lee de disco, igual que en las demás instancias
 }
 
 app.post("/api/download", (req, res) => {
@@ -150,7 +255,9 @@ app.post("/api/download", (req, res) => {
   if (!/^https?:\/\//i.test(url)) return res.status(400).json({ error: "Pega un enlace válido (https://…)" });
   const id = newId();
   fs.mkdirSync(jobDir(id));
-  jobs.set(id, { id, status: "downloading", progress: 0, message: "Iniciando…" });
+  const job = { id, status: "downloading", progress: 0, message: "Iniciando…" };
+  jobs.set(id, job);
+  saveJob(job);
   runDownload(id, url, String(req.body.quality || "1080"));
   res.json({ id });
 });
@@ -183,7 +290,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
       fs.unlinkSync(req.file.path);
     }
     const title = path.parse(Buffer.from(req.file.originalname, "latin1").toString("utf8")).name;
-    jobs.set(id, {
+    saveJob({
       id, status: "ready", progress: 100, message: "Listo", title,
       duration: await probeDuration(out), heatmap: [], chapters: [], file: "video.mp4",
     });
@@ -194,8 +301,8 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 });
 
 function getJob(req, res) {
-  const job = jobs.get(req.params.id);
-  if (!job) res.status(404).json({ error: "No encontrado" });
+  const job = loadJob(req.params.id);
+  if (!job) res.status(404).json({ error: "No se encontró el video. Puede que se haya borrado; vuelve a cargarlo." });
   return job;
 }
 
@@ -280,12 +387,15 @@ app.post("/api/jobs/:id/highlights", async (req, res) => {
 async function runExport(exportId, job, clips, vertical, precise) {
   const exp = exports_.get(exportId);
   const src = path.join(jobDir(job.id), job.file);
-  const outDir = path.join(jobDir(job.id), "clips", exportId);
+  const outDir = path.dirname(exportFile(exportId));
+  const save = () => writeJson(exportFile(exportId), exp);
   fs.mkdirSync(outDir, { recursive: true });
+  save();
   const encode = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-c:a", "aac", "-b:a", "160k"];
   try {
     for (const [n, c] of clips.entries()) {
       exp.message = `Cortando ${n + 1} de ${clips.length}: ${c.name}`;
+      save();
       const outName = `${String(n + 1).padStart(2, "0")}_${c.name}.mp4`;
       const args = ["-y", "-v", "error", "-ss", c.start.toFixed(3), "-i", src, "-t", (c.end - c.start).toFixed(3)];
       if (vertical) args.push("-vf", "crop='min(iw,ih*9/16)':ih,scale=1080:1920,setsar=1", ...encode);
@@ -293,13 +403,15 @@ async function runExport(exportId, job, clips, vertical, precise) {
       else args.push("-c", "copy", "-avoid_negative_ts", "make_zero");
       args.push("-movflags", "+faststart", path.join(outDir, outName));
       await ffmpeg(args);
-      exp.files.push({ name: outName, url: `/media/${job.id}/clips/${exportId}/${encodeURIComponent(outName)}` });
+      exp.files.push({ name: outName, url: `/media/${job.id}/clips/${exportId.slice(32)}/${encodeURIComponent(outName)}` });
       exp.progress = Math.round(((n + 1) * 100) / clips.length);
     }
     Object.assign(exp, { status: "done", message: "¡Clips listos!" });
   } catch (err) {
     Object.assign(exp, { status: "error", message: err.message.slice(-500) || "Error de ffmpeg" });
   }
+  save();
+  exports_.delete(exportId); // a partir de aquí se lee de disco, igual que en las demás instancias
 }
 
 app.post("/api/jobs/:id/export", (req, res) => {
@@ -316,23 +428,23 @@ app.post("/api/jobs/:id/export", (req, res) => {
     clips.push({ start, end, name: safeName(c.name, `clip_${n + 1}`) });
   }
   if (!clips.length) return res.status(400).json({ error: "No hay clips para exportar" });
-  const exportId = newId();
+  const exportId = job.id + newId();
   exports_.set(exportId, { id: exportId, job: job.id, status: "working", progress: 0, message: "Preparando…", files: [] });
   runExport(exportId, job, clips, Boolean(req.body.vertical), req.body.precise !== false);
   res.json({ id: exportId });
 });
 
 app.get("/api/exports/:id", (req, res) => {
-  const exp = exports_.get(req.params.id);
-  if (!exp) return res.status(404).json({ error: "No encontrado" });
+  const exp = loadExport(req.params.id);
+  if (!exp) return res.status(404).json({ error: "No se encontró la exportación. Vuelve a exportar los clips." });
   res.json(exp);
 });
 
 app.get("/api/exports/:id/zip", (req, res) => {
-  const exp = exports_.get(req.params.id);
+  const exp = loadExport(req.params.id);
   if (!exp) return res.sendStatus(404);
-  const folder = path.join(jobDir(exp.job), "clips", exp.id);
-  const title = safeName(jobs.get(exp.job)?.title, "clips");
+  const folder = path.dirname(exportFile(exp.id));
+  const title = safeName(loadJob(exp.job)?.title, "clips");
   res.attachment(`${title}_clips.zip`);
   const zip = archiver("zip", { store: true });
   zip.on("error", () => res.destroy());
