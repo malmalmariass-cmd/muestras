@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YT Clipper</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+  <h1>✂️ YT Clipper</h1>
+  <p>Descarga un video de YouTube y córtalo en <b>highlights</b> o en <b>partes de máximo 10 minutos</b>.</p>
+</header>
+
+<main>
+  <!-- 1. Fuente -->
+  <section class="card" id="source">
+    <h2>1. Video</h2>
+    <form id="dl-form" class="row">
+      <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=…" required>
+      <select id="quality" title="Calidad">
+        <option value="720">720p</option>
+        <option value="1080" selected>1080p</option>
+        <option value="best">Máxima</option>
+      </select>
+      <button type="submit">Descargar</button>
+    </form>
+    <div class="row muted small">
+      <span>…o sube un archivo:</span>
+      <input id="file" type="file" accept="video/*">
+    </div>
+    <div id="dl-status" class="status hidden">
+      <div class="bar"><div id="dl-bar"></div></div>
+      <span id="dl-msg"></span>
+    </div>
+  </section>
+
+  <!-- 2. Editor -->
+  <section class="card hidden" id="editor">
+    <h2 id="title">2. Editor</h2>
+    <video id="player" controls preload="metadata"></video>
+    <canvas id="timeline" height="56" title="Haz clic para saltar"></canvas>
+    <div class="row">
+      <button id="mark-in" class="ghost">⟦ Inicio <kbd>I</kbd></button>
+      <span id="in-out" class="mono">— → —</span>
+      <button id="mark-out" class="ghost">Fin <kbd>O</kbd> ⟧</button>
+      <button id="add-clip">+ Añadir clip <kbd>A</kbd></button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="split">Dividir en partes</button>
+      <button class="tab" data-tab="hl">Highlights automáticos</button>
+    </div>
+
+    <div class="pane" id="pane-split">
+      <p class="muted small">Corta todo el video en partes de máximo N minutos.</p>
+      <div class="row">
+        <label>Máx. minutos por parte
+          <input id="split-min" type="number" min="1" max="10" step="0.5" value="10">
+        </label>
+        <label class="check"><input id="split-equal" type="checkbox" checked> Partes iguales (evita un final muy corto)</label>
+        <button id="do-split">Generar partes</button>
+      </div>
+    </div>
+
+    <div class="pane hidden" id="pane-hl">
+      <p class="muted small">Detecta los mejores momentos usando “Lo más visto” de YouTube (si existe) o la intensidad del audio.</p>
+      <div class="row">
+        <label>Cantidad <input id="hl-count" type="number" min="1" max="30" value="5"></label>
+        <label>Duración (seg) <input id="hl-len" type="number" min="5" max="600" value="30"></label>
+        <label>Fuente
+          <select id="hl-source">
+            <option value="auto">Automática</option>
+            <option value="audio">Solo audio</option>
+          </select>
+        </label>
+        <button id="do-hl">Sugerir highlights</button>
+      </div>
+      <p id="hl-info" class="muted small"></p>
+    </div>
+  </section>
+
+  <!-- 3. Clips -->
+  <section class="card hidden" id="clips-card">
+    <div class="row between">
+      <h2>3. Clips <span id="clip-count" class="pill">0</span></h2>
+      <button id="clear" class="ghost danger">Borrar todos</button>
+    </div>
+    <table id="clips">
+      <thead><tr><th>#</th><th>Nombre</th><th>Inicio</th><th>Fin</th><th>Duración</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="muted small">Formato de tiempo: <span class="mono">mm:ss</span> o <span class="mono">h:mm:ss</span>. Máximo 10:00 por clip.</p>
+
+    <h3>Exportar</h3>
+    <div class="row">
+      <label>Formato
+        <select id="fmt">
+          <option value="original">Original (horizontal)</option>
+          <option value="vertical">Vertical 9:16 (Shorts / Reels / TikTok)</option>
+        </select>
+      </label>
+      <label>Corte
+        <select id="precise">
+          <option value="1">Preciso (re-codifica)</option>
+          <option value="0">Rápido (sin re-codificar, ±segundos)</option>
+        </select>
+      </label>
+      <button id="export">Exportar clips</button>
+    </div>
+    <div id="exp-status" class="status hidden">
+      <div class="bar"><div id="exp-bar"></div></div>
+      <span id="exp-msg"></span>
+    </div>
+    <ul id="results"></ul>
+    <a id="zip" class="button hidden" href="#">⬇ Descargar todo (ZIP)</a>
+  </section>
+</main>
+
+<footer class="muted small">
+  Usa esta herramienta solo con videos propios o con permiso del autor y respeta los Términos de YouTube.
+</footer>
+
+<script>window.MAX_CLIP = {{ max_clip }};</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
