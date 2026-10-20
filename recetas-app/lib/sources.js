@@ -102,7 +102,7 @@ export async function fetchSourceText(url) {
     if (ld) {
       for (const block of ld) {
         const body = block.replace(/^<script[^>]*>|<\/script>$/gi, "");
-        if (/Recipe/.test(body)) parts.push(body.slice(0, 20000));
+        if (/Recipe/.test(body)) parts.push(body.slice(0, 8000));
       }
     }
   }

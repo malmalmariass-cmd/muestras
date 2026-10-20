@@ -11,7 +11,7 @@ Tu diario y libro de cocina, con una amiga chef (Canela) que te ayuda a guardar 
 - Compartir la lista por WhatsApp o mensaje.
 - **Cocinar conmigo**: modo cocina paso a paso a pantalla completa, con temporizadores que detecta en cada paso, la pantalla siempre encendida y una lección de técnica de Canela en cada paso.
 - **Mi diario**: al terminar calificas con estrellas, eliges cómo te quedó y escribes una nota; se guarda como página de tu diario con tu racha de días cocinando.
-- **Platicar con Canela**: chat para preguntar técnicas, sustitutos o qué cocinar con lo que tienes (usa la IA).
+- **Consejos de Canela**: un botón te da consejos según dónde estés (la receta que ves, el súper o tu objetivo). Vienen guardados en la app, así que no gastan créditos de IA.
 - **Secretos de chef** en cada receta: trucos que explican por qué funcionan.
 
 La paleta está definida como variables CSS al inicio de `public/styles.css` (papel crema, terracota, salvia, mantequilla, rosa y ciruela); el color principal cambia según tu objetivo.
@@ -31,9 +31,27 @@ Sin `ANTHROPIC_API_KEY` la app funciona con las recetas incluidas, la lista del 
 
 Para poder "compartir a la app" desde Instagram, TikTok o YouTube en Android, ábrela en Chrome desde un dominio con HTTPS e instálala ("Agregar a pantalla de inicio").
 
+## Costo de la IA
+
+Solo dos acciones usan IA (y créditos): **sacar una receta de un link** y **"No lo encuentro"**. Todo lo demás (consejos, modo cocina, diario, lista) es gratis.
+
+La app no manda el video a la IA, solo el texto del post (título, caption o descripción), por eso es barato. Estimación por receta con los precios de la API:
+
+| Modelo (`CLAUDE_MODEL`) | Receta típica | Peor caso (descripción muy larga) | 100 recetas |
+|---|---|---|---|
+| `claude-opus-5-5` (por defecto) | ~US$0.04 | ~US$0.10 | ~US$4 |
+| `claude-sonnet-5-5` | ~US$0.02 | ~US$0.05 | ~US$2 |
+| `claude-haiku-5-5` | ~US$0.001 | ~US$0.003 | ~US$0.10 |
+
+"No lo encuentro" cuesta alrededor de US$0.01 por producto con el modelo por defecto.
+
+- Si dos personas (o tú dos veces) guardan el mismo link, la segunda vez sale del caché del servidor (`data/`) y no cuesta nada.
+- El servidor imprime en la consola los tokens y el costo aproximado de cada llamada, para que veas el gasto real.
+- Para cambiar de modelo: `export CLAUDE_MODEL=claude-haiku-5-5`.
+
 ## Estructura
 
-- `server.js` – API Express: `/api/extract`, `/api/chef`, `/api/alternatives`, `/api/score`, `/api/status`.
+- `server.js` – API Express: `/api/extract`, `/api/alternatives`, `/api/score`, `/api/status`.
 - `lib/sources.js` – lee el título, caption o descripción públicos del post (oEmbed de YouTube/TikTok, metadatos de Instagram y sitios web).
 - `lib/schemas.js` – esquemas JSON de salida estructurada para Claude.
 - `lib/fallback.js` – nombres regionales y sustitutos sin IA.

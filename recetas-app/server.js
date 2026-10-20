@@ -1,5 +1,6 @@
 import express from "express";
 import { fileURLToPath } from "node:url";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import Anthropic from "@anthropic-ai/sdk";
 import { fetchSourceText } from "./lib/sources.js";
 import { RECIPE_SCHEMA, ALTERNATIVES_SCHEMA, SCORE_SCHEMA } from "./lib/schemas.js";
@@ -9,12 +10,18 @@ const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(fileURLToPath(new URL("./public", import.meta.url))));
 
-const MODEL = "claude-opus-5-5";
+const MODEL = process.env.CLAUDE_MODEL || "claude-opus-5-5";
+// USD per million tokens (input, output), to log what each call costs.
+const PRICES = {
+  "claude-opus-5-5": [4, 20],
+  "claude-sonnet-5-5": [2, 10],
+  "claude-haiku-5-5": [0.1, 0.5],
+};
 const hasKey = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
 const client = hasKey ? new Anthropic() : null;
 
 // One structured-output call to Claude. Returns the parsed JSON object.
-async function askClaude({ system, prompt, schema, effort = "medium", maxTokens = 16000 }) {
+async function askClaude({ label, system, prompt, schema, effort = "medium", maxTokens = 16000 }) {
   const response = await client.beta.messages.create({
     model: MODEL,
     max_tokens: maxTokens,
@@ -30,8 +37,43 @@ async function askClaude({ system, prompt, schema, effort = "medium", maxTokens 
   if (response.stop_reason === "max_tokens") {
     throw new Error("La respuesta fue demasiado larga; intenta con otra receta.");
   }
+  logUsage(label, response);
   const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("");
   return JSON.parse(text);
+}
+
+function logUsage(label, response) {
+  const u = response.usage ?? {};
+  const [pin, pout] = PRICES[response.model] ?? PRICES[MODEL] ?? [0, 0];
+  const input = (u.input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) + (u.cache_read_input_tokens ?? 0);
+  const cost = (input * pin + (u.output_tokens ?? 0) * pout) / 1e6;
+  console.log(`[ia] ${label}: ${input} tokens entrada, ${u.output_tokens ?? 0} salida, ~$${cost.toFixed(4)} USD (${response.model})`);
+}
+
+// Recipes already extracted, keyed by link, so the same link is never paid for twice.
+const CACHE_DIR = fileURLToPath(new URL("./data", import.meta.url));
+const CACHE_FILE = `${CACHE_DIR}/recetas-cache.json`;
+let cache = {};
+try {
+  cache = JSON.parse(readFileSync(CACHE_FILE, "utf8"));
+} catch {
+  cache = {};
+}
+function cacheKey(url) {
+  try {
+    const u = new URL(url);
+    return `${u.hostname.replace(/^www\./, "")}${u.pathname.replace(/\/$/, "")}${u.hostname.includes("youtube") ? `?v=${u.searchParams.get("v") ?? ""}` : ""}`;
+  } catch {
+    return null;
+  }
+}
+function saveCache() {
+  try {
+    mkdirSync(CACHE_DIR, { recursive: true });
+    writeFileSync(CACHE_FILE, JSON.stringify(cache));
+  } catch (err) {
+    console.error("No se pudo guardar el caché de recetas:", err.message);
+  }
 }
 
 const SCORING_RULES = `Califica la receta de 1 a 10 para tres objetivos:
@@ -48,6 +90,8 @@ app.get("/api/status", (_req, res) => {
 app.post("/api/extract", async (req, res) => {
   const { url = "", text = "" } = req.body ?? {};
   if (!url && !text) return res.status(400).json({ error: "Pega un link o el texto de la receta." });
+  const key = url && !text ? cacheKey(url) : null;
+  if (key && cache[key]) return res.json({ recipe: cache[key], cached: true });
   if (!client) {
     return res.status(503).json({
       error: "Falta configurar ANTHROPIC_API_KEY en el servidor para extraer recetas de links.",
@@ -57,6 +101,7 @@ app.post("/api/extract", async (req, res) => {
     const source = url ? await fetchSourceText(url) : { platform: "texto", title: "", author: "", text: "" };
     const combined = [source.text, text].filter(Boolean).join("\n\n---\n\n");
     const recipe = await askClaude({
+      label: "extraer receta",
       system:
         "Eres un chef y nutriólogo. Extraes recetas completas a partir del texto de publicaciones de redes sociales (descripción, caption o transcripción). Respondes siempre en español.",
       prompt: `Plataforma: ${source.platform}
@@ -78,7 +123,12 @@ ${SCORING_RULES}`,
       schema: RECIPE_SCHEMA,
       effort: "medium",
     });
-    res.json({ recipe: { ...recipe, sourceUrl: url, platform: source.platform, author: source.author } });
+    const full = { ...recipe, sourceUrl: url, platform: source.platform, author: source.author };
+    if (key) {
+      cache[key] = full;
+      saveCache();
+    }
+    res.json({ recipe: full });
   } catch (err) {
     console.error(err);
     res.status(502).json({ error: errorMessage(err) });
@@ -91,6 +141,7 @@ app.post("/api/score", async (req, res) => {
   if (!client) return res.status(503).json({ error: "Falta configurar ANTHROPIC_API_KEY." });
   try {
     const result = await askClaude({
+      label: "calificar receta",
       system: "Eres un nutriólogo deportivo. Respondes en español.",
       prompt: `${SCORING_RULES}\n\nReceta:\n${JSON.stringify(recipe)}`,
       schema: SCORE_SCHEMA,
@@ -103,51 +154,13 @@ app.post("/api/score", async (req, res) => {
   }
 });
 
-// Chat with the friend-chef persona. History comes from the client.
-app.post("/api/chef", async (req, res) => {
-  const { messages = [], recipe = null, goal = "rico", country = "", userName = "", chefName = "Canela" } = req.body ?? {};
-  const history = messages
-    .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
-    .slice(-16);
-  if (!history.length || history[history.length - 1].role !== "user") {
-    return res.status(400).json({ error: "Falta tu mensaje." });
-  }
-  if (!client) {
-    return res.status(503).json({ error: "Para platicar conmigo hace falta configurar la IA (ANTHROPIC_API_KEY)." });
-  }
-  // The API requires the conversation to start with a user turn.
-  while (history[0]?.role !== "user") history.shift();
-  try {
-    const response = await client.beta.messages.create({
-      model: MODEL,
-      max_tokens: 4000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "low" },
-      system: `Eres ${chefName}, la mejor amiga chef de ${userName || "la persona"}. Eres cálida, cercana, divertida y paciente; hablas en español latino natural, de tú, como amiga (sin exagerar con los diminutivos).
-Sabes muchísimo de cocina y de nutrición. Te encanta enseñar el porqué de las técnicas para que tu amiga aprenda, no solo que siga instrucciones.
-Su objetivo ahora es: ${goalLabel(goal)}. Cuando venga al caso, sugiere cómo hacer el platillo más rico y más saludable para ese objetivo, sin regañar ni juzgar.
-Compra en: ${country || "Latinoamérica"}; usa nombres de ingredientes de ese país.
-Responde breve (2 a 6 frases o una lista corta), práctico y con un toque de cariño. No uses encabezados. Puedes usar algún emoji.
-Si te preguntan algo de salud delicado (enfermedades, alergias graves, trastornos alimentarios), responde con cuidado y sugiere consultar a un profesional.
-${recipe ? `Están viendo esta receta:\n${JSON.stringify(recipe).slice(0, 8000)}` : ""}`,
-      messages: history.map((m) => ({ role: m.role, content: m.content.slice(0, 4000) })),
-    });
-    if (response.stop_reason === "refusal") throw new Error("Uy, de eso mejor no puedo opinar. ¿Te ayudo con otra cosa de la cocina?");
-    const text = response.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-    res.json({ reply: text });
-  } catch (err) {
-    console.error(err);
-    res.status(502).json({ error: errorMessage(err) });
-  }
-});
-
 app.post("/api/alternatives", async (req, res) => {
   const { product = "", country = "", recipes = [], goal = "rico" } = req.body ?? {};
   if (!product) return res.status(400).json({ error: "Falta el producto." });
   if (!client) return res.json({ ...localAlternatives(product, country), offline: true });
   try {
     const result = await askClaude({
+      label: "alternativas",
       system:
         "Eres un experto en supermercados de Latinoamérica, España y EE.UU. Ayudas a encontrar productos y sus sustitutos. Respondes en español.",
       prompt: `Estoy en el súper en ${country || "un país de habla hispana"} y no encuentro: "${product}".

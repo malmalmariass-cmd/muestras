@@ -1,5 +1,5 @@
 import { RECETAS_BASE } from "./recetas-base.js";
-import { tecnicaPara, tipDelDia, saludo, FRASES_EXTRAYENDO, ANIMOS, reaccionDiario } from "./chef.js";
+import { tecnicaPara, tipDelDia, saludo, FRASES_EXTRAYENDO, ANIMOS, reaccionDiario, consejosPara } from "./chef.js";
 
 const GOALS = {
   rico: { label: "Comer rico", short: "comer rico", emoji: "😋", blurb: "Lo más sabroso primero" },
@@ -29,10 +29,11 @@ function load() {
   const defaults = {
     nombre: "", chefName: "Canela", onboarded: false,
     mias: [], goal: "rico", country: "México", seleccion: {}, lista: null,
-    favoritos: [], diario: [], chat: [],
+    favoritos: [], diario: [],
   };
   try {
-    return { ...defaults, ...JSON.parse(localStorage.getItem(STORE_KEY) || "{}") };
+    const { chat, ...saved } = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+    return { ...defaults, ...saved };
   } catch {
     return defaults;
   }
@@ -228,7 +229,7 @@ document.addEventListener("click", (e) => {
   if (go) show(go.dataset.go);
 });
 $("#goal-chip").addEventListener("click", () => show("perfil"));
-$("#chef-fab").addEventListener("click", () => openChat());
+$("#chef-fab").addEventListener("click", () => openTip());
 
 function renderGoalChip() {
   const g = GOALS[state.goal];
@@ -254,7 +255,7 @@ function renderHoy() {
       <button class="quick-btn q1" data-action="add" type="button"><span>🔗</span>Guardar receta de un link</button>
       <button class="quick-btn q2" data-go="super" type="button"><span>🧺</span>Armar mi súper</button>
       <button class="quick-btn q3" data-go="recetario" type="button"><span>🍳</span>¿Qué cocino hoy?</button>
-      <button class="quick-btn q4" data-action="chat" type="button"><span>💬</span>Preguntarle a ${esc(chef())}</button>
+      <button class="quick-btn q4" data-action="tip" type="button"><span>💡</span>Un consejo de ${esc(chef())}</button>
     </div>
 
     ${
@@ -286,7 +287,7 @@ function renderHoy() {
   `;
   bindCards($("#view-hoy"));
   $$("[data-action=add]", $("#view-hoy")).forEach((b) => b.addEventListener("click", openAdd));
-  $$("[data-action=chat]", $("#view-hoy")).forEach((b) => b.addEventListener("click", () => openChat()));
+  $$("[data-action=tip]", $("#view-hoy")).forEach((b) => b.addEventListener("click", () => openTip()));
 }
 
 // ---------- Recetario ----------
@@ -471,7 +472,7 @@ function openRecipe(id, servings) {
       <ol class="steps">${r.pasos.map((p) => `<li>${esc(stepText(p))}</li>`).join("")}</ol>
 
       <div class="actions-col">
-        <button class="btn ghost" id="ask-btn" type="button">💬 Pregúntale a ${esc(chef())} sobre esta receta</button>
+        <button class="btn ghost" id="ask-btn" type="button">💡 Dame un consejo para esta receta</button>
         <button class="btn ghost" id="log-btn" type="button">📔 Ya la cociné, anotarla en mi diario</button>
         ${r.origen === "mia" ? '<button class="btn ghost danger" id="delete-recipe" type="button">Borrar receta</button>' : ""}
       </div>
@@ -514,7 +515,7 @@ function openRecipe(id, servings) {
     closeSheet(d);
     startCooking(r, porciones);
   });
-  $("#ask-btn", d).addEventListener("click", () => openChat(r));
+  $("#ask-btn", d).addEventListener("click", () => openTip(r));
   $("#log-btn", d).addEventListener("click", () => openDiaryForm(r));
   $("#delete-recipe", d)?.addEventListener("click", () => {
     if (!confirm("¿Borrar esta receta de tu recetario?")) return;
@@ -1200,112 +1201,30 @@ async function openAlternatives(item) {
   }
 }
 
-// ---------- Chat with the chef ----------
-function chatSuggestions(recipe) {
-  if (recipe) {
-    return [
-      `¿Cómo hago “${recipe.titulo}” más saludable?`,
-      "¿Con qué la acompaño?",
-      "¿Se puede congelar o preparar antes?",
-      "¿Qué hago si no tengo algún ingrediente?",
-    ];
-  }
-  return [
-    "¿Qué ceno hoy que sea rico y ligero?",
-    "Ideas de desayunos altos en proteína",
-    "¿Cómo hago que el pollo quede jugoso?",
-    "Tengo huevo, espinaca y queso, ¿qué hago?",
-  ];
-}
-
-function openChat(recipe = null) {
+// ---------- Chef tips (local, no AI credits) ----------
+function openTip(recipe = null) {
   const d = $("#sheet2");
-  const ctx = recipe ? `Hablando de: ${emojiFor(recipe)} ${esc(recipe.titulo)}` : "Tu amiga chef";
-  openSheet(
-    d,
-    `${sheetHead(`${esc(chef())} 👩‍🍳`, ctx)}
-    <div class="sheet-body chat">
-      <div class="chat-log" id="chat-log"></div>
-      <div class="chat-suggest" id="chat-suggest">${chatSuggestions(recipe)
-        .map((s) => `<button type="button" class="chip">${esc(s)}</button>`)
-        .join("")}</div>
-      <form class="chat-input" id="chat-form">
-        <input id="chat-text" autocomplete="off" placeholder="Escríbele a ${esc(chef())}…" />
-        <button class="btn primary" type="submit" aria-label="Enviar">➤</button>
-      </form>
-    </div>`,
-  );
-  d.dataset.recipe = recipe?.id ?? "";
-  renderChatLog();
-  $$("#chat-suggest .chip", d).forEach((b) => b.addEventListener("click", () => sendChat(b.textContent, recipe)));
-  $("#chat-form", d).addEventListener("submit", (e) => {
-    e.preventDefault();
-    const text = $("#chat-text").value.trim();
-    if (text) sendChat(text, recipe);
-  });
-}
-
-function renderChatLog(typing = false) {
-  const log = $("#chat-log");
-  if (!log) return;
-  const intro = {
-    role: "assistant",
-    content: `¡Hola${state.nombre ? `, ${state.nombre}` : ""}! Pregúntame lo que quieras: técnicas, sustitutos, cómo hacer algo más sano o qué cocinar con lo que tienes. 💛`,
-  };
-  log.innerHTML = [intro, ...state.chat]
-    .map((m) =>
-      m.role === "user"
-        ? `<div class="msg me"><p>${esc(m.content)}</p></div>`
-        : `<div class="msg chef"><span class="avatar">👩‍🍳</span><p>${formatReply(m.content)}</p></div>`,
-    )
-    .join("") + (typing ? `<div class="msg chef"><span class="avatar">👩‍🍳</span><p><span class="dots"><i></i><i></i><i></i></span></p></div>` : "");
-  log.scrollTop = log.scrollHeight;
-  $("#chat-suggest").hidden = state.chat.length > 0;
-}
-
-// Light formatting for replies: bold and simple bullet lists.
-function formatReply(text) {
-  return esc(text)
-    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
-    .replace(/^\s*[-•]\s+(.*)$/gm, "• $1")
-    .replace(/\n/g, "<br>");
-}
-
-async function sendChat(text, recipe) {
-  const input = $("#chat-text");
-  input.value = "";
-  state.chat.push({ role: "user", content: text });
-  state.chat = state.chat.slice(-30);
-  save();
-  renderChatLog(true);
-  try {
-    const res = await fetch("/api/chef", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        messages: state.chat,
-        recipe: recipe ? { titulo: recipe.titulo, ingredientes: recipe.ingredientes, pasos: recipe.pasos, porciones: recipe.porciones } : null,
-        goal: state.goal,
-        country: state.country,
-        userName: state.nombre,
-        chefName: chef(),
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    state.chat.push({ role: "assistant", content: data.reply });
-  } catch (err) {
-    state.chat.pop();
-    renderChatLog();
-    $("#chat-log").insertAdjacentHTML(
-      "beforeend",
-      `<div class="msg chef"><span class="avatar">👩‍🍳</span><p>${esc(err.message || "Se me fue la señal 😅 ¿Lo intentamos otra vez?")}</p></div>`,
+  const tips = consejosPara({ view: currentView, recipe, goal: state.goal });
+  let k = Math.floor(Math.random() * tips.length);
+  const paint = () => {
+    openSheet(
+      d,
+      `${sheetHead(`Un consejo de ${esc(chef())}`, recipe ? `Para: ${emojiFor(recipe)} ${esc(recipe.titulo)}` : "")}
+      <div class="sheet-body">
+        ${bubble(esc(tips[k % tips.length]))}
+        <div class="actions-row">
+          <button class="btn ghost grow" id="tip-next" type="button">🔁 Otro consejo</button>
+          <button class="btn primary grow" data-close type="button">¡Gracias! 💛</button>
+        </div>
+      </div>`,
     );
-    input.value = text;
-    return;
-  }
-  save();
-  renderChatLog();
+    $("#tip-next", d).addEventListener("click", () => {
+      k++;
+      haptic(8);
+      paint();
+    });
+  };
+  paint();
 }
 
 // ---------- Perfil ----------

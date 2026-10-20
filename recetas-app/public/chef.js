@@ -78,3 +78,40 @@ export function reaccionDiario(estrellas) {
   if (estrellas >= 3) return "¡Bien hecho! Anota qué cambiarías y la próxima queda perfecta.";
   return "Hasta los chefs tenemos días así. Lo importante es que lo intentaste. 💛";
 }
+
+// Tips for the moment you're in. All local: asking for one never costs credits.
+const CONSEJOS_SUPER = [
+  "Ve primero a los pasillos de despensa y deja lo frío al final, así llega fresco a casa. 🧊",
+  "Compara el precio por kilo, no por paquete: ahí se esconden las ofertas de verdad.",
+  "Las verduras congeladas son igual de nutritivas que las frescas y no se echan a perder.",
+  "Lee la etiqueta: si el azúcar aparece entre los primeros 3 ingredientes, mejor busca otra opción.",
+  "Nunca vayas al súper con hambre: compras más antojos de los que necesitas. 😅",
+  "Las frutas y verduras de temporada están más ricas y más baratas.",
+];
+const CONSEJOS_OBJETIVO = {
+  rico: [
+    "El secreto de lo rico casi siempre es dorar bien: la costrita dorada es puro sabor.",
+    "Termina tus platillos con algo fresco: hierbas, limón o un chorrito de buen aceite.",
+    "Un poquito de sal en lo dulce y un toque dulce en lo salado equilibran todo.",
+  ],
+  bajar: [
+    "Empieza tu comida con verduras o un caldo: llegas al plato fuerte con menos hambre.",
+    "Mide el aceite con cuchara en vez de echarlo directo: es donde más calorías se cuelan.",
+    "La proteína en cada comida te mantiene satisfecha por más tiempo.",
+  ],
+  subir: [
+    "Agrega calorías buenas sin llenarte de más: aceite de oliva, aguacate, nueces y crema de cacahuate.",
+    "Come cada 3 o 4 horas: es más fácil sumar calorías en varias comidas que en tres grandes.",
+    "Los licuados son tu mejor amigo: se toman fácil y cargan mucha energía y proteína.",
+  ],
+};
+
+export function consejosPara({ view, recipe, goal }) {
+  if (recipe) {
+    const pasos = recipe.pasos.map((p) => tecnicaPara(typeof p === "string" ? p : p?.texto ?? "")).filter(Boolean);
+    const objetivo = recipe.calificaciones?.[goal]?.tip;
+    return [...new Set([objetivo, ...(recipe.secretos ?? []), ...pasos].filter(Boolean))];
+  }
+  if (view === "super") return CONSEJOS_SUPER;
+  return [...(CONSEJOS_OBJETIVO[goal] ?? []), ...TIPS_DEL_DIA];
+}
