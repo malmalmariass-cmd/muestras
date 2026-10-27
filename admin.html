@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cher Supervisor Panel</title>
 <meta name="theme-color" content="#ffffff">
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'">
@@ -1977,15 +1977,20 @@ $('#chgList').onclick = async e => {
   const yes = b.dataset.c === 'yes', reply = yes ? '' : (prompt('Reason for the technician (optional):', '') ?? null); if (reply === null) return;
   try { await api('report_change_decide', { id: row.dataset.id, approve: yes, reply }); toast(yes ? 'Approved: the technician can edit it for 24 hours' : 'Declined'); loadChanges(); loadBadges(); } catch (err) { toast(err.message); }
 };
-let lastPay = null, lastJc = null;
+let lastPay = null, lastJc = null, lastReq = null, lastSign = null;
 async function loadBadges() {
   try {
     const b = await api('badges');
     const set = (k, n) => $$(`.nb[data-b="${k}"]`).forEach(el => { el.hidden = !n; el.textContent = n > 99 ? '99+' : n; el.title = n ? n + ' pending' : ''; });
     set('jobs', b.jobsOverdue + b.jobsUnassigned + (b.jobCancel || 0)); set('invoices', b.invoicesOverdue); set('parts', b.requests + b.orders + (b.payments || 0));
-    if ((b.payments || 0) > (lastPay ?? b.payments)) toast('💳 A technician sent a customer payment to verify — see Parts & Orders');
-    if ((b.jobCancel || 0) > (lastJc ?? b.jobCancel)) toast('📅 A technician asks to cancel a job — see Reports & Jobs');
-    lastPay = b.payments || 0; lastJc = b.jobCancel || 0;
+    const alert_ = (m, tag) => { toast(m); try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: m.replace(/^\S+ /, ''), tag, icon: 'icons/icon-192.png' }); } catch {} };
+    if ((b.payments || 0) > (lastPay ?? b.payments)) alert_('💳 A technician sent a customer payment to verify — see Parts & Orders', 'pay');
+    if ((b.jobCancel || 0) > (lastJc ?? b.jobCancel)) alert_('📅 A technician asks to cancel a job — see Reports & Jobs', 'jobcancel');
+    if ((b.requests || 0) > (lastReq ?? b.requests)) alert_('🔧 New parts request from a technician — see Parts & Orders', 'preq');
+    if ((b.toSign || 0) > (lastSign ?? b.toSign)) alert_('✍ A report signed by the customer waits for your signature — see Reports', 'tosign');
+    lastPay = b.payments || 0; lastJc = b.jobCancel || 0; lastReq = b.requests || 0; lastSign = b.toSign || 0;
+    const pend = (b.requests || 0) + (b.payments || 0) + (b.jobCancel || 0) + (b.changeRequests || 0) + (b.toSign || 0) + (b.newCustomers || 0);
+    document.title = (pend ? `(${pend}) ` : '') + document.title.replace(/^\(\d+\) /, '');   // waiting items show on the browser tab
     set('requests', b.requests); set('orders', b.orders); set('stock', b.lowStock);
     set('customers', b.newCustomers || 0); set('changes', b.changeRequests || 0);
     if (b.changeRequests > (lastChg ?? b.changeRequests)) { const m = 'A technician asks to change a signed report — see Reports'; toast('🔒 ' + m); try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: m }); } catch {} }

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cher Service Report</title>
 <meta name="theme-color" content="#ffffff">
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Cher Services LLC — digital service report with on-screen customer signature.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.png">
@@ -852,6 +853,8 @@ Object.assign(I18N.en, {
   docSentTo: 'Sent to {t}', invoiceReady: 'Invoice #{n} ready', rq_accepted: 'Customer accepted · waiting for the office', reservedUntil: 'Parts reserved until {t}',
   totalTax: 'Total {a} (tax {x})', payOnline: 'Connect to the internet to send the payment.', photoErr: 'The photo could not be read.'
 });
+Object.assign(I18N.en, { nNewJob: 'New job: {c} · {d}', nQuoted: 'The office sent the quote {n} ({c}) — show it to the customer', nApproved: 'Parts request {n} approved', nDeclined: 'Parts request {n} was declined' });
+Object.assign(I18N.es, { nNewJob: 'Trabajo nuevo: {c} · {d}', nQuoted: 'La oficina envió la cotización {n} ({c}) — muéstrasela al cliente', nApproved: 'Solicitud de partes {n} aprobada', nDeclined: 'La solicitud de partes {n} fue rechazada' });
 Object.assign(I18N.es, {
   viewJob: 'Ver trabajo', jobReceived: 'Recibido', jobWhen: 'Cita', jobAddress: 'Dirección', jobEquip: 'Equipo', jobContact: 'Contacto', jobNoIns: 'Sin instrucciones especiales.',
   jobInstructions: 'Instrucciones de la oficina', followUp: 'Seguimiento', openFollowUp: 'Abrir reporte (seguimiento)', jobPostpone: 'Aplazar (mismo día)', jobReschedule: 'Reprogramar',
@@ -1229,7 +1232,15 @@ async function flushReqQueue() {
 const once = fn => { let p = null; return () => p || (p = fn().finally(() => { p = null; })); };
 const pullRequests = once(async () => {
   if (!session) return;
-  try { requests = reqForRole((await api('preq_list')).requests); LS.set('cher.requests', requests); } catch {}
+  try {
+    const before = Object.fromEntries(requests.filter(q => q.id).map(q => [q.id, q.status]));
+    requests = reqForRole((await api('preq_list')).requests); LS.set('cher.requests', requests);
+    requests.forEach(q => { const was = before[q.id]; if (!was || was === q.status) return;   // the office answered: tell the technician even if the app is in the background
+      if (q.status === 'quoted') techNotify(t('nQuoted', { n: q.no, c: q.customer || '' }), 'rq' + q.id);
+      else if (q.status === 'approved') techNotify(t('nApproved', { n: q.no }), 'rq' + q.id);
+      else if (q.status === 'declined') techNotify(t('nDeclined', { n: q.no }), 'rq' + q.id);
+      else if (q.status === 'invoiced') techNotify(t('invoiceReady', { n: q.invoiceNo || '' }), 'rq' + q.id); });
+  } catch {}
   payWatch();
   if (!$('#viewReqs').hidden) markReqsSeen(); else updateBadges();
   if (report) renderParts(); if (!$('#viewReqs').hidden) renderReqs();
@@ -1636,8 +1647,13 @@ $('#unsavedSave').onclick = async () => { const d = unsavedOf(); if (!d) return;
 $('#unsavedDel').onclick = () => { const d = unsavedOf(); if (!d || !isSup() || !confirm(t('unsavedDelQ'))) return; discardDraft(d); toast(t('removed')); checkUnsaved(); };
 setInterval(() => { if (session) checkUnsaved(); }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && session) checkUnsaved(); });
-// ask once for permission to show reminders while the app is in the background
-document.addEventListener('pointerdown', () => { try { if ('Notification' in window && Notification.permission === 'default' && unsavedDrafts().length) Notification.requestPermission().catch(() => {}); } catch {} }, { passive: true });
+// ask once (on the first tap after signing in) for permission to notify: new jobs, quotes, invoices, unsaved reports
+document.addEventListener('pointerdown', () => { try { if (session && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {}); } catch {} }, { passive: true });
+function techNotify(msg, tag) {
+  toast(msg);
+  try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: msg, tag, icon: 'icons/icon-192.png' }); } catch {}
+}
+setInterval(() => { if (session && navigator.onLine) { pullJobs(); pullRequests(); } }, 120000);   // check the office every 2 minutes
 $('#btnNew').onclick = async () => {
   const started = report && report.startedAt && !report.updatedAt && !isLocked(report);
   if (!isSup() && started) await save(true);   // technicians don't discard reports: the current one is saved first
@@ -1775,7 +1791,12 @@ $('#histChip').onclick = () => {
 var jobsCache = noPrices(LS.get('cher.jobs', []));
 const pullJobs = once(async () => {
   if (!session) return;
-  try { const j = await api('jobs_list'); jobsCache = forRole(j.jobs); LS.set('cher.jobs', jobsCache); } catch {}
+  try {
+    const j = await api('jobs_list'), had = new Set(jobsCache.map(x => x.id)), first = !LS.get('cher.jobsSeenOnce', false);
+    const fresh = j.jobs.filter(x => !had.has(x.id) && x.status === 'scheduled');
+    jobsCache = forRole(j.jobs); LS.set('cher.jobs', jobsCache); LS.set('cher.jobsSeenOnce', true);
+    if (!first && fresh.length) techNotify(t('nNewJob', { c: fresh[0].customerName, d: fmtD(fresh[0].date) + (fresh[0].time ? ' ' + fmtT(fresh[0].time) : '') }) + (fresh.length > 1 ? ` (+${fresh.length - 1})` : ''), 'job');
+  } catch {}
   updateJobsCount(); if (!$('#viewJobs').hidden) renderJobs();
 });
 function updateJobsCount() {
