@@ -252,6 +252,16 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
   - El botón **💡** arriba lo enciende o apaga en cualquier momento; queda guardado en ese dispositivo.
   - Los textos van en el idioma elegido (inglés o español). Para cambiar o agregar notas: `G` (tarjetas de sección) y `TIPS` (notas de botones) en `ui-help.js`.
 
+## Sin internet (app del técnico)
+- `sw.js` guarda la app en la tablet (páginas, scripts, motor de PDF, iconos): abre sin señal. La API nunca se guarda ahí.
+- El motor de PDF (jsPDF 2.5.1) va dentro de la app: `vendor/jspdf.umd.min.js` (antes venía de internet).
+- **Entrar sin internet**: después de iniciar sesión UNA vez con internet en esa tablet, el técnico puede volver a entrar
+  sin señal durante 30 días con su mismo ID y PIN. La tablet guarda solo una huella del PIN (PBKDF2), nunca el PIN.
+  5 PIN incorrectos sin internet bloquean la entrada sin internet 15 minutos.
+- Sin señal se puede: ver trabajos y clientes ya descargados, llenar y guardar reportes, firmar, hacer el PDF y pedir partes
+  (quedan en cola). Al volver la señal todo se envía solo y se asignan los números.
+- Necesitan internet: el panel del supervisor, enviar por correo/WhatsApp, cotizaciones nuevas y pagos.
+
 ## Sesiones: una por pestaña
 - Cada pestaña o ventana tiene **su propia sesión**: en una puedes tener el panel del supervisor y en otra la app
   del técnico, al mismo tiempo.
