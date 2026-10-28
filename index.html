@@ -727,7 +727,7 @@ const I18N = {
     st_scheduled: 'Scheduled', st_in_progress: 'In progress', st_done: 'Done', st_cancelled: 'Cancelled', jobFrom: 'Job for {cust} · {d}', repeats: 'Repeats',
     equipHistory: 'Equipment history', prevServices: '🛠 {n} previous service(s) — view', noHistory: 'No previous services for this serial number.', histFor: 'Serial {s}',
     partsUsed: 'Parts', repairDone: 'Repair completed', repairNotDone: 'Not completed',
-    loginHint: 'Sign in with your Employee ID and PIN', employeeIdPh: 'Employee ID', signIn: 'Sign in', enterTip: 'Tip: press Enter to sign in', noNetLogin: 'No internet connection. Connect to sign in.',
+    loginHint: 'Sign in with your Employee ID and PIN', employeeIdPh: 'Employee ID', signIn: 'Sign in', enterTip: 'Tip: press Enter to sign in', noNetLogin: 'No internet connection. To sign in without internet, first sign in once WITH internet on this device.',
     sessionEnded: 'Your session ended. Please sign in again.', sessionIdle: 'Your session was closed after 2 hours without use. Sign in again.', pendingSignOut: '{n} report(s) have not reached the office yet. They stay on this tablet and will sync next time you sign in. Sign out?',
     saved: 'Saved', newReport: 'New report', newConfirm: 'Start a new report? Unsaved changes in this one will be lost.',
     invPending: 'Invoice pending', invoice: 'Invoice {n}', stSynced: 'synced with office', stWaiting: 'saved on tablet · waiting to sync', stNotSaved: 'not saved yet',
@@ -805,7 +805,7 @@ const I18N = {
     st_scheduled: 'Programado', st_in_progress: 'En proceso', st_done: 'Terminado', st_cancelled: 'Cancelado', jobFrom: 'Trabajo de {cust} · {d}', repeats: 'Se repite',
     equipHistory: 'Historial del equipo', prevServices: '🛠 {n} servicio(s) anterior(es) — ver', noHistory: 'No hay servicios anteriores para este número de serie.', histFor: 'Serie {s}',
     partsUsed: 'Repuestos', repairDone: 'Reparación completada', repairNotDone: 'No completada',
-    loginHint: 'Entra con tu ID de empleado y PIN', employeeIdPh: 'ID de empleado', signIn: 'Entrar', enterTip: 'Consejo: presiona Enter para entrar', noNetLogin: 'Sin internet. Conéctate para entrar.',
+    loginHint: 'Entra con tu ID de empleado y PIN', employeeIdPh: 'ID de empleado', signIn: 'Entrar', enterTip: 'Consejo: presiona Enter para entrar', noNetLogin: 'Sin internet. Para entrar sin internet, primero inicia sesión UNA vez CON internet en este equipo.',
     sessionEnded: 'Tu sesión terminó. Vuelve a entrar.', sessionIdle: 'Tu sesión se cerró tras 2 horas sin uso. Vuelve a entrar.', pendingSignOut: '{n} reporte(s) aún no llegan a la oficina. Se quedan en la tablet y se enviarán cuando vuelvas a entrar. ¿Salir?',
     saved: 'Guardado', newReport: 'Reporte nuevo', newConfirm: '¿Empezar un reporte nuevo? Se perderán los cambios sin guardar.',
     invPending: 'Factura pendiente', invoice: 'Factura {n}', stSynced: 'sincronizado con la oficina', stWaiting: 'guardado en la tablet · esperando sincronizar', stNotSaved: 'sin guardar',
@@ -853,8 +853,8 @@ Object.assign(I18N.en, {
   docSentTo: 'Sent to {t}', invoiceReady: 'Invoice #{n} ready', rq_accepted: 'Customer accepted · waiting for the office', reservedUntil: 'Parts reserved until {t}',
   totalTax: 'Total {a} (tax {x})', payOnline: 'Connect to the internet to send the payment.', photoErr: 'The photo could not be read.'
 });
-Object.assign(I18N.en, { offlineIn: 'Signed in without internet — your reports stay on this tablet and go to the office when the signal returns.', offlineNever: 'No internet. To sign in without internet, sign in once with internet on this tablet first.', offlineWrong: 'Wrong PIN.', offlineBlocked: 'Too many wrong PINs. Wait 15 minutes or connect to the internet.' });
-Object.assign(I18N.es, { offlineIn: 'Sesión iniciada sin internet — tus reportes quedan en esta tablet y llegan a la oficina cuando vuelva la señal.', offlineNever: 'Sin internet. Para entrar sin internet, primero inicia sesión una vez con internet en esta tablet.', offlineWrong: 'PIN incorrecto.', offlineBlocked: 'Demasiados PIN incorrectos. Espera 15 minutos o conéctate a internet.' });
+Object.assign(I18N.en, { offlineIn: 'Signed in without internet — your reports stay on this tablet and go to the office when the signal returns.', offlineNever: 'No internet. To sign in without internet, sign in once with internet on this tablet first.', offlineWrong: 'Wrong PIN.', offlineBlocked: 'Too many wrong PINs. Wait 15 minutes or connect to the internet.', offlineSup: 'No internet: the supervisor panel needs internet, so the reports app opened. Reports wait on this device and go to the office when the signal returns.' });
+Object.assign(I18N.es, { offlineIn: 'Sesión iniciada sin internet — tus reportes quedan en esta tablet y llegan a la oficina cuando vuelva la señal.', offlineNever: 'Sin internet. Para entrar sin internet, primero inicia sesión una vez con internet en esta tablet.', offlineWrong: 'PIN incorrecto.', offlineBlocked: 'Demasiados PIN incorrectos. Espera 15 minutos o conéctate a internet.', offlineSup: 'Sin internet: el panel del supervisor necesita internet, así que se abrió la app de reportes. Los reportes esperan en este equipo y llegan a la oficina cuando vuelva la señal.' });
 Object.assign(I18N.en, { nNewJob: 'New job: {c} · {d}', nQuoted: 'The office sent the quote {n} ({c}) — show it to the customer', nApproved: 'Parts request {n} approved', nDeclined: 'Parts request {n} was declined' });
 Object.assign(I18N.es, { nNewJob: 'Trabajo nuevo: {c} · {d}', nQuoted: 'La oficina envió la cotización {n} ({c}) — muéstrasela al cliente', nApproved: 'Solicitud de partes {n} aprobada', nDeclined: 'La solicitud de partes {n} fue rechazada' });
 Object.assign(I18N.es, {
@@ -2170,6 +2170,7 @@ async function supervisorLogin() {
   if (j.user?.role !== 'supervisor') throw new Error(t('notSupervisor'));
   if (!DEMO) { LS.set('cher.lastRole', 'sup'); LS.set('cher.lastCode', j.user.code); }   // the on-screen demo does not change what this browser remembers
   SESS.set(ADMIN_LSK, { token: j.token, user: j.user });
+  if (!DEMO) await offlineRemember(j.user, j.token, $('#lgPin').value);   // so the same supervisor can open the reports app without signal
   // the panel asks for a new PIN when the server requires it (the PIN itself is never stored)
   if (j.mustChangePin) sessionStorage.setItem('cher.mustChangePin', j.user.code === 'ADMI26' ? 'master' : 'short');
   $('#lgPin').value = ''; lastAct = Date.now(); try { localStorage.setItem(IDLE_KEY, String(lastAct)); } catch {} location.href = 'admin.html';
@@ -2177,7 +2178,15 @@ async function supervisorLogin() {
 $('#loginForm').onsubmit = async e => {
   e.preventDefault(); $('#lgErr').textContent = ''; $('#lgBtn').disabled = true;
   try {
-    if (loginRole === 'sup') { await supervisorLogin(); return; }
+    if (loginRole === 'sup') {
+      try { await supervisorLogin(); return; }
+      catch (err) {   // no signal: the panel needs internet, so the supervisor enters the reports app (fill, sign, PDF) instead
+        if (!err.offline) throw err;
+        const o = await offlineLogin($('#lgCode').value, $('#lgPin').value); if (!o) throw err;
+        session = Object.assign(o, { offline: true }); SESS.set('cher.session', session); lastAct = Date.now(); try { localStorage.setItem(IDLE_KEY, String(lastAct)); } catch {}
+        $('#lgPin').value = ''; startSession(); toast(t('offlineSup')); return;
+      }
+    }
     let j;
     try { j = await api('login', { code: $('#lgCode').value, pin: $('#lgPin').value }); }
     catch (err) {   // no signal: sign in with the PIN checked on this tablet (only after a sign-in with internet here)
@@ -2268,7 +2277,14 @@ if (!standalone && /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) && 'on
   $('#installText').dataset.t = 'installIos'; $('#installText').textContent = t('installIos');
   $('#installBtn').hidden = true; $('#installBox').classList.add('on');
 }
-if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js').catch(() => {});
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  const hadSW = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register('sw.js').then(r => r.update().catch(() => {})).catch(() => {});
+  navigator.serviceWorker.addEventListener('controllerchange', () => {   // a new version was installed: reload once to use it (drafts are kept)
+    if (!hadSW || sessionStorage.getItem('cher.swReload')) return;
+    sessionStorage.setItem('cher.swReload', '1'); try { if (report && dirty) saveDraft(); } catch {} location.reload();
+  });
+}
 if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
 
 /* ---------------- tutorial recording ----------------

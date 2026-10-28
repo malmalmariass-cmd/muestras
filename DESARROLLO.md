@@ -260,7 +260,9 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
   5 PIN incorrectos sin internet bloquean la entrada sin internet 15 minutos.
 - Sin señal se puede: ver trabajos y clientes ya descargados, llenar y guardar reportes, firmar, hacer el PDF y pedir partes
   (quedan en cola). Al volver la señal todo se envía solo y se asignan los números.
+- El supervisor también puede entrar sin internet (después de una vez con internet): se abre la app de reportes, porque el panel necesita internet.
 - Necesitan internet: el panel del supervisor, enviar por correo/WhatsApp, cotizaciones nuevas y pagos.
+- Al subir una versión nueva, la app se recarga sola una vez para usarla.
 
 ## Sesiones: una por pestaña
 - Cada pestaña o ventana tiene **su propia sesión**: en una puedes tener el panel del supervisor y en otra la app
