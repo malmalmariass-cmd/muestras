@@ -943,7 +943,7 @@ function normalize(r) {
   r.faults = Array.isArray(r.faults) ? objs(r.faults) : (typeof faultsOf === 'function' ? faultsOf(r) : []).map(f => ({ fault: f.fault, correction: f.correction || null }));
   if (!r.faults.length) r.faults.push({ fault: '', correction: null });
   r.services = objs(r.services);
-  if (!r.status) r.status = jobStatusOf(r);
+  if (!r.status) r.status = typeof jobStatusOf === 'function' ? jobStatusOf(r) : '';
   r.statusHistory = Array.isArray(r.statusHistory) ? r.statusHistory : [];
   return r;
 }
@@ -2476,6 +2476,17 @@ if (session?.token) startSession();
 else if (loginRole === 'sup' && !DEMO && SESS.get(ADMIN_LSK)) location.replace('admin.html');   // this tab is already the supervisor panel
 else { $('#lgCode').value = LS.get('cher.lastCode', ''); $('#login').hidden = false; }
 window.addEventListener('pagehide', () => { if (dirty) saveDraft(); });
+</script>
+<script>
+/* if a required file did not reach the server (or did not download), say which one instead of buttons that do nothing */
+window.addEventListener('load', () => {
+  const miss = [['pdf.js', typeof buildPdf === 'function' && typeof jobStatusOf === 'function'], ['pdf-codes.js', typeof buildPdf !== 'function' || typeof buildQuotePdf === 'function'], ['vendor/jspdf.umd.min.js', !!window.jspdf]].filter(x => !x[1]).map(x => x[0]);
+  if (!miss.length) return;
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#b00020;color:#fff;font:600 15px/1.4 system-ui,sans-serif;padding:12px 16px;text-align:center';
+  d.textContent = 'Missing file on the server: ' + miss.join(', ') + ' — upload it to the app folder, then reload. Reports, PDFs and emails need it. / Falta en el servidor: ' + miss.join(', ') + ' — súbelo a la carpeta de la app y recarga.';
+  document.body.appendChild(d);
+});
 </script>
 </body>
 </html>
