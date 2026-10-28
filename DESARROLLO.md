@@ -252,6 +252,29 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
   - El botón **💡** arriba lo enciende o apaga en cualquier momento; queda guardado en ese dispositivo.
   - Los textos van en el idioma elegido (inglés o español). Para cambiar o agregar notas: `G` (tarjetas de sección) y `TIPS` (notas de botones) en `ui-help.js`.
 
+## Actividad del equipo (panel → Employees)
+
+- **Team activity**: una tarjeta por persona activa con:
+  - **Doing now / today**: el reporte que está llenando en este momento (número reservado, cliente, equipo y tipo de reporte) y los trabajos de hoy o en proceso;
+  - **Overdue**: trabajos programados con fecha pasada y sin terminar;
+  - **Reports still open**: reportes guardados con estado en proceso, esperando partes, seguimiento o devolver al cliente;
+  - **Coming up**: trabajos asignados para los próximos días;
+  - **Done**: últimos reportes, cuántos reportes esta semana, trabajos terminados y solicitudes de partes abiertas;
+  - **Using the app now** (verde) si usó la app en los últimos 5 minutos; si no, cuándo se vio por última vez.
+- Se actualiza sola cada minuto. **Full activity** abre la línea de tiempo completa de esa persona: trabajos (los próximos arriba), reportes, solicitudes de partes, envíos por correo o WhatsApp y acciones registradas. Tiene filtros, y al tocar un elemento se abre ese reporte, trabajo o solicitud.
+- Servidor: acciones `team_activity` y `employee_activity`. El esquema pasa a la v12: `number_holds.info` guarda lo que el técnico está llenando (lo manda la tablet al reservar el número).
+
+## Historial del técnico
+
+- Al abrir **History** se cargan del servidor los reportes de ese técnico, como máximo cada 2 minutos. Así aparece lo que hizo en otra tablet o en una tablet nueva.
+- Un reporte que todavía no se envió desde esta tablet nunca se reemplaza.
+
+## Ventanas una encima de otra
+
+- Una ventana que se abre desde otra (por ejemplo, el PIN desde Developer tools) siempre queda al frente (`ui-help.js`). Antes podía quedar debajo y parecía que el botón no hacía nada.
+- **Developer tools → Download backup first** descarga el respaldo con el **PIN de desarrolladora**, el mismo que se escribió para abrir las herramientas. No pide el PIN del supervisor.
+- **Settings → Download full backup** sigue pidiendo el PIN del supervisor.
+
 ## Sin internet (app del técnico)
 - `sw.js` guarda la app en la tablet (páginas, scripts, motor de PDF, iconos): abre sin señal. La API nunca se guarda ahí.
 - El motor de PDF (jsPDF 2.5.1) va dentro de la app: `vendor/jspdf.umd.min.js` (antes venía de internet).

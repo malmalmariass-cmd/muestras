@@ -13,6 +13,17 @@
   const L = o => (o && (o[lang()] || o.en)) || '';
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+  /* ------------------------------------------------------------------ windows on top
+     A window opened from inside another one (the PIN check from Developer tools, a contact from an invoice…) always
+     comes to the front, whatever its place in the page; otherwise it opened behind and the button seemed dead. */
+  const isWin = el => el.nodeType === 1 && (el.classList.contains('modal') || el.classList.contains('sheet'));
+  new MutationObserver(ms => ms.forEach(m => {
+    const el = m.target; if (!isWin(el) || el.hidden) return;
+    let top = 0; document.querySelectorAll('.modal:not([hidden]),.sheet:not([hidden])').forEach(o => { if (o !== el) top = Math.max(top, +getComputedStyle(o).zIndex || 0); });
+    el.style.zIndex = ''; const own = +getComputedStyle(el).zIndex || 0;
+    if (top >= own) el.style.zIndex = top + 1;
+  })).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['hidden'] });
+
   /* ------------------------------------------------------------------ styles */
   const css = `
 @media (max-width:820px){

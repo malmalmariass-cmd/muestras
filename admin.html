@@ -18,7 +18,7 @@
 <script src="pdf.js?v=9"></script>
 <script src="pdf-codes.js?v=2"></script>
 <script src="combo.js?v=1" defer></script>
-<script src="ui-help.js?v=1" defer></script>
+<script src="ui-help.js?v=2" defer></script>
 <style>
 :root{
   --navy:#123a8c; --navy-50:#eef3ff; --red:#d0021b; --ink:#16202e; --ink-2:#4a5568; --muted:#7a8499;
@@ -41,6 +41,17 @@ main{max-width:1280px;margin:0 auto;padding:20px}
 h1{font-size:22px;margin:0 0 4px}
 .sub{color:var(--muted);margin:0 0 16px;font-size:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.team{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.tm{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.tm .hd{display:flex;align-items:center;gap:8px;justify-content:space-between}.tm .hd b{font-size:16px}
+.tm .dot{width:10px;height:10px;border-radius:50%;background:#c3cad6;display:inline-block;margin-right:6px}.tm .dot.on{background:#1f9d55;box-shadow:0 0 0 3px rgba(31,157,85,.18)}
+.tm h4{margin:4px 0 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tm ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}.tm li{font-size:14px;line-height:1.35}
+.tm li a{color:var(--navy);cursor:pointer;text-decoration:underline}.tm .nums{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}.tm .nums b{color:var(--ink)}
+.actf{display:flex;flex-wrap:wrap;gap:6px}.actf button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}.actf button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tl .d{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.tl .ev{display:flex;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;background:#fff}
+.tl .ev:hover{border-color:var(--navy)}.tl .ev .ic{font-size:18px}.tl .ev small{display:block;color:var(--muted)}.tl .ev.fut{background:#f3f7ff}
 .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px}
 .filters .f{display:flex;flex-direction:column;gap:4px}
 .filters label{font-size:12px;font-weight:600;color:var(--ink-2)}
@@ -458,6 +469,10 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
       <div><h1>Employees</h1><p class="sub">Technicians sign in on the tablets with their Employee ID and PIN.</p></div>
       <button class="btn p" id="addEmp">+ Add employee</button>
     </div>
+    <h2 style="font-size:17px;margin:18px 0 4px">Team activity</h2>
+    <p class="sub" style="margin:0 0 10px">What each person did, is doing right now and has coming up. Updates every minute. Tap <b>Full activity</b> for everything a person did.</p>
+    <div class="team" id="teamGrid"><div class="empty">Loading…</div></div>
+    <h2 style="font-size:17px;margin:22px 0 8px">Accounts</h2>
     <div class="card" style="padding:0"><div class="tablewrap">
       <table class="t"><thead><tr><th>Name</th><th>Employee ID</th><th>Role</th><th>Status</th><th class="num">Reports</th><th class="hide-sm">Last sign-in</th><th></th></tr></thead><tbody id="empBody"></tbody></table>
     </div></div>
@@ -701,6 +716,13 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
 </div>
 
 <!-- employee modal -->
+<div class="modal" id="actModal" hidden>
+  <div class="mc wide">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 id="actTitle" style="margin:0">Activity</h2><button type="button" class="btn s" data-close id="actClose">Close</button></div>
+    <div class="actf" id="actFilter" style="margin:10px 0"><button type="button" data-f="" class="on">Everything</button><button type="button" data-f="job">Jobs</button><button type="button" data-f="report">Reports</button><button type="button" data-f="parts">Parts</button><button type="button" data-f="send">Sent</button><button type="button" data-f="log">Other</button></div>
+    <div id="actList" class="tl"></div>
+  </div>
+</div>
 <div class="modal" id="empModal" hidden>
   <form class="mc" id="empForm" autocomplete="off">
     <h2 id="empTitle">Add employee</h2>
@@ -1037,7 +1059,7 @@ function view(v) {
   if (v === 'requests') loadRequests();
   if (v === 'settings') { loadServices(); loadLog(); }
   if (v === 'stats') loadStats();
-  if (v === 'emps') loadEmps();
+  if (v === 'emps') { loadEmps(); loadTeam(); }
   if (v === 'settings') { loadSettings(); loadMailStatus(); }
   if (v === 'jobs') { techOptions('#jTech', true, true); loadJobs(); }
   if (v === 'customers') loadCustomers();
@@ -1219,6 +1241,62 @@ async function loadEmps() {
       <td class="num">${fmtN(e.reports)}</td><td class="hide-sm">${fmtDT(e.lastLogin)}</td><td>${e.id === me?.id ? '' : `<button type="button" class="btn d" data-del="${e.id}" title="Delete this employee">Delete</button>`}</td></tr>`).join('') : '<tr><td colspan="7" class="empty">No employees yet.</td></tr>';
   } catch (e) { toast(e.message); }
 }
+/* ---------------- team activity: done / doing now / coming up, per person ---------------- */
+let teamT = null, actEvents = [], actEmp = null;
+async function loadTeam() {
+  clearTimeout(teamT); if (current !== 'emps') return;
+  try {
+    const j = await api('team_activity'), box = $('#teamGrid');
+    const ppl = j.people.filter(p => p.active);
+    const jl = x => `<li><a data-job="${x.id}">${esc(x.customerName)}</a> · ${fmtD(x.date)}${x.time ? ' ' + esc(x.time) : ''}${x.kind === 'followup' ? ' · follow-up' : ''}${x.status === 'in_progress' ? ' <span class="tag warn">In progress</span>' : ''}</li>`;
+    const rl = x => `<li><a data-rep="${esc(x.id)}">#${esc(x.invoiceNo)}</a> ${esc(x.customer || 'No customer')}${x.equipment ? ' · ' + esc(x.equipment) : ''}${x.status ? ` <span class="tag ${x.status === 'complete' ? 'ok' : 'warn'}">${esc(JS_LBL?.[x.status] || x.status.replace(/_/g, ' '))}</span>` : ''}</li>`;
+    box.innerHTML = ppl.length ? ppl.map(p => {
+      const now = [...p.now.drafts.map(d => `<li>✍ Filling report #${esc(d.invoiceNo)}${d.info ? ' · ' + esc(d.info) : ''} <small style="color:var(--muted)">since ${fmtDT(d.since)}</small></li>`), ...p.now.jobs.map(jl)];
+      return `<div class="tm" data-emp="${p.id}">
+        <div class="hd"><b><span class="dot ${p.online ? 'on' : ''}"></span>${esc(p.name)}</b><span class="tag ${p.role === 'supervisor' ? 'off' : 'ok'}">${p.role === 'supervisor' ? 'Supervisor' : 'Technician'}</span></div>
+        <div class="sub" style="margin:0">${p.online ? '<b style="color:#1f9d55">Using the app now</b>' : (p.lastSeen ? 'Last seen ' + fmtDT(p.lastSeen) : 'Never signed in')}</div>
+        <h4>Doing now / today</h4><ul>${now.join('') || '<li style="color:var(--muted)">Nothing open right now</li>'}</ul>
+        ${p.late.length ? `<h4 style="color:var(--red)">Overdue (${p.late.length})</h4><ul>${p.late.slice(0, 4).map(jl).join('')}</ul>` : ''}
+        ${p.now.open.length ? `<h4>Reports still open</h4><ul>${p.now.open.slice(0, 4).map(rl).join('')}</ul>` : ''}
+        <h4>Coming up (${p.next.length})</h4><ul>${p.next.slice(0, 4).map(jl).join('') || '<li style="color:var(--muted)">No jobs assigned</li>'}</ul>
+        <h4>Done</h4><ul>${p.done.recent.slice(0, 3).map(rl).join('') || '<li style="color:var(--muted)">No reports in the last 30 days</li>'}</ul>
+        <div class="nums"><span><b>${p.done.reportsWeek}</b> reports this week</span><span><b>${p.done.jobsWeek}</b> jobs done</span><span><b>${p.done.reportsTotal}</b> reports total</span>${p.done.partsOpen ? `<span><b>${p.done.partsOpen}</b> parts requests open</span>` : ''}</div>
+        <div><button type="button" class="btn s" data-act="${p.id}">Full activity</button></div></div>`;
+    }).join('') : '<div class="empty">No active employees.</div>';
+  } catch (e) { $('#teamGrid').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+  teamT = setTimeout(loadTeam, 60000);
+}
+async function openJobById(id) {
+  try { const j = (await api('jobs_list', { employeeId: 0 })).jobs.find(x => String(x.id) === String(id)); if (j) jobModal(j); else toast('Job not found'); } catch (e) { toast(e.message); }
+}
+$('#teamGrid').onclick = e => {
+  const a = e.target.closest('[data-act]'), r = e.target.closest('[data-rep]'), jb = e.target.closest('[data-job]');
+  if (a) openActivity(+a.dataset.act); else if (r) openReport(r.dataset.rep); else if (jb) openJobById(jb.dataset.job);
+};
+async function openActivity(id) {
+  actEmp = id; $('#actList').innerHTML = '<div class="empty">Loading…</div>'; $('#actTitle').textContent = 'Activity'; openModal('#actModal');
+  try { const j = await api('employee_activity', { id }); actEvents = j.events; $('#actTitle').textContent = `Activity · ${j.employee.name} (${j.employee.code})`; renderActivity(); }
+  catch (e) { $('#actList').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+}
+function renderActivity() {
+  const f = $('#actFilter .on')?.dataset.f || '', IC = { job: '🗓', report: '📝', parts: '🔩', send: '✉', log: '•' };
+  const list = actEvents.filter(x => !f || x.kind === f);
+  if (!list.length) { $('#actList').innerHTML = '<div class="empty">Nothing here yet.</div>'; return; }
+  let last = '', html = '';
+  list.forEach((x, i) => {
+    const day = x.future ? 'Coming up' : fmtD(x.at);
+    if (day !== last) { html += `<div class="d">${esc(day)}</div>`; last = day; }
+    html += `<div class="ev ${x.future ? 'fut' : ''}" data-i="${i}"><span class="ic">${IC[x.kind] || '•'}</span><div><b>${esc(x.text)}</b><small>${esc(x.detail || '')}${x.future ? '' : ' · ' + esc(x.at.length > 10 ? new Date(x.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '')}</small></div></div>`;
+  });
+  $('#actList').innerHTML = html; $('#actList')._list = list;
+}
+$('#actFilter').onclick = e => { const b = e.target.closest('button'); if (!b) return; $$('#actFilter button').forEach(x => x.classList.toggle('on', x === b)); renderActivity(); };
+$('#actList').onclick = e => {
+  const d = e.target.closest('.ev'); if (!d) return; const x = $('#actList')._list[+d.dataset.i];
+  if (x.kind === 'report' || (x.kind === 'send' && x.ref)) openReport(x.ref); else if (x.kind === 'parts') openRequest(+x.ref); else if (x.kind === 'job') openJobById(x.ref);
+};
+$('#actClose').onclick = () => closeModal('#actModal');
+
 let editId = 0;
 function empModal(e) {
   editId = e?.id || 0;
@@ -2153,15 +2231,16 @@ $('#pinOk').onclick = async () => {
 };
 
 /* ---------------- backup ---------------- */
+async function downloadBackup(auth) {   // auth: { pin } (supervisor, Settings) or { devPin } (Developer tools)
+  const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Auth-Token': session.token }, body: JSON.stringify({ action: 'backup_export', ...auth }) });
+  const ct = res.headers.get('Content-Type') || '';
+  if (!res.ok || ct.includes('json')) { let m = 'Backup failed'; try { m = (await res.json()).error || m; } catch {} throw new Error(m); }
+  const blob = await res.blob(), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = `cher-backup-${iso(new Date())}.sql`; document.body.appendChild(a); a.click(); a.remove();
+  toast('Backup downloaded'); loadLog();
+}
 $('#bkBtn').onclick = () => askPin({ title: 'Download a full backup', text: 'Type your PIN. The file (.sql) has all the data — keep it private.', button: 'Download', reason: false,
-  onOk: async pin => {
-    const res = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Auth-Token': session.token }, body: JSON.stringify({ action: 'backup_export', pin }) });
-    const ct = res.headers.get('Content-Type') || '';
-    if (!res.ok || ct.includes('json')) { let m = 'Backup failed'; try { m = (await res.json()).error || m; } catch {} throw new Error(m); }
-    const blob = await res.blob(), a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = `cher-backup-${iso(new Date())}.sql`; document.body.appendChild(a); a.click(); a.remove();
-    toast('Backup downloaded'); loadLog();
-  } });
+  onOk: pin => downloadBackup({ pin }) });
 
 /* ---------------- activity log ---------------- */
 const LOG_LBL = { invoice_deleted: 'Invoice deleted', report_deleted: 'Report deleted', invoice_void: 'Invoice voided', employee_created: 'Employee created', employee_changed: 'Employee changed', pin_changed: 'PIN changed', backup_downloaded: 'Backup downloaded' };
@@ -2954,7 +3033,12 @@ $('#tutStopBar').onclick = tutStop;
 const rsLog = m => { const b = $('#rsLog'); b.hidden = false; b.insertAdjacentHTML('beforeend', `<div>${esc(new Date().toLocaleTimeString())} · ${esc(m)}</div>`); b.scrollTop = b.scrollHeight; };
 const RS_LBL = { reports: 'Service reports', testReports: 'Load-test reports', invoices: 'Invoices', partsRequests: 'Parts requests', vendorOrders: 'Vendor orders', jobs: 'Jobs', customers: 'Customers',
   testCustomers: 'Load-test customers', partsArchived: 'Parts archived', testTechs: 'Test technicians', testTechsDeactivated: 'Test technicians deactivated', techsDeactivated: 'Technicians deactivated', nextInvoice: 'Next invoice number', series: 'New number series', nextNo: 'Next report / invoice number' };
-$('#rsBackup').onclick = $('#exSql').onclick = () => $('#bkBtn').click();
+/* in Developer tools the backup uses the developer PIN already typed to open them (no second PIN window) */
+$('#rsBackup').onclick = $('#exSql').onclick = async e => {
+  const btn = e.currentTarget; if (!devPin) { toast('Unlock Developer tools with your developer PIN first'); return; }
+  btn.disabled = true; toast('Preparing the backup…');
+  try { await downloadBackup({ devPin }); } catch (err) { toast(err.message); } finally { btn.disabled = false; }
+};
 $('#rsGo').onclick = async () => {
   const w = {}; $$('#devReset [data-w]').forEach(c => { w[c.dataset.w] = c.checked; });
   const next = +$('#rsNext').value || 0;

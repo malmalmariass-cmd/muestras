@@ -23,7 +23,7 @@
 <script src="pdf.js?v=9"></script>
 <script src="pdf-codes.js?v=2"></script>
 <script src="combo.js?v=1" defer></script>
-<script src="ui-help.js?v=1" defer></script>
+<script src="ui-help.js?v=2" defer></script>
 <style>
 :root{
   --navy:#123a8c; --navy-2:#0c2a68; --red:#d0021b; --ink:#16202e; --muted:#5b6678;
@@ -1021,7 +1021,8 @@ function reserveNumber() {
   const r = report;
   if (!session || !r || r.invoiceNo || r.synced || reserving || Date.now() - reserveTry < 20000) return;
   reserveTry = Date.now();
-  reserving = api('reserve_number', { reportId: r.id }).then(j => {
+  const info = [r.customerName, [r.make, r.model].filter(Boolean).join(' '), r.type === 'maintenance' ? 'Equipment Service Report' : 'Field Service Report'].filter(Boolean).join(' · ');   // the supervisor sees it as work in progress
+  reserving = api('reserve_number', { reportId: r.id, info }).then(j => {
     if (!j.invoiceNo || r.invoiceNo) return;
     reserveTry = 0;   // the 20-second pause is only for retries without internet
     r.invoiceNo = j.invoiceNo; r.reservedAt = new Date().toISOString();
@@ -2102,12 +2103,19 @@ async function renderHist() {
 }
 $('#search').addEventListener('input', renderHist);
 $('#syncNow').onclick = () => syncAll(true);
+/* History shows everything this technician did, also on other tablets: their reports come from the server
+   when History opens (at most every 2 minutes); reports not sent yet from this tablet are never overwritten. */
+let histPulled = 0;
+async function pullMine(manual) {
+  if (!manual && Date.now() - histPulled < 120000) return; histPulled = Date.now();
+  const j = await api('my_reports'); let n = 0;
+  for (const r of forRole(j.reports)) { const loc = await DB.get(r.id); if (!loc || (loc.synced && (loc.updatedAt || '') <= (r.updatedAt || ''))) { if (!loc || JSON.stringify(loc) !== JSON.stringify({ ...r, synced: true })) n++; r.synced = true; if (loc?.officeSentAt && !r.officeSentAt) r.officeSentAt = loc.officeSentAt; await DB.put(r); } }
+  if (n && !$('#viewHist').hidden) renderHist();
+  return n;
+}
 $('#pullMine').onclick = async () => {
-  try {
-    const j = await api('my_reports'); let n = 0;
-    for (const r of forRole(j.reports)) { const loc = await DB.get(r.id); if (!loc || loc.synced) { r.synced = true; await DB.put(r); n++; } }
-    toast(t('downloaded', { n })); renderHist();
-  } catch (e) { toast(e.offline ? t('noConnShort') : e.message); }
+  try { const n = await pullMine(true); toast(t('downloaded', { n })); renderHist(); }
+  catch (e) { toast(e.offline ? t('noConnShort') : e.message); }
 };
 
 /* ---------------- views ---------------- */
@@ -2129,7 +2137,7 @@ function show(v) {
   $('#viewJobs').hidden = v !== 'jobs'; $('#viewForm').hidden = !isForm; $('#viewHist').hidden = v !== 'hist'; $('#viewReqs').hidden = v !== 'reqs'; $('#formBar').hidden = !isForm;
   $('#tabJobs').classList.toggle('on', v === 'jobs'); $('#tabForm').classList.toggle('on', v === 'form'); $('#tabMaint').classList.toggle('on', v === 'maint');
   $('#tabReqs').classList.toggle('on', v === 'reqs'); $('#tabHist').classList.toggle('on', v === 'hist');
-  if (v === 'hist') renderHist();
+  if (v === 'hist') { renderHist(); pullMine(false).catch(() => {}); }
   if (v === 'reqs') { renderReqs(); pullRequests().then(markReqsSeen); }
   if (v === 'jobs') { renderJobs(); pullJobs(); }
   LS.set('cher.view', v); scrollTo(0, 0);
