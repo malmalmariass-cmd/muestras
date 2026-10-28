@@ -3,7 +3,7 @@
    - Pages: the newest version from the server when there is signal, the saved copy when there is not.
    - Scripts and images: the saved copy at once, refreshed in the background.
    - The API (api/…) is never saved here: reports wait in the app's own storage and are sent when the signal returns. */
-const VERSION = 'cher-v14';
+const VERSION = 'cher-v15';
 const CORE = ['./', 'index.html', 'admin.html', 'pdf.js', 'pdf-codes.js', 'combo.js', 'ui-help.js', 'vendor/jspdf.umd.min.js',
   'vendor/xlsx.full.min.js', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-192.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-32.png'];
 

@@ -937,11 +937,12 @@ function blankReport(type) {
   };
 }
 function normalize(r) {
-  r.sigs = r.sigs || {}; r.time = r.time?.length ? r.time : [{}]; r.parts = Array.isArray(r.parts) ? r.parts : [];
+  const objs = a => Array.isArray(a) ? a.filter(x => x && typeof x === 'object') : [];   // drafts saved by older versions can hold empty rows
+  r.sigs = r.sigs && typeof r.sigs === 'object' ? r.sigs : {}; r.time = objs(r.time); if (!r.time.length) r.time = [{}]; r.parts = objs(r.parts);
   r.type = r.type === 'maintenance' ? 'maintenance' : 'repair';
-  if (!Array.isArray(r.faults)) r.faults = faultsOf(r).map(f => ({ fault: f.fault, correction: f.correction || null }));
+  r.faults = Array.isArray(r.faults) ? objs(r.faults) : (typeof faultsOf === 'function' ? faultsOf(r) : []).map(f => ({ fault: f.fault, correction: f.correction || null }));
   if (!r.faults.length) r.faults.push({ fault: '', correction: null });
-  r.services = Array.isArray(r.services) ? r.services : [];
+  r.services = objs(r.services);
   if (!r.status) r.status = jobStatusOf(r);
   r.statusHistory = Array.isArray(r.statusHistory) ? r.statusHistory : [];
   return r;
@@ -2115,11 +2116,16 @@ function useType(type) {
   if (report) saveDraft();
   const d = getDraft(type);
   if (d && d.employeeId === me()) report = normalize(d); else { report = blankReport(type); report.employeeId = me(); }
-  dirty = false; render();
+  dirty = false;
+  try { render(); }
+  catch (e) {   // a draft this version cannot show: keep a copy and open a clean report, so the tab always opens
+    console.error(e); LS.set('cher.draft.broken.' + Date.now(), report);
+    report = blankReport(type); report.employeeId = me(); saveDraft(); render();
+  }
 }
 function show(v) {
   const isForm = v === 'form' || v === 'maint';
-  if (isForm) useType(v === 'maint' ? 'maintenance' : 'repair');
+  if (isForm) try { useType(v === 'maint' ? 'maintenance' : 'repair'); } catch (e) { console.error(e); }
   $('#viewJobs').hidden = v !== 'jobs'; $('#viewForm').hidden = !isForm; $('#viewHist').hidden = v !== 'hist'; $('#viewReqs').hidden = v !== 'reqs'; $('#formBar').hidden = !isForm;
   $('#tabJobs').classList.toggle('on', v === 'jobs'); $('#tabForm').classList.toggle('on', v === 'form'); $('#tabMaint').classList.toggle('on', v === 'maint');
   $('#tabReqs').classList.toggle('on', v === 'reqs'); $('#tabHist').classList.toggle('on', v === 'hist');
