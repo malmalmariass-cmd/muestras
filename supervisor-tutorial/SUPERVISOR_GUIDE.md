@@ -1,6 +1,6 @@
 # Supervisor Panel: Quick Guide
 
-This guide covers the daily tasks in the **Supervisor Panel**. A narrated video version is in
+This guide covers the daily tasks in the **Supervisor Panel**. A printable PDF manual is in [`Cher_Services_Supervisor_Panel_Manual.pdf`](Cher_Services_Supervisor_Panel_Manual.pdf). A narrated video version is in
 [`Supervisor_Panel_Tutorial.mp4`](Supervisor_Panel_Tutorial.mp4), with subtitles in
 [`Supervisor_Panel_Tutorial.srt`](Supervisor_Panel_Tutorial.srt).
 
@@ -184,7 +184,40 @@ Parts leave the stock when the invoice is made.
 The invoice opens on screen: **Edit**, **PDF**, **Print**, **Email**, **WhatsApp**.
 When the customer pays, enter the **Amount**, **Method** and **Date** under **Payments** and click **Record payment**.
 
-## 7. Customers
+### Orders to vendors and Vendors
+
+**Orders to vendors** lists the parts you need to buy from a supplier. To save a supplier, open **Vendors** and click
+**+ Add vendor**: company, contact person, phone, WhatsApp, email, website, your account number with them, address and notes.
+Then click **Save vendor**.
+
+![Add vendor](img/38-add-vendor.jpg)
+
+## 7. Manage invoices
+
+**Invoices → click an invoice**
+
+- **Unsaved changes**: if you leave changes to an invoice without saving, a yellow banner appears on every page. Click **Open** to go back, or **Delete** to discard them.
+
+![Unsaved changes](img/31-unsaved-changes.jpg)
+
+- **Edit**: click **Edit**, choose the service report in **Work order** (each report shows its number, date and machine), then **Save invoice**.
+
+![Edit invoice](img/32-edit-invoice-workorder.jpg)
+
+- **Record a payment**: under **Payments**, enter Amount, Method, Date and a Note, then click **+ Record payment**.
+  Payments are not collected in the app; you only record what the customer paid.
+
+![Record payment](img/33-record-payment.jpg)
+
+- **Status**: choose a new status (for example *Paid*), add a note and click **Update status**. Every change is kept in the **Status history**.
+
+![Update status](img/34-update-status.jpg)
+
+- **Void invoice** cancels it and returns its in-house parts to stock. **Delete** removes it completely (reason + supervisor PIN; a copy stays in the activity log).
+
+![Delete invoice](img/36-delete-invoice.jpg)
+
+## 8. Customers
 
 ![Import customers](img/11-import-customers.jpg)
 
@@ -201,7 +234,11 @@ From there you can also **Schedule job** or create a **New invoice** for that cu
 
 ![Edit customer](img/30-edit-customer.jpg)
 
-## 8. Inventory and Equipment
+From the customer card, click **Schedule job** to open a new job with the customer's details filled in, or **New invoice** to bill them.
+
+![Customer card](img/41-schedule-from-customer.jpg)
+
+## 9. Inventory and Equipment
 
 ![Inventory](img/13-inventory.jpg)
 
@@ -212,14 +249,14 @@ From there you can also **Schedule job** or create a **New invoice** for that cu
 
 - **Equipment**: every machine serviced, grouped by serial number. Open one to see all the work done on it.
 
-## 9. Statistics
+## 10. Statistics
 
 ![Statistics](img/15-statistics.jpg)
 
 Choose a period (**This month**, **Last 30 days**, **Last 90 days**, **This year**, **All time**) and, if you want, a **Technician**.
 You will see service reports, hours worked, signed reports, top customers, most serviced makes and parts used.
 
-## 10. Settings
+## 11. Settings
 
 ![Settings](img/16-settings.jpg)
 

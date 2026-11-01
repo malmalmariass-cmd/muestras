@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supervisor Panel – User Manual | Cher Services LLC</title>
+<style>
+  @page { size: Letter; margin: 0.75in 0.7in 0.8in 0.7in; }
+  @page :first { margin: 0; }
+  :root{
+    --navy:#103775; --blue:#1C58A8; --yellow:#F9C917; --ink:#1d2433; --muted:#5d6678;
+    --line:#e3e8f1; --soft:#f3f6fb;
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ font-family:"Inter", "DejaVu Sans", sans-serif; color:var(--ink); font-size:10.5pt; line-height:1.5; margin:0; }
+  h1,h2,h3{ color:var(--navy); line-height:1.2; }
+  b, strong{ color:#0f1d3a; }
+  .ui{ display:inline-block; padding:0 6px; border-radius:4px; background:#e8eefb; color:var(--navy); font-weight:600; font-size:9.5pt; white-space:nowrap; }
+
+  /* ---------- cover ---------- */
+  .cover{ height:11in; width:8.5in; position:relative; overflow:hidden; page-break-after:always;
+    background:linear-gradient(160deg, #0b2a5e 0%, var(--navy) 45%, var(--blue) 100%); color:white; }
+  .cover .stripe{ position:absolute; left:0; right:0; height:14px; background:var(--yellow); }
+  .cover .logo-card{ position:absolute; top:1.3in; left:50%; transform:translateX(-50%); background:white; border-radius:18px;
+    padding:28px 44px 22px; box-shadow:0 18px 40px rgba(0,0,0,.25); border-bottom:6px solid var(--yellow); }
+  .cover .logo-card img{ width:3.6in; display:block; }
+  .cover .title{ position:absolute; top:4.15in; width:100%; text-align:center; }
+  .cover .kicker{ color:var(--yellow); letter-spacing:.25em; font-weight:700; font-size:11pt; text-transform:uppercase; }
+  .cover h1{ color:white; font-size:40pt; margin:.15in 0 .1in; font-weight:800; }
+  .cover .subtitle{ font-size:14pt; opacity:.9; }
+  .cover .shot{ position:absolute; bottom:1.25in; left:50%; transform:translateX(-50%) rotate(-2deg); width:6.2in; border-radius:10px;
+    border:5px solid white; box-shadow:0 22px 50px rgba(0,0,0,.35); }
+  .cover .foot{ position:absolute; bottom:.42in; width:100%; text-align:center; font-size:9.5pt; opacity:.85; }
+
+  /* ---------- toc ---------- */
+  .toc{ page-break-after:always; }
+  .toc h2{ font-size:22pt; margin:0 0 .15in; }
+  .toc ol{ list-style:none; padding:0; margin:0; counter-reset:t; }
+  .toc li{ display:flex; align-items:center; gap:14px; padding:6px 0; border-bottom:1px solid var(--line); font-size:12pt; }
+  .toc .n{ width:28px; height:28px; border-radius:50%; background:var(--navy); color:white; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none; }
+  .toc .d{ color:var(--muted); font-size:9.5pt; }
+  .intro-box{ margin-top:.3in; background:var(--soft); border-left:5px solid var(--yellow); padding:14px 18px; border-radius:6px; }
+  .menu-strip{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+
+  /* ---------- sections ---------- */
+  section.chapter{ page-break-before:always; }
+  .ch-head{ display:flex; align-items:center; gap:16px; padding:16px 20px; border-radius:10px;
+    background:linear-gradient(120deg, var(--navy), var(--blue)); color:white; margin-bottom:16px; position:relative; overflow:hidden; }
+  .ch-head::after{ content:""; position:absolute; right:-30px; top:0; bottom:0; width:120px; background:var(--yellow); transform:skewX(-18deg); opacity:.95; }
+  .ch-head .num{ font-size:30pt; font-weight:800; color:var(--yellow); line-height:1; min-width:48px; }
+  .ch-head h2{ color:white; margin:0; font-size:19pt; }
+  .ch-head .where{ font-size:9.5pt; opacity:.9; margin-top:3px; }
+  h3{ break-after:avoid-page; page-break-after:avoid; font-size:13pt; margin:18px 0 6px; padding-bottom:4px; border-bottom:2px solid var(--yellow); display:inline-block; }
+  p{ margin:6px 0; orphans:3; widows:3; }
+  h3 + p, h3 + ol, h3 + ul{ break-before:avoid-page; }
+  ol.steps{ counter-reset:s; list-style:none; padding:0; margin:8px 0; }
+  ol.steps > li{ counter-increment:s; position:relative; padding:3px 0 3px 34px; }
+  ol.steps > li::before{ content:counter(s); position:absolute; left:0; top:3px; width:22px; height:22px; border-radius:50%;
+    background:var(--yellow); color:var(--navy); font-weight:800; font-size:9.5pt; display:flex; align-items:center; justify-content:center; }
+  ul{ margin:6px 0; padding-left:20px; }
+  ul li{ margin:2px 0; }
+  ul li::marker{ color:var(--blue); }
+  figure{ margin:12px 0 14px; page-break-inside:avoid; }
+  figure img{ width:auto; max-width:100%; max-height:3.25in; margin:0 auto; border-radius:8px; border:1px solid var(--line); box-shadow:0 4px 14px rgba(16,55,117,.12); display:block; }
+  figure.half img{ max-height:2.6in; }
+  figcaption{ font-size:8.8pt; color:var(--muted); margin-top:5px; text-align:center; font-style:italic; }
+  .tip, .note{ page-break-inside:avoid; border-radius:8px; padding:10px 14px 10px 46px; margin:12px 0; position:relative; font-size:10pt; }
+  .tip{ background:#fff8dc; border:1px solid #f3dd85; }
+  .note{ background:#eaf1fd; border:1px solid #c6d7f5; }
+  .tip::before, .note::before{ position:absolute; left:12px; top:9px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11pt; }
+  .tip::before{ content:"★"; background:var(--yellow); color:var(--navy); }
+  .note::before{ content:"i"; background:var(--blue); color:white; font-family:Georgia, serif; }
+  .tip b:first-child, .note b:first-child{ color:var(--navy); }
+  .keep{ page-break-inside:avoid; }
+
+  /* ---------- quick ref ---------- */
+  table.qr{ width:100%; border-collapse:collapse; margin-top:10px; font-size:10pt; }
+  table.qr th{ background:var(--navy); color:white; text-align:left; padding:8px 10px; }
+  table.qr td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.qr tr:nth-child(even) td{ background:var(--soft); }
+  table.qr td:first-child{ font-weight:600; color:var(--navy); width:42%; }
+
+  .back{ page-break-before:always; text-align:center; padding-top:2.6in; }
+  .back img{ width:3in; }
+  .back p{ color:var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- ======================= COVER ======================= -->
+<div class="cover">
+  <div class="stripe" style="top:0"></div>
+  <div class="logo-card"><img src="../img/cher-logo.png" alt="Cher Services LLC"></div>
+  <div class="title">
+    <div class="kicker">User Manual</div>
+    <h1>Supervisor Panel</h1>
+    <div class="subtitle">Step-by-step guide for supervisors</div>
+  </div>
+  <img class="shot" src="../img/05-job-list.jpg" alt="">
+  <div class="foot">Cher Services LLC &nbsp;•&nbsp; Version 1.0 &nbsp;•&nbsp; November 2026</div>
+  <div class="stripe" style="bottom:0"></div>
+</div>
+
+<!-- ======================= TOC ======================= -->
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><span class="n">1</span><div>Service reports<div class="d">Review, approve changes, sign and delete reports</div></div></li>
+    <li><span class="n">2</span><div>Employees<div class="d">Add technicians and supervisors</div></div></li>
+    <li><span class="n">3</span><div>Schedule a job<div class="d">Create visits and recurring maintenance</div></div></li>
+    <li><span class="n">4</span><div>Manage jobs<div class="d">Cancel requests, reschedule, reassign, delete</div></div></li>
+    <li><span class="n">5</span><div>Create an invoice<div class="d">Customer, work order, labor and parts</div></div></li>
+    <li><span class="n">6</span><div>Parts &amp; Orders<div class="d">Quotes, approvals, vendors and invoices from parts</div></div></li>
+    <li><span class="n">7</span><div>Manage invoices<div class="d">Edit, payments, status, void and delete</div></div></li>
+    <li><span class="n">8</span><div>Customers<div class="d">Import, add, edit, schedule and bill</div></div></li>
+    <li><span class="n">9</span><div>Inventory &amp; Equipment<div class="d">Stock and machine history</div></div></li>
+    <li><span class="n">10</span><div>Statistics<div class="d">Business overview by period and technician</div></div></li>
+    <li><span class="n">11</span><div>Settings<div class="d">Invoice numbers, tax, labor rate, backups</div></div></li>
+  </ol>
+  <div class="intro-box">
+    <b>Getting around.</b> The main menu is always at the top of the screen:
+    <div class="menu-strip">
+      <span class="ui">Reports &amp; Jobs</span><span class="ui">Invoices</span><span class="ui">Parts &amp; Orders</span><span class="ui">Customers</span>
+      <span class="ui">Inventory</span><span class="ui">Equipment</span><span class="ui">Statistics</span><span class="ui">Employees</span><span class="ui">Settings</span>
+    </div>
+    <p style="margin-top:8px">The red numbers next to a menu item show how many things are waiting for you. Click <span class="ui">Tips</span> at any time for help.
+    A narrated video version of this manual is also available: <i>Supervisor_Panel_Tutorial.mp4</i>.</p>
+  </div>
+</div>
+
+<!-- ======================= 1 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">01</div><div><h2>Service reports</h2><div class="where">Reports &amp; Jobs → Service reports</div></div></div>
+  <p>Every report sent from the technicians' tablets appears here, newest first.</p>
+  <figure><img src="../img/01-service-reports.jpg"><figcaption>The Service reports list, with the warning box for reports that may not be worth keeping.</figcaption></figure>
+  <ul>
+    <li>The <b>yellow box</b> warns about <b>empty</b> reports (nothing written, no signatures) and <b>possible duplicates</b> (same customer, day, type and machine). Choose <span class="ui">Open</span>, <span class="ui">Keep</span> or <span class="ui">Delete</span>.</li>
+    <li>Filter by <b>Search</b>, <b>Technician</b>, <b>Status</b>, <b>Type</b> and dates. Click <span class="ui">Export CSV</span> to download the list.</li>
+  </ul>
+
+  <h3>Open a report</h3>
+  <p>Click a report number. The panel shows the customer and job, equipment, <b>daily time record</b>, services performed, parts requests, job status and signatures.</p>
+  <figure><img src="../img/20-report-detail.jpg"><figcaption>Report details. Top: PDF, Email, Delete. Bottom: Email the office copy, Create invoice from this report.</figcaption></figure>
+  <div class="tip"><b>Tip:</b> click <b>View full history of S/N…</b> to see all the work ever done on that machine.</div>
+
+  <h3>Approve a customer data change</h3>
+  <p>If a technician asks to change the customer's data (for example a new email), a yellow box appears at the top of the report. Review it and click <span class="ui">Approve and update the customer</span>.</p>
+  <figure><img src="../img/21-approve-customer-change.jpg"><figcaption>A data change requested by the technician.</figcaption></figure>
+
+  <h3>Sign as supervisor</h3>
+  <ol class="steps">
+    <li>Scroll down to <b>Signatures</b> and click <span class="ui">Sign as supervisor</span>.</li>
+    <li>Sign with the mouse, a finger or a pen. Click <span class="ui">Clear</span> to start over.</li>
+    <li>Click <span class="ui">Accept signature</span>. The message <i>"Signed — the job is complete"</i> confirms it.</li>
+  </ol>
+  <figure class="half"><img src="../img/22-supervisor-signature.jpg"><figcaption>The supervisor signature pad.</figcaption></figure>
+
+  <h3>Delete a report</h3>
+  <p>Open the report and click <span class="ui">Delete</span>. Write the <b>reason</b> and enter your <b>supervisor PIN</b> — both are required.</p>
+  <figure class="half"><img src="../img/23-delete-report.jpg"><figcaption>Deleting a report requires a reason and your PIN.</figcaption></figure>
+  <div class="note"><b>Good to know:</b> in-house parts go back to stock, and a copy of the deleted report stays in <b>Settings → Activity log</b>.</div>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">02</div><div><h2>Employees</h2><div class="where">Employees → + Add employee</div></div></div>
+  <ol class="steps">
+    <li>Type the <b>Full name</b>.</li>
+    <li>Enter an <b>Employee ID</b> (for example <i>MS26</i>). It is used to sign in on the tablet.</li>
+    <li>Choose the <b>Role</b>: <i>Technician</i> or <i>Supervisor</i>.</li>
+    <li>Set a <b>PIN</b> of 4 to 8 digits.</li>
+    <li>Leave <b>Active (can sign in)</b> checked and click <span class="ui">Save</span>.</li>
+  </ol>
+  <figure><img src="../img/02-add-employee.jpg"><figcaption>The Add employee form.</figcaption></figure>
+  <figure><img src="../img/03-employee-saved.jpg"><figcaption>The employee list shows each person's ID, role, status, reports and last sign-in.</figcaption></figure>
+  <div class="tip"><b>Tip:</b> to remove someone's access, click <span class="ui">Delete</span> on their row, or uncheck <b>Active</b>.</div>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">03</div><div><h2>Schedule a job</h2><div class="where">Reports &amp; Jobs → Jobs &amp; appointments → + New job</div></div></div>
+  <ol class="steps">
+    <li><b>Customer:</b> pick a saved customer or type a new name.</li>
+    <li><b>Technician:</b> choose who will do the visit.</li>
+    <li>Check <b>Customer agrees to WhatsApp reminders</b> if the customer agreed.</li>
+    <li>Set the <b>Appointment date</b> and <b>time</b>.</li>
+    <li><b>Repeat:</b> for regular maintenance choose a frequency, e.g. <i>Every week</i>.</li>
+    <li>Fill in the <b>Address</b>, <b>Customer WhatsApp</b> and <b>email</b>.</li>
+    <li>Optional: <b>Make</b>, <b>Model</b>, <b>Serial No.</b>, <b>Work order #</b>, <b>Location</b> and <b>Instructions for the technician</b>.</li>
+    <li>Click <span class="ui">Save job</span>.</li>
+  </ol>
+  <figure><img src="../img/04-new-job.jpg"><figcaption>The New job form.</figcaption></figure>
+  <figure><img src="../img/05-job-list.jpg"><figcaption>The new job in the list. It also appears on the technician's tablet with everything filled in.</figcaption></figure>
+  <div class="note"><b>Recurring jobs:</b> the next visit is created automatically as soon as the customer and the supervisor sign the report. <b>Overdue</b> jobs are marked in orange.</div>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">04</div><div><h2>Manage jobs</h2><div class="where">Reports &amp; Jobs → Jobs &amp; appointments</div></div></div>
+  <h3>Cancel requests from technicians</h3>
+  <p>When a technician asks to cancel a job, the job is highlighted in the list. Open it and, at the bottom, click <span class="ui">Approve — cancel the job</span> or <span class="ui">Decline</span>.</p>
+  <figure><img src="../img/24-cancel-request.jpg"><figcaption>A cancel request from the technician, shown at the bottom of the job.</figcaption></figure>
+  <h3>Reschedule, reassign or delete</h3>
+  <ul>
+    <li><b>Move to date / Time</b> → <span class="ui">Reschedule</span> to move the visit.</li>
+    <li><span class="ui">WhatsApp reminder</span>, <span class="ui">Cancel job</span> and <span class="ui">Follow-up visit done</span> are at the bottom of the job.</li>
+    <li>Change the <b>Technician</b> to give the job to someone else, then click <span class="ui">Save job</span>.</li>
+    <li>A cancelled job can be <span class="ui">Reopen</span>ed. Click <span class="ui">Delete</span> to remove a job completely.</li>
+  </ul>
+  <figure><img src="../img/25-reschedule-job.jpg"><figcaption>Editing a job: reschedule, reminders and status.</figcaption></figure>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">05</div><div><h2>Create an invoice</h2><div class="where">Invoices → + New invoice</div></div></div>
+  <h3>Customer</h3>
+  <ul>
+    <li><b>The customer pays</b> — a person or a company pays directly.</li>
+    <li><b>A person pays for a company we already serve</b> — the invoice goes in the company's name. Pick the company and write the <b>Contact name</b>; the invoice says <i>Attn: this person</i>.</li>
+    <li>Address, phone and email fill in automatically. Keep <b>Update this customer's information in Customers</b> checked to save changes.</li>
+  </ul>
+  <figure><img src="../img/06-invoice-customer.jpg"><figcaption>Choosing who pays.</figcaption></figure>
+  <h3>Work order and lines</h3>
+  <ul>
+    <li><b>Work order (service report)</b> is required. Choose the service report from the list, or <b>Sale without a service report (parts / counter sale)</b>.</li>
+    <li><span class="ui">+ Labor / service</span> — enter hours (Qty) and rate (Unit price).</li>
+    <li><span class="ui">+ In-house part</span> — search the part and click <span class="ui">Add</span>. In-house parts come out of the inventory automatically.</li>
+    <li><span class="ui">+ Part from a vendor</span> — vendor parts go to <b>Orders</b>.</li>
+    <li>Check <b>Tax</b> on taxable lines. Subtotal, sales tax and total are calculated for you.</li>
+    <li>Optional <b>Notes for the customer</b>, then click <span class="ui">Save invoice</span>.</li>
+  </ul>
+  <figure><img src="../img/07-invoice-lines.jpg"><figcaption>Adding labor and an in-house part.</figcaption></figure>
+  <figure><img src="../img/08-invoice-workorder.jpg"><figcaption>Work order selected and lines ready to save.</figcaption></figure>
+  <div class="note"><b>Red messages:</b> if something is missing, a red message above the buttons tells you what to fix — for example the contact name or the work order.</div>
+  <div class="keep"><h3>Unsaved invoices</h3>
+  <figure><img src="../img/09-draft-banner.jpg"><figcaption>The yellow banner for an unsaved invoice.</figcaption></figure></div>
+  <p>If you leave an invoice without saving, a yellow banner appears. Click <span class="ui">Open</span> to finish it or <span class="ui">Delete</span> to discard it.</p>
+  <div class="tip"><b>Remember:</b> unsaved drafts are deleted automatically after <b>24 hours</b>.</div>
+</section>
+
+<!-- ======================= 6 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">06</div><div><h2>Parts &amp; Orders</h2><div class="where">Parts &amp; Orders → Parts requests · Orders to vendors · Vendors</div></div></div>
+  <p><b>Parts requests</b> shows the parts your technicians ask for. The cards at the top count requests waiting for you, quoted, approved and ready to invoice.</p>
+  <figure><img src="../img/10-parts-orders.jpg"><figcaption>Parts requests overview.</figcaption></figure>
+  <h3>Send a quote</h3>
+  <ol class="steps">
+    <li>Click a request to open it (technician, customer, machine and parts).</li>
+    <li>Check the <b>Unit price</b> and change it if needed. You can add a line or choose a vendor.</li>
+    <li>Write a <b>Message to the technician</b>, e.g. <i>"available now, full payment required"</i>.</li>
+    <li>Click <span class="ui">Send quote to technician</span>. The technician shows it to the customer.</li>
+  </ol>
+  <figure><img src="../img/26-parts-quote.jpg"><figcaption>A parts request ready to be quoted.</figcaption></figure>
+  <h3>Approve and reserve</h3>
+  <p>When the customer accepts, click <span class="ui">Customer said yes — approve &amp; reserve parts</span>. In-house parts are reserved for <b>2 hours</b>; use <span class="ui">+2 h</span> <span class="ui">+8 h</span> <span class="ui">+1 day</span> to extend.</p>
+  <figure><img src="../img/27-parts-approved.jpg"><figcaption>Approved request with reserved parts and history.</figcaption></figure>
+  <h3>Create the invoice</h3>
+  <ol class="steps">
+    <li>Click <span class="ui">Create invoice</span>. Customer, parts and prices are filled in, and the <b>Reference</b> shows the parts request number.</li>
+    <li>In <b>Work order</b>, choose the service report these parts belong to, or <b>Sale without a service report</b> if they were sold on their own.</li>
+    <li>Click <span class="ui">Save invoice</span>.</li>
+  </ol>
+  <figure><img src="../img/28-invoice-from-parts.jpg"><figcaption>An invoice created from a parts request.</figcaption></figure>
+  <h3>Orders to vendors and Vendors</h3>
+  <p><b>Orders to vendors</b> lists the parts you need to buy from a supplier. To save a supplier, open <b>Vendors</b> and click <span class="ui">+ Add vendor</span>:
+    enter the company, contact person, phone, WhatsApp, email, website, <b>your account number</b> with them, address and notes, then click <span class="ui">Save vendor</span>.</p>
+  <figure><img src="../img/38-add-vendor.jpg"><figcaption>Adding a vendor.</figcaption></figure>
+  <figure><img src="../img/39-vendor-list.jpg"><figcaption>The vendor list. Click Edit to update a vendor.</figcaption></figure>
+  <div class="note"><b>Stock:</b> parts leave the stock only when the invoice is made.</div>
+</section>
+
+<!-- ======================= 7 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">07</div><div><h2>Manage invoices</h2><div class="where">Invoices → click an invoice</div></div></div>
+  <figure><img src="../img/29-invoice-saved-payment.jpg"><figcaption>An open invoice: Edit, PDF, Print, Email, WhatsApp and Delete at the top.</figcaption></figure>
+  <h3>Unsaved changes</h3>
+  <p>If you leave changes to an invoice without saving, a yellow banner appears at the top of every page. Click <span class="ui">Open</span> to go back to it, or <span class="ui">Delete</span> to discard the changes.</p>
+  <figure><img src="../img/31-unsaved-changes.jpg"><figcaption>Banner for unsaved changes to an invoice.</figcaption></figure>
+  <h3>Edit an invoice</h3>
+  <ol class="steps">
+    <li>Open the invoice and click <span class="ui">Edit</span>.</li>
+    <li>In <b>Work order</b>, open the list and choose the service report this invoice belongs to. Each report shows its <b>number, date and machine</b>.</li>
+    <li>Click <span class="ui">Save invoice</span>.</li>
+  </ol>
+  <figure><img src="../img/32-edit-invoice-workorder.jpg"><figcaption>Service report #0003 selected as the work order.</figcaption></figure>
+  <h3>Record a payment</h3>
+  <p>Under <b>Payments</b>, enter the <b>Amount</b>, <b>Method</b>, <b>Date</b> and a <b>Note</b> (check number, reference…), then click <span class="ui">+ Record payment</span>. The <b>Balance due</b> updates automatically.</p>
+  <figure><img src="../img/33-record-payment.jpg"><figcaption>Recording a payment.</figcaption></figure>
+  <div class="note"><b>Important:</b> payments are not collected in the app. Here you only record what the customer paid (cash, check, Zelle…).</div>
+  <h3>Change the status</h3>
+  <p>Under <b>Status</b>, choose a new status (for example <i>Paid</i>), add an optional note and click <span class="ui">Update status</span>. Every change is saved in the <b>Status history</b> with the date and the person who made it.</p>
+  <figure><img src="../img/34-update-status.jpg"><figcaption>Updating the status and the status history.</figcaption></figure>
+  <h3>Void or delete</h3>
+  <ul>
+    <li><span class="ui">Void invoice</span> cancels the invoice and returns its in-house parts to stock. The invoice stays in the list marked as <b>Void</b>.</li>
+    <li><span class="ui">Delete</span> removes the invoice completely. Write the <b>reason</b> and enter your <b>supervisor PIN</b>. A copy stays in <b>Settings → Activity log</b>.</li>
+  </ul>
+  <figure><img src="../img/36-delete-invoice.jpg"><figcaption>Deleting an invoice requires a reason and your PIN.</figcaption></figure>
+</section>
+
+<!-- ======================= 8 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">08</div><div><h2>Customers</h2><div class="where">Customers</div></div></div>
+  <p>The list shows each customer's contacts, number of reports and last service. Customers typed on the tablets are added automatically.</p>
+  <h3>Import a list</h3>
+  <p>Click <span class="ui">Import Excel / Word</span> to load customers from Excel, CSV, Word, or a photo of a table. Click <span class="ui">Download template</span> to get the format. Duplicates are merged and existing customers are never overwritten.</p>
+  <figure><img src="../img/11-import-customers.jpg"><figcaption>Importing customers.</figcaption></figure>
+  <h3>Add or edit a customer</h3>
+  <ul>
+    <li><span class="ui">+ Add customer</span> creates a customer by hand. Add extra contacts (reports and invoices can be sent to them) and check <b>Frequent customer</b> for regulars.</li>
+    <li>To edit, search the name and click it. Update the details and click <span class="ui">Save</span>.</li>
+  </ul>
+  <figure><img src="../img/12-add-customer.jpg"><figcaption>The Add customer form.</figcaption></figure>
+  <h3>Schedule or bill from the customer card</h3>
+  <p>In the customer card, click <span class="ui">Schedule job</span> to open a new job with the customer's details already filled in, or <span class="ui">New invoice</span> to bill them right away.</p>
+  <figure><img src="../img/41-schedule-from-customer.jpg"><figcaption>Customer card with Delete, Schedule job and New invoice.</figcaption></figure>
+</section>
+
+<!-- ======================= 9 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">09</div><div><h2>Inventory &amp; Equipment</h2><div class="where">Inventory · Equipment</div></div></div>
+  <p><b>Inventory</b> shows every part with its price, quantity in stock, status and the total stock value. Use <span class="ui">+ Add part</span> or <span class="ui">Import Excel / Word</span>, and <span class="ui">Export CSV</span> to download.</p>
+  <figure><img src="../img/13-inventory.jpg"><figcaption>Inventory with stock value and low-stock counters.</figcaption></figure>
+  <p><b>Equipment</b> lists every machine serviced, grouped by serial number. Open one to see all the work done on it.</p>
+  <figure><img src="../img/14-equipment.jpg"><figcaption>Equipment history by serial number.</figcaption></figure>
+</section>
+
+<!-- ======================= 10 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">10</div><div><h2>Statistics</h2><div class="where">Statistics</div></div></div>
+  <p>Choose a period — <span class="ui">This month</span> <span class="ui">Last 30 days</span> <span class="ui">Last 90 days</span> <span class="ui">This year</span> <span class="ui">All time</span> — and, if you want, a <b>Technician</b>.</p>
+  <figure><img src="../img/15-statistics.jpg"><figcaption>Statistics dashboard.</figcaption></figure>
+  <p>You will see service reports, hours worked, signed and completed reports, customers served, parts used, reports per week, top customers, most serviced makes and top parts.</p>
+</section>
+
+<!-- ======================= 11 ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">11</div><div><h2>Settings</h2><div class="where">Settings</div></div></div>
+  <ul>
+    <li><b>Next invoice number</b> — numbers are assigned automatically, in order, so two tablets never get the same number.</li>
+    <li><b>Invoices</b> — default <b>Sales tax (%)</b> and <b>Labor rate per hour (USD)</b> for every new invoice.</li>
+  </ul>
+  <figure><img src="../img/16-settings.jpg"><figcaption>Invoice numbering and defaults.</figcaption></figure>
+  <ul>
+    <li><b>Security &amp; backup</b> — <span class="ui">Download full backup (.sql)</span> or <span class="ui">Export all data (Excel)</span>, and <span class="ui">Change my PIN</span>.</li>
+    <li><b>Activity log</b> — who did what, and when, including deleted reports and invoices.</li>
+  </ul>
+  <figure><img src="../img/17-backup.jpg"><figcaption>Backup options and the activity log.</figcaption></figure>
+  <div class="tip"><b>Best practice:</b> download a full backup regularly and keep it somewhere safe.</div>
+</section>
+
+<!-- ======================= QUICK REFERENCE ======================= -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">✓</div><div><h2>Quick reference</h2><div class="where">The most common tasks at a glance</div></div></div>
+  <table class="qr">
+    <tr><th>I want to…</th><th>Go to</th></tr>
+    <tr><td>Review a report from a technician</td><td>Reports &amp; Jobs → Service reports → click the report number</td></tr>
+    <tr><td>Sign a finished job</td><td>Open the report → Signatures → Sign as supervisor → Accept signature</td></tr>
+    <tr><td>Add a technician</td><td>Employees → + Add employee</td></tr>
+    <tr><td>Schedule a visit</td><td>Jobs &amp; appointments → + New job (or Customers → card → Schedule job)</td></tr>
+    <tr><td>Approve a cancel request</td><td>Jobs &amp; appointments → highlighted job → Approve — cancel the job</td></tr>
+    <tr><td>Quote parts to a customer</td><td>Parts &amp; Orders → request → Send quote to technician</td></tr>
+    <tr><td>Reserve parts after a "yes"</td><td>Parts &amp; Orders → request → Customer said yes — approve &amp; reserve parts</td></tr>
+    <tr><td>Bill a customer</td><td>Invoices → + New invoice (or Create invoice from a report / parts request)</td></tr>
+    <tr><td>Record a payment</td><td>Invoices → invoice → Payments → + Record payment</td></tr>
+    <tr><td>Mark an invoice as paid</td><td>Invoices → invoice → Status → Paid → Update status</td></tr>
+    <tr><td>Cancel an invoice</td><td>Invoices → invoice → Void invoice</td></tr>
+    <tr><td>Add a supplier</td><td>Parts &amp; Orders → Vendors → + Add vendor</td></tr>
+    <tr><td>Back up all data</td><td>Settings → Security &amp; backup → Download full backup</td></tr>
+  </table>
+  <div class="note" style="margin-top:18px"><b>Deleting reports and invoices</b> always asks for a reason and your supervisor PIN, and keeps a copy in the activity log.</div>
+</section>
+
+<div class="back">
+  <img src="../img/cher-logo.png" alt="Cher Services LLC">
+  <h2 style="margin-top:.3in">Supervisor Panel — User Manual</h2>
+  <p>Cher Services LLC</p>
+</div>
+
+</body>
+</html>
