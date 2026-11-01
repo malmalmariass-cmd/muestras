@@ -255,6 +255,13 @@ table.parts .x{background:none;border:0;color:var(--red);font-size:22px;cursor:p
 .hrow ul{margin:6px 0 0;padding-left:18px;font-size:14px}
 .hrow .muted{color:var(--muted);font-size:13px}
 .seg2{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.machask{margin-top:10px;padding:10px 12px;border-radius:12px;background:#f3f7ff;border:1px solid #cfdcf7;font-size:14px}
+.machask b{display:block;margin-bottom:6px;color:var(--navy)}.machask .mc{display:flex;gap:6px;flex-wrap:wrap}
+.machask button{border:1.5px solid #9db6ea;background:#fff;border-radius:10px;padding:7px 10px;font-weight:700;cursor:pointer;text-align:left;font-size:14px}
+.machask button small{display:block;font-weight:500;color:var(--muted);font-size:12px}.machask button.no{border-style:dashed;color:var(--muted)}
+.machask .lk{display:flex;gap:8px;align-items:center}.machask .lk button{padding:2px 8px;border:0;background:none;font-size:18px;color:var(--muted)}
+.rpill{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.03em}.rpill.f{background:#e4edff;color:#1d4fb8}.rpill.e{background:#ddf3e6;color:#0e7a43}
+#histBody h4{margin:14px 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .vcbar{display:flex;gap:8px;flex-wrap:wrap}#vcRec.rec{background:var(--red,#d0021b);border-color:var(--red,#d0021b)}
 .vclive{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fff5f5;border:1px solid #f3c2c2;font-size:15px;min-height:44px;display:flex;gap:10px;align-items:flex-start}
 .vcdot{width:12px;height:12px;border-radius:50%;background:#d0021b;flex:none;margin-top:4px;animation:vcp 1s infinite}@keyframes vcp{50%{opacity:.25}}
@@ -384,6 +391,8 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
           </div>
         </div>
         <div class="office" id="custNote" hidden style="margin-top:10px"></div>
+        <div class="machask" id="custMach" hidden></div>
+        <button type="button" class="histchip" id="custChip" hidden></button>
         <datalist id="custList"></datalist>
       </div>
       <div class="card">
@@ -665,7 +674,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
 <!-- equipment history sheet -->
 <div class="sheet" id="histSheet" hidden>
   <div class="pn">
-    <div class="hd"><h3 data-t="equipHistory">Equipment history</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
+    <div class="hd"><h3 data-t="equipHistory">Related reports</h3><button class="btn s" type="button" data-close data-t="close">Close</button></div>
     <p class="sub" id="histSub"></p>
     <div id="histBody"></div>
   </div>
@@ -756,7 +765,9 @@ const I18N = {
     newJobHint: 'Schedule a visit for yourself (for example a follow-up or a customer who called).', saveJob: 'Save job', jobSaved: 'Job saved',
     startReport: 'Start report', openReport: 'Open report', today: 'Today', tomorrow: 'Tomorrow', overdue: 'Overdue', noJobs: 'No jobs assigned. New jobs from the office appear here.',
     st_scheduled: 'Scheduled', st_in_progress: 'In progress', st_done: 'Done', st_cancelled: 'Cancelled', jobFrom: 'Job for {cust} · {d}', repeats: 'Repeats',
-    equipHistory: 'Equipment history', prevServices: '🛠 {n} previous service(s) — view', noHistory: 'No previous services for this serial number.', histFor: 'Serial {s}',
+    custReports: '📋 {n} other report(s) of this customer — view', thisMachine: 'This machine', otherCust: 'Other reports of {c}', whichMachine: 'Is it one of these machines of {c}?',
+    machInfo: '{n} report(s) · last {d}', otherMachine: 'Another machine', sameAs: 'Same machine as report #{n} {m}', linkedMachine: 'Linked to the machine of report #{n}',
+    equipHistory: 'Related reports', prevServices: '🛠 {n} previous service(s) — view', noHistory: 'No other reports of this machine yet.', histFor: 'Serial {s}',
     partsUsed: 'Parts', repairDone: 'Repair completed', repairNotDone: 'Not completed',
     loginHint: 'Sign in with your Employee ID and PIN', employeeIdPh: 'Employee ID', signIn: 'Sign in', enterTip: 'Tip: press Enter to sign in', noNetLogin: 'No internet connection. To sign in without internet, first sign in once WITH internet on this device.',
     sessionEnded: 'Your session ended. Please sign in again.', sessionIdle: 'Your session was closed after 2 hours without use. Sign in again.', pendingSignOut: '{n} report(s) have not reached the office yet. They stay on this tablet and will sync next time you sign in. Sign out?',
@@ -834,7 +845,9 @@ const I18N = {
     newJobHint: 'Agenda una visita para ti (por ejemplo, un seguimiento o un cliente que llamó).', saveJob: 'Guardar trabajo', jobSaved: 'Trabajo guardado',
     startReport: 'Iniciar reporte', openReport: 'Abrir reporte', today: 'Hoy', tomorrow: 'Mañana', overdue: 'Atrasados', noJobs: 'No tienes trabajos asignados. Los trabajos nuevos de la oficina aparecerán aquí.',
     st_scheduled: 'Programado', st_in_progress: 'En proceso', st_done: 'Terminado', st_cancelled: 'Cancelado', jobFrom: 'Trabajo de {cust} · {d}', repeats: 'Se repite',
-    equipHistory: 'Historial del equipo', prevServices: '🛠 {n} servicio(s) anterior(es) — ver', noHistory: 'No hay servicios anteriores para este número de serie.', histFor: 'Serie {s}',
+    custReports: '📋 {n} reporte(s) más de este cliente — ver', thisMachine: 'Esta máquina', otherCust: 'Otros reportes de {c}', whichMachine: '¿Es una de estas máquinas de {c}?',
+    machInfo: '{n} reporte(s) · último {d}', otherMachine: 'Otra máquina', sameAs: 'Misma máquina que el reporte #{n} {m}', linkedMachine: 'Enlazado a la máquina del reporte #{n}',
+    equipHistory: 'Reportes relacionados', prevServices: '🛠 {n} servicio(s) anterior(es) — ver', noHistory: 'Todavía no hay otros reportes de esta máquina.', histFor: 'Serie {s}',
     partsUsed: 'Repuestos', repairDone: 'Reparación completada', repairNotDone: 'No completada',
     loginHint: 'Entra con tu ID de empleado y PIN', employeeIdPh: 'ID de empleado', signIn: 'Entrar', enterTip: 'Consejo: presiona Enter para entrar', noNetLogin: 'Sin internet. Para entrar sin internet, primero inicia sesión UNA vez CON internet en este equipo.',
     sessionEnded: 'Tu sesión terminó. Vuelve a entrar.', sessionIdle: 'Tu sesión se cerró tras 2 horas sin uso. Vuelve a entrar.', pendingSignOut: '{n} reporte(s) aún no llegan a la oficina. Se quedan en la tablet y se enviarán cuando vuelvas a entrar. ¿Salir?',
@@ -1001,7 +1014,7 @@ function render() {
   customerCheck(); renderTime(); renderFaults(); renderServices(); renderParts(); renderJobStatus(); renderSigs(); updateStatus(); renderOffice(); renderJobBanner();
   requestAnimationFrame(() => $$('#viewForm textarea.grow').forEach(grow));
   renderLock(); renderCode(); renderFollowups(); renderVoice();
-  histState = { serial: null, list: [] }; $('#histChip').hidden = true; checkHistory();
+  histState = { key: null, machine: [], customer: [] }; $('#histChip').hidden = $('#custChip').hidden = true; checkHistory(); machineAsk();
 }
 /* A report the customer signed is locked for the technician 1 hour later (the server decides, and keeps the office copy).
    To change it, the technician asks; the supervisor approves (the report opens for 24 hours) or declines. */
@@ -1018,7 +1031,7 @@ function renderLock() {
   const lk = isLocked(report), bar = $('#lockBar');
   $('#viewForm').classList.toggle('locked', lk);
   // parts can still be requested and the machine's history looked at; the report itself is read-only
-  $$('#viewForm input, #viewForm textarea, #viewForm select, #viewForm .card button').forEach(el => { if (!['invoiceNo', 'addPart', 'histChip', 'fuBtn'].includes(el.id)) el.disabled = lk; });
+  $$('#viewForm input, #viewForm textarea, #viewForm select, #viewForm .card button').forEach(el => { if (!['invoiceNo', 'addPart', 'histChip', 'custChip', 'fuBtn'].includes(el.id)) el.disabled = lk; });
   $('#btnSave').hidden = lk;
   const c = report.changeReq, open = !isSup() && report.unlockedUntil && Date.now() < Date.parse(report.unlockedUntil);
   if (!lk && !open) { bar.hidden = true; return; }
@@ -1070,7 +1083,8 @@ document.addEventListener('input', e => {
   const k = e.target.dataset?.k; if (!k) return;
   report[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
   if (e.target.type === 'checkbox') e.target.closest('.chk')?.classList.toggle('on', e.target.checked);
-  if (k === 'serialNo') checkHistory();
+  if (['serialNo', 'customerName', 'make', 'model'].includes(k)) checkHistory();
+  if (k === 'customerName' || k === 'serialNo') machineAsk();
   if (k === 'customerName' || CUST_FIELDS.some(([f]) => f === k)) customerCheck();
   markDirty();
 });
@@ -1182,18 +1196,17 @@ $$('.sheet').forEach(sh => { sh.addEventListener('click', e => { if (e.target ==
 
 /* ---------------- voice notes: the technician talks during the job, then the report fills itself ----------------
    Speech → text: the browser's own speech recognition (Chrome; needs signal). Each recording is a separate note.
-   Notes → report: with the office's Claude key (api voice_fill) the notes are understood in plain words; without it,
-   or without internet, the app reads key words (customer, serial, hours, fault, correction…). Whatever has no
-   field goes to Technician notes. The technician checks every change before it is applied. */
+   Notes → report: the app reads key words in English or Spanish (customer, serial, hours, fault, correction…), on the
+   tablet, without internet. Whatever has no field goes to Technician notes. The technician checks every change first. */
 Object.assign(I18N.en, {
   vcTitle: '🎙 Voice notes', vcRec: 'Record a note', vcStop: 'Stop and save the note', vcWrite: 'Write a note', vcFill: 'Fill the report with the notes',
   vcHint: 'Talk while you work: each recording is a separate note. When you finish, tap “Fill the report” — the fields fill themselves and what has no place goes to Technician notes. You check everything before it is applied.',
   vcHelpT: 'Words the app understands (no internet needed)', vcListening: 'Listening… talk now', vcNoSR: 'This browser cannot turn speech into text. Use Chrome, or write the note.',
   vcMic: 'The microphone is blocked. Allow it for this site in Chrome (🔒 next to the address).', vcNet: 'Turning speech into text needs internet. Write the note instead, or try again with signal.',
   vcEmpty: 'Nothing was heard — the note was not saved.', vcSaved: 'Note saved', vcNoteN: 'Note {n}', vcUsed: 'used', vcNone: 'Record or write a note first.',
-  vcReview: 'Check before filling the report', vcApply: 'Fill the report', vcHowAI: 'Read by Claude from {n} notes. Fields that already had something are not changed.',
-  vcHowKW: 'Read from key words in {n} notes. Fields that already had something are not changed.', vcAIfail: 'Smart reading not available ({e}) — using key words.',
-  vcNothing: 'No new information for the report. The notes went to Technician notes.', vcDone: 'Report filled from the voice notes — check it before signing.', vcReading: 'Reading the notes…',
+  vcReview: 'Check before filling the report', vcApply: 'Fill the report',
+  vcHowKW: 'Read from key words in {n} notes. Fields that already had something are not changed.',
+  vcNothing: 'No new information for the report. The notes went to Technician notes.', vcDone: 'Report filled from the voice notes — check it before signing.',
   vcF_customerName: 'Customer', vcF_location: 'Location', vcF_make: 'Make', vcF_model: 'Model', vcF_serialNo: 'Serial no.', vcF_hour: 'Hours', vcF_time: 'Time record',
   vcF_faults: 'Fault', vcF_services: 'Service done', vcF_status: 'Job status', vcF_notes: 'Technician notes', vcWritePh: 'Write what you did, found or need…',
 });
@@ -1203,14 +1216,14 @@ Object.assign(I18N.es, {
   vcHelpT: 'Palabras que la app entiende (sin internet)', vcListening: 'Escuchando… habla ahora', vcNoSR: 'Este navegador no convierte la voz en texto. Usa Chrome, o escribe la nota.',
   vcMic: 'El micrófono está bloqueado. Permítelo para este sitio en Chrome (🔒 junto a la dirección).', vcNet: 'Convertir la voz en texto necesita internet. Escribe la nota, o vuelve a intentar con señal.',
   vcEmpty: 'No se escuchó nada — la nota no se guardó.', vcSaved: 'Nota guardada', vcNoteN: 'Nota {n}', vcUsed: 'usada', vcNone: 'Primero graba o escribe una nota.',
-  vcReview: 'Revisa antes de llenar el reporte', vcApply: 'Llenar el reporte', vcHowAI: 'Leído por Claude de {n} notas. Los campos que ya tenían algo no se cambian.',
-  vcHowKW: 'Leído por palabras clave de {n} notas. Los campos que ya tenían algo no se cambian.', vcAIfail: 'Lectura inteligente no disponible ({e}) — se usan palabras clave.',
-  vcNothing: 'No hay información nueva para el reporte. Las notas pasaron a Notas del técnico.', vcDone: 'Reporte llenado con las notas de voz — revísalo antes de firmar.', vcReading: 'Leyendo las notas…',
+  vcReview: 'Revisa antes de llenar el reporte', vcApply: 'Llenar el reporte',
+  vcHowKW: 'Leído por palabras clave de {n} notas. Los campos que ya tenían algo no se cambian.',
+  vcNothing: 'No hay información nueva para el reporte. Las notas pasaron a Notas del técnico.', vcDone: 'Reporte llenado con las notas de voz — revísalo antes de firmar.',
   vcF_customerName: 'Cliente', vcF_location: 'Ubicación', vcF_make: 'Marca', vcF_model: 'Modelo', vcF_serialNo: 'Número de serie', vcF_hour: 'Horas', vcF_time: 'Registro de horas',
   vcF_faults: 'Falla', vcF_services: 'Servicio hecho', vcF_status: 'Estado del trabajo', vcF_notes: 'Notas del técnico', vcWritePh: 'Escribe lo que hiciste, encontraste o necesitas…',
 });
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let vcLang = LS.get('cher.voiceLang', LANG), vcRecog = null, vcOn = false, vcFinal = '', vcAI = null;
+let vcLang = LS.get('cher.voiceLang', LANG), vcRecog = null, vcOn = false, vcFinal = '';
 function renderVoice() {
   $$('#vcLang button').forEach(b => b.classList.toggle('on', b.dataset.l === vcLang));
   const list = report.voiceNotes || [], box = $('#vcList'); box.innerHTML = '';
@@ -1334,7 +1347,7 @@ $('#vcHelp').innerHTML = (() => {
        ['falla … corrección …', 'falla fuga en la manguera del brazo corrección cambié la manguera y probé'], ['servicio …', 'servicio cambio de aceite (equipo)'], ['partes …', 'partes 2 filtros hidráulicos'], ['estado …', 'estado esperando partes / completo'], ['fecha …', 'fecha hoy / ayer / 10/28']]
     : [['customer …', 'customer ACME Corp'], ['make / model …', 'make Caterpillar model 320'], ['serial …', 'serial CAT0320X1234'], ['hours …', 'hours 1250'], ['left / started / finished …', 'left 7:30, started 8:15, finished 11:40'], ['mileage …', 'mileage 22'],
        ['fault … correction …', 'fault hose leaking on the boom correction replaced the hose and tested'], ['service …', 'service change engine oil (maintenance)'], ['parts …', 'parts 2 hydraulic filters'], ['status …', 'status awaiting parts / complete'], ['date …', 'date today / yesterday / 10/28']];
-  return `<table>${rows.map(r => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td></tr>`).join('')}</table><div style="margin-top:6px">${esc(es ? 'Todo lo demás va a Notas del técnico. Con la clave de Claude en el servidor no hacen falta palabras clave: habla normal.' : 'Everything else goes to Technician notes. With the Claude key on the server no key words are needed: just talk normally.')}</div>`;
+  return `<table>${rows.map(r => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td></tr>`).join('')}</table><div style="margin-top:6px">${esc(es ? 'Todo lo demás va a Notas del técnico.' : 'Everything else goes to Technician notes.')}</div>`;
 })();
 
 /* the fields read from the notes → the changes proposed to the report (only empty fields are filled) */
@@ -1377,27 +1390,14 @@ function vcPlan(f) {
   if (add) { r.notes = [String(r.notes || '').trim(), add].filter(Boolean).join('\n'); ch.push([t('vcF_notes'), add]); }
   return { r, ch };
 }
-$('#vcFill').onclick = async () => {
+$('#vcFill').onclick = () => {
   if (vcOn) vcStop();
   const all = (report.voiceNotes || []).filter(n => n.text.trim()), notes = all.some(n => !n.used) ? all.filter(n => !n.used) : all;
   if (!notes.length) { toast(t('vcNone')); return; }
-  const btn = $('#vcFill'); btn.disabled = true; toast(t('vcReading'));
-  let f = null, how = 'vcHowKW';
-  try {
-    if (navigator.onLine && session && !session.offline) {
-      if (vcAI === null) vcAI = await api('voice_status').then(j => !!j.enabled).catch(() => false);
-      if (vcAI) {
-        const ctx = { type: report.type, invoiceNo: report.invoiceNo, customerName: report.customerName, make: report.make, model: report.model, serialNo: report.serialNo, instructions: report.instructions, services: report.type === 'maintenance' ? report.services.map(s => s.name) : [] };
-        try { f = (await api('voice_fill', { notes: notes.map(n => ({ text: n.text, at: new Date(n.at).toLocaleString('en-US') })), report: ctx, lang: 'en' })).fields; how = 'vcHowAI'; }
-        catch (e) { toast(t('vcAIfail', { e: e.message })); }
-      }
-    }
-    if (!f) f = vcKeywords(notes);
-    vcPending = { ...vcPlan(f), ids: notes.map(n => n.id) };
-    $('#vcHow').textContent = t(how, { n: notes.length });
-    $('#vcChanges').innerHTML = vcPending.ch.map(([a, b]) => `<div class="vcch"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('') || `<div class="hint">${esc(t('vcNothing'))}</div>`;
-    openSheet('#vcSheet');
-  } finally { btn.disabled = false; }
+  vcPending = { ...vcPlan(vcKeywords(notes)), ids: notes.map(n => n.id) };
+  $('#vcHow').textContent = t('vcHowKW', { n: notes.length });
+  $('#vcChanges').innerHTML = vcPending.ch.map(([a, b]) => `<div class="vcch"><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('') || `<div class="hint">${esc(t('vcNothing'))}</div>`;
+  openSheet('#vcSheet');
 };
 $('#vcApply').onclick = () => {
   if (!vcPending) return;
@@ -2020,32 +2020,71 @@ $('#sharePdfBtn').onclick = async () => {
 };
 
 /* ---------------- equipment history ---------------- */
-let histState = { serial: null, list: [] }, histT;
+let histState = { key: null, machine: [], customer: [] }, histT;
+/* other reports of this machine (same serial, linked as the same machine, or same make + model for this customer)
+   and the rest of this customer's reports: chips on the serial number and on the customer, one sheet with both */
 function checkHistory(rerender) {
-  if (rerender) { if (histState.list.length) showHistChip(); return; }
+  if (rerender) { showHistChip(); return; }
   clearTimeout(histT);
   histT = setTimeout(async () => {
-    const s = (report.serialNo || '').replace(/[\s.\-]/g, '').toUpperCase();
-    if (s.length < 4) { $('#histChip').hidden = true; histState = { serial: null, list: [] }; return; }
-    if (s === histState.serial) return;
-    try {
-      const j = await api('equipment_history', { serial: report.serialNo, excludeId: report.id });
-      histState = { serial: s, list: j.history }; showHistChip();
-    } catch { /* offline: no hint */ }
+    const q = { id: report.id, serial: report.serialNo || '', customer: (report.customerName || '').trim(), make: report.make || '', model: report.model || '' };
+    const key = JSON.stringify([q.serial.replace(/[\s.\-]/g, '').toUpperCase(), q.customer.toLowerCase(), q.make, q.model, (report.links || []).join()]);
+    if (!q.customer && q.serial.replace(/[\s.\-]/g, '').length < 4) { histState = { key: null, machine: [], customer: [] }; showHistChip(); return; }
+    if (key === histState.key) return;
+    try { const j = await api('related_reports', q); histState = { key, machine: j.machine, customer: j.customer }; showHistChip(); }
+    catch { /* offline: no hint */ }
   }, 700);
 }
-function showHistChip() { const c = $('#histChip'); c.hidden = !histState.list.length; c.textContent = t('prevServices', { n: histState.list.length }); }
-$('#histChip').onclick = () => {
-  $('#histSub').textContent = t('histFor', { s: report.serialNo }) + (report.make || report.model ? ' · ' + [report.make, report.model].filter(Boolean).join(' ') : '');
-  $('#histBody').innerHTML = histState.list.length ? histState.list.map(h => `<div class="hrow">
-    <div class="t1"><b>#${esc(h.invoiceNo)}</b><span>${fmtD(h.date)}</span><span class="pill ${h.status === 'complete' ? 'ok' : h.status ? 'warn' : ''}">${esc(h.status ? t('st_job_' + h.status) : '—')}</span>${h.type === 'maintenance' ? `<span class="pill">${esc(t('typeMaint'))}</span>` : ''}
-      <span class="muted">${esc(h.tech || '')} · ${esc(h.customer || '')}${h.hour ? ' · ' + esc(h.hour) + ' h' : ''}</span></div>
+function showHistChip() {
+  const m = histState.machine?.length || 0, c = histState.customer?.length || 0;
+  $('#histChip').hidden = !m; $('#histChip').textContent = t('prevServices', { n: m });
+  $('#custChip').hidden = !c; $('#custChip').textContent = t('custReports', { n: c });
+}
+const relRow = h => `<div class="hrow">
+    <div class="t1"><span class="rpill ${h.type === 'maintenance' ? 'e' : 'f'}">${esc(t(h.type === 'maintenance' ? 'tabMaint' : 'tabReport'))}</span><b>#${esc(h.invoiceNo)}</b><span>${fmtD(h.date)}</span><span class="pill ${h.status === 'complete' ? 'ok' : h.status ? 'warn' : ''}">${esc(h.status ? t('st_job_' + h.status) : '—')}</span>${h.how === 'linked' ? '<span class="pill">🔗</span>' : ''}
+      <span class="muted">${esc(h.tech || '')} · ${esc([h.make, h.model].filter(Boolean).join(' '))}${h.serial ? ' · S/N ' + esc(h.serial) : ''}${h.hour ? ' · ' + esc(h.hour) + ' h' : ''}</span></div>
     ${h.faults.length ? `<ul>${h.faults.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}
     ${h.correction ? `<div style="margin-top:6px;font-size:14px;white-space:pre-wrap">${esc(h.correction)}</div>` : ''}
     ${(h.services || []).length ? `<div style="margin-top:6px;font-size:14px">✓ ${esc(h.services.join(', '))}</div>` : ''}
     ${h.parts.length ? `<div class="muted" style="margin-top:6px">${esc(t('partsUsed'))}: ${esc(h.parts.join(', '))}</div>` : ''}
-  </div>`).join('') : `<div class="empty">${esc(t('noHistory'))}</div>`;
+    ${h.notes ? `<div class="muted" style="margin-top:6px;white-space:pre-wrap">${esc(h.notes)}</div>` : ''}
+  </div>`;
+function openHist() {
+  $('#histSub').textContent = [report.customerName, [report.make, report.model].filter(Boolean).join(' '), report.serialNo && t('histFor', { s: report.serialNo })].filter(Boolean).join(' · ');
+  const m = histState.machine || [], c = histState.customer || [];
+  $('#histBody').innerHTML = `<h4>${esc(t('thisMachine'))} (${m.length})</h4>` + (m.map(relRow).join('') || `<div class="empty">${esc(t('noHistory'))}</div>`)
+    + (c.length ? `<h4>${esc(t('otherCust', { c: report.customerName || '' }))} (${c.length})</h4>` + c.map(relRow).join('') : '');
   openSheet('#histSheet');
+}
+$('#histChip').onclick = openHist; $('#custChip').onclick = openHist;
+
+/* "is it one of these machines?": when the customer is chosen and there is no serial yet, the app offers the machines
+   of that customer seen in earlier reports; choosing one fills make / model / serial and links the reports */
+let machT, machFor = null;
+function machineAsk() {
+  clearTimeout(machT);
+  machT = setTimeout(async () => {
+    const box = $('#custMach'), name = (report.customerName || '').trim();
+    if (report.links?.length) { box.hidden = false; box.innerHTML = `<div class="lk">🔗 <span>${esc(t('sameAs', { n: report.linkInfo?.no || '', m: report.linkInfo?.label || '' }))}</span><button type="button" data-unlink title="×">×</button></div>`; return; }
+    if (!name || (report.serialNo || '').trim() || report.machineAsked === name || isLocked(report) || !navigator.onLine) { box.hidden = true; return; }
+    try {
+      const j = await api('customer_machines', { customer: name });
+      if ((report.customerName || '').trim() !== name || (report.serialNo || '').trim() || report.links?.length) return;
+      const ms = j.machines.filter(m => !(m.lastId === report.id && m.reports === 1)); machFor = ms;
+      if (!ms.length) { box.hidden = true; return; }
+      box.hidden = false;
+      box.innerHTML = `<b>🚜 ${esc(t('whichMachine', { c: name }))}</b><div class="mc">${ms.map((m, i) => `<button type="button" data-m="${i}">${esc([m.make, m.model].filter(Boolean).join(' ') || '—')}${m.serial ? ' · S/N ' + esc(m.serial) : ''}<small>${esc(t('machInfo', { n: m.reports, d: fmtD(m.lastDate) }))}</small></button>`).join('')}<button type="button" class="no" data-m="no">${esc(t('otherMachine'))}</button></div>`;
+    } catch { box.hidden = true; }
+  }, 600);
+}
+$('#custMach').onclick = e => {
+  if (e.target.closest('[data-unlink]')) { report.links = []; report.linkInfo = null; report.machineAsked = null; markDirty(); machineAsk(); checkHistory(); return; }
+  const b = e.target.closest('[data-m]'); if (!b) return;
+  if (b.dataset.m === 'no') { report.machineAsked = (report.customerName || '').trim(); markDirty(); $('#custMach').hidden = true; return; }
+  const m = machFor[+b.dataset.m]; if (!m) return;
+  for (const [k, v] of [['make', m.make], ['model', m.model], ['serialNo', m.serial]]) if (v && !(report[k] || '').trim()) report[k] = v;
+  report.links = [m.lastId]; report.linkInfo = { no: m.lastNo, label: [m.make, m.model].filter(Boolean).join(' ') };
+  markDirty(); render(); toast(t('linkedMachine', { n: m.lastNo }));
 };
 
 /* ---------------- jobs ---------------- */
@@ -2338,7 +2377,7 @@ async function renderHist() {
     const signed = r.sigs?.customer?.img;
     d.innerHTML = `<div class="no">#${esc(r.invoiceNo || '····')}</div>
       <div class="info"><b></b><small></small></div>
-      ${r.type === 'maintenance' ? `<span class="pill warn">${esc(t('typeMaint'))}</span>` : ''}<span class="pill ${signed ? 'ok' : ''}">${esc(signed ? t('signed') : t('unsigned'))}</span>
+      <span class="rpill ${r.type === 'maintenance' ? 'e' : 'f'}">${esc(t(r.type === 'maintenance' ? 'tabMaint' : 'tabReport'))}</span><span class="pill ${signed ? 'ok' : ''}">${esc(signed ? t('signed') : t('unsigned'))}</span>
       <span class="pill ${r.synced ? 'ok' : ''}">${esc(r.synced ? t('inOffice') : t('pendingSync'))}</span>
       <div class="acts"><button class="btn s" data-a="open">${esc(t('open'))}</button><button class="btn p" data-a="pdf">PDF</button><button class="btn s" data-a="dup">${esc(t('copy'))}</button>${isSup() ? `<button class="btn d" data-a="del">` : '<button hidden>'}${esc(t('remove'))}</button></div>`;
     d.querySelector('b').textContent = r.customerName || t('noCustomer');

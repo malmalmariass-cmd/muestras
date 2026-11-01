@@ -41,6 +41,18 @@ main{max-width:1280px;margin:0 auto;padding:20px}
 h1{font-size:22px;margin:0 0 4px}
 .sub{color:var(--muted);margin:0 0 16px;font-size:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+/* the two kinds of report: Field Service (repairs, blue 🔧) and Equipment Service (maintenance, green ⚙) */
+.rt{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.rt.f{background:#e4edff;color:#1d4fb8}.rt.e{background:#ddf3e6;color:#0e7a43}
+tr.rt-f td:first-child{box-shadow:inset 4px 0 #2f6fdc}tr.rt-e td:first-child{box-shadow:inset 4px 0 #17a35e}
+.rtchips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.rtchips button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-weight:700;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.rtchips button b{background:#eef1f6;border-radius:999px;padding:1px 8px;font-size:12px}.rtchips button.on{border-color:var(--navy);background:var(--navy);color:#fff}.rtchips button.on b{background:rgba(255,255,255,.2)}
+.rtchips button[data-t="repair"].on{background:#1d4fb8;border-color:#1d4fb8}.rtchips button[data-t="maintenance"].on{background:#0e7a43;border-color:#0e7a43}
+.drawer.rt-f .dh{border-top:6px solid #2f6fdc}.drawer.rt-e .dh{border-top:6px solid #17a35e}
+.rel h4{margin:12px 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.rel .ri{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:7px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;background:#fff}
+.rel .ri:hover{border-color:var(--navy)}.rel .ri .eq{flex-basis:100%}.rel .ri .x{margin-left:auto;border:0;background:none;color:var(--muted);font-size:16px;cursor:pointer}
+.rel .how{font-size:11px;color:var(--muted);font-weight:700}
 .team{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .tm{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
 .tm .hd{display:flex;align-items:center;gap:8px;justify-content:space-between}.tm .hd b{font-size:16px}
@@ -285,12 +297,13 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
       <div class="f grow"><label>Search</label><input id="fQ" placeholder="Invoice, customer, serial, model, work order…"></div>
       <div class="f"><label>Technician</label><select id="fTech"><option value="">All</option></select></div>
       <div class="f"><label>Status</label><select id="fStatus"><option value="">All</option><option value="to_sign">Waiting for my signature</option><option value="approved">Approved (all signed)</option><option value="signed">Customer signed</option><option value="unsigned">Customer not signed</option><option value="completed">Complete</option><option value="open">Not complete</option><option value="in_progress">Job in progress</option><option value="awaiting_parts">Awaiting parts</option><option value="follow_up">Follow up repair</option><option value="return_client">Return to client</option></select></div>
-      <div class="f"><label>Type</label><select id="fType"><option value="">All reports</option><option value="repair">Service report (repairs)</option><option value="maintenance">Equipment service report</option></select></div>
+      <div class="f"><label>Type</label><select id="fType"><option value="">All reports</option><option value="repair">🔧 Field Service Report (repairs)</option><option value="maintenance">⚙ Equipment Service Report (maintenance)</option></select></div>
       <div class="f"><label>From</label><input id="fFrom" type="date"></div>
       <div class="f"><label>To</label><input id="fTo" type="date"></div>
       <button class="btn s" id="fClear">Clear</button>
       <button class="btn s" id="csv">Export CSV</button>
     </div>
+    <div class="rtchips" id="rtChips"><button type="button" data-t="">All reports <b>—</b></button><button type="button" data-t="repair">🔧 Field Service Reports <b>—</b></button><button type="button" data-t="maintenance">⚙ Equipment Service Reports <b>—</b></button></div>
     <div class="card" style="padding:0">
       <div class="tablewrap">
         <table class="t">
@@ -1073,20 +1086,32 @@ document.addEventListener('click', e => { const g = e.target.closest('.subtabs.g
 
 /* ---------------- reports ---------------- */
 let page = 0; const PER = 50; let lastRows = [];
+const rtBadge = t => t === 'maintenance' ? '<span class="rt e" title="Equipment Service Report (maintenance)">⚙ Equipment Service</span>' : '<span class="rt f" title="Field Service Report (repairs)">🔧 Field Service</span>';
+const rtName = t => t === 'maintenance' ? 'Equipment Service Report' : 'Field Service Report';
 const filt = () => ({ q: $('#fQ').value, employeeId: $('#fTech').value, status: $('#fStatus').value, type: $('#fType').value, from: $('#fFrom').value, to: $('#fTo').value });
 const JS_LBL = { in_progress: 'Job in progress', awaiting_parts: 'Awaiting parts', follow_up: 'Follow up repair', return_client: 'Return to client', complete: 'Complete' };
 /* who signed: Technician, Customer, Supervisor — the job is complete when the supervisor signs */
 const sigChips = r => [['T', 'Technician', r.tech_signed], ['C', 'Customer', r.customer_signed], ['S', 'Supervisor', r.sup_signed]]
   .map(([k, n, on]) => `<span class="tag ${+on ? 'ok' : k === 'S' ? 'warn' : 'off'}" title="${n}: ${+on ? 'signed' : 'not signed'}">${+on ? '✓' : '✗'} ${k}</span>`).join(' ');
 const jsTag = k => k ? `<span class="tag ${k === 'complete' ? 'ok' : k === 'awaiting_parts' ? 'warn' : 'info'}">${k === 'complete' ? '✓ ' : ''}${JS_LBL[k] || k}</span>` : '<span class="tag off">—</span>';
+/* quick filter by kind of report, with how many there are of each (with the other filters applied) */
+let rtCT = 0;
+async function rtCounts() {
+  const my = ++rtCT, f = filt(); delete f.type;
+  try {
+    const [all, fr, er] = await Promise.all(['', 'repair', 'maintenance'].map(type => api('reports_list', { ...f, type, limit: 1, offset: 0 })));
+    if (my !== rtCT) return;
+    $$('#rtChips button').forEach(b => { b.classList.toggle('on', b.dataset.t === $('#fType').value); b.querySelector('b').textContent = fmtN({ '': all, repair: fr, maintenance: er }[b.dataset.t].total); });
+  } catch {}
+}
 async function loadReports() {
   try {
     const j = await api('reports_list', { ...filt(), limit: PER, offset: page * PER });
     lastRows = j.rows;
     const tb = $('#repBody');
     if (!j.rows.length) tb.innerHTML = `<tr><td colspan="8" class="empty">${j.total ? '' : 'No reports match these filters.'}</td></tr>`;
-    else tb.innerHTML = j.rows.map(r => `<tr data-id="${esc(r.id)}">
-      <td class="inv">#${docNo(r.invoice_no)}<div class="eq" style="font-weight:600">${esc(`${custInitials(r.customer_name)}-${docNo(r.invoice_no)}-${String(r.job_date || '').replace(/-/g, '')}`)}</div>${r.report_type === 'maintenance' ? '<div class="eq" style="font-weight:600">Equipment service</div>' : ''}</td>
+    else tb.innerHTML = j.rows.map(r => `<tr data-id="${esc(r.id)}" class="${r.report_type === 'maintenance' ? 'rt-e' : 'rt-f'}">
+      <td class="inv">#${docNo(r.invoice_no)}<div class="eq" style="font-weight:600">${esc(`${custInitials(r.customer_name)}-${docNo(r.invoice_no)}-${String(r.job_date || '').replace(/-/g, '')}`)}</div><div style="margin-top:4px">${rtBadge(r.report_type)}</div></td>
       <td>${fmtD(r.job_date)}</td>
       <td><b>${esc(r.customer_name || '—')}</b>${r.work_order ? `<div class="eq">WO ${esc(r.work_order)}</div>` : ''}</td>
       <td class="hide-sm eq">${esc([r.make, r.model].filter(Boolean).join(' ') || '—')}${r.serial_no ? `<div>S/N ${esc(r.serial_no)}</div>` : ''}</td>
@@ -1096,11 +1121,13 @@ async function loadReports() {
       <td class="hide-sm">${+r.tech_signed && +r.customer_signed && +r.sup_signed ? '<span class="tag ok" title="Technician, customer and supervisor signed">✔ Approved</span> ' : ''}${jsTag(r.job_status || (r.repair_completed === 'yes' ? 'complete' : ''))}</td></tr>`).join('');
     const a = j.total ? page * PER + 1 : 0, b = Math.min(j.total, (page + 1) * PER);
     $('#pgInfo').textContent = `${a}–${b} of ${fmtN(j.total)} reports`;
+    rtCounts();
     $('#pgPrev').disabled = page === 0; $('#pgNext').disabled = b >= j.total;
   } catch (e) { toast(e.message); }
 }
 $('#repBody').onclick = e => { const tr = e.target.closest('tr[data-id]'); if (tr) openReport(tr.dataset.id); };
 let fT; ['#fQ', '#fTech', '#fStatus', '#fType', '#fFrom', '#fTo'].forEach(s => $(s).addEventListener('input', () => { clearTimeout(fT); fT = setTimeout(() => { page = 0; loadReports(); }, 250); }));
+$('#rtChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; $('#fType').value = b.dataset.t; page = 0; loadReports(); };
 $('#fClear').onclick = () => { ['#fQ', '#fTech', '#fStatus', '#fType', '#fFrom', '#fTo'].forEach(s => $(s).value = ''); page = 0; loadReports(); };
 $('#pgPrev').onclick = () => { page--; loadReports(); };
 $('#pgNext').onclick = () => { page++; loadReports(); };
@@ -1113,7 +1140,7 @@ $('#csv').onclick = async () => {
     while (rows.length < j.total && off < 5000) { const k = await api('reports_list', { ...filt(), limit: 200, offset: off }); rows = rows.concat(k.rows); off += 200; }
     const head = ['Invoice', 'Job date', 'Work order', 'Customer', 'Make', 'Model', 'Serial No.', 'Technician', 'Hours', 'Mileage', 'Customer signed', 'Status', 'Type', 'Last update'];
     const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const csv = [head.map(q).join(',')].concat(rows.map(r => [docNo(r.invoice_no), r.job_date, r.work_order, r.customer_name, r.make, r.model, r.serial_no, r.tech_name, r.hours, r.mileage, +r.customer_signed ? 'Yes' : 'No', JS_LBL[r.job_status] || r.repair_completed, r.report_type === 'maintenance' ? 'Equipment service' : 'Service report', r.updated_at].map(q).join(','))).join('\r\n');
+    const csv = [head.map(q).join(',')].concat(rows.map(r => [docNo(r.invoice_no), r.job_date, r.work_order, r.customer_name, r.make, r.model, r.serial_no, r.tech_name, r.hours, r.mileage, +r.customer_signed ? 'Yes' : 'No', JS_LBL[r.job_status] || r.repair_completed, rtName(r.report_type), r.updated_at].map(q).join(','))).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv' })); a.download = `cher-reports-${iso(new Date())}.csv`; a.click();
   } catch (e) { toast(e.message); }
 };
@@ -1146,7 +1173,8 @@ document.addEventListener('click', async e => {
 async function openReport(id) {
   try {
     const j = await api('report_get', { id }); openR = j.report; const r = j.report; openRReqs = j.requests || [];
-    $('#dTitle').textContent = `${r.type === 'maintenance' ? 'Equipment service' : 'Report'} #${r.invoiceNo} · ${r.customerName || 'No customer'}`;
+    $('#dTitle').innerHTML = `${rtBadge(r.type)} <span>${esc(rtName(r.type))} #${esc(r.invoiceNo)} · ${esc(r.customerName || 'No customer')}</span>`;
+    $('#drawer').classList.toggle('rt-e', r.type === 'maintenance'); $('#drawer').classList.toggle('rt-f', r.type !== 'maintenance');
     const kv = (pairs) => `<dl class="kv">${pairs.filter(p => p[1]).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
     const fmtT = t => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; };
     const time = (r.time || []).filter(t => t && Object.values(t).some(Boolean));
@@ -1158,9 +1186,10 @@ async function openReport(id) {
       `<div class="sect">Equipment</div>` + kv([['Make', r.make], ['Model', r.model], ['Serial No.', r.serialNo], ['Hours', r.hour], ['Location', r.location], ['Delivery date', r.deliveryDate && fmtD(r.deliveryDate)]]) +
       (time.length ? `<div class="sect">Daily time record</div><table class="mini"><tr><th>Date</th><th>Left shop</th><th>Started</th><th>Completed</th><th>Mileage</th></tr>${time.map(t => `<tr><td>${fmtD(t.date)}</td><td>${fmtT(t.left)}</td><td>${fmtT(t.started)}</td><td>${fmtT(t.completed)}</td><td>${esc(t.mileage || '')}</td></tr>`).join('')}</table>` : '') +
       (r.serialNo ? `<button type="button" class="linkbtn" id="openEquip">View full history of S/N ${esc(r.serialNo)}</button>` : '') +
+      `<div class="sect">Related reports</div><div class="rel" id="dRel"><div class="eq">Loading…</div></div>` +
       (r.type === 'maintenance'
         ? `<div class="sect">Services performed</div>` + (((r.services || []).filter(x => x.done)).map(x => `<div class="fbox">✓ <b>${esc(x.name)}</b>${x.note ? ` — ${esc(x.note)}` : ''}</div>`).join('') || '<div class="eq">No services checked.</div>') + (r.notes ? kv([['Technician notes', r.notes]]) : '')
-        : `<div class="sect">Faults &amp; corrections</div>` + (faultsOf(r).map((f, i) => `<div class="fbox"><b>Fault ${i + 1}:</b> ${esc(f.fault || '—')}${f.correction ? `<div class="c"><b>Correction:</b> ${esc(f.correction)}</div>` : ''}</div>`).join('') || '<div class="eq">No faults recorded.</div>')) +
+        : `<div class="sect">Faults &amp; corrections</div>` + (faultsOf(r).map((f, i) => `<div class="fbox"><b>Fault ${i + 1}:</b> ${esc(f.fault || '—')}${f.correction ? `<div class="c"><b>Correction:</b> ${esc(f.correction)}</div>` : ''}</div>`).join('') || '<div class="eq">No faults recorded.</div>') + (r.notes ? kv([['Technician notes', r.notes]]) : '')) +
       `<div class="sect">Parts requests</div>` + (openRReqs.length ? openRReqs.map(q => `<div class="fbox"><button type="button" class="linkbtn" data-req="${q.id}">${esc(q.no)}</button> ${rqTag(q.status)} · ${money(q.total)}<div class="eq">${esc(q.lines.map(l => +l.qty + ' × ' + l.name).join(', '))}</div></div>`).join('') : '<div class="eq">No parts requested for this report.</div>') +
       ((r.parts || []).length ? `<div class="sect">Parts &amp; materials</div><table class="mini"><tr><th>Part no.</th><th>Description</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Total</th></tr>${r.parts.map(p => `<tr><td>${esc(p.partNo || '')}</td><td>${esc(p.name)}${p.source === 'order' ? `<div class="tag warn" style="margin-top:3px">To order${p.vendor ? ' · ' + esc(p.vendor) : ''}</div>` : ''}</td><td class="r">${fmtN(p.qty, p.qty % 1 ? 2 : 0)} ${esc(p.unit || '')}</td><td class="r">${money(p.price)}</td><td class="r">${money(p.qty * p.price)}</td></tr>`).join('')}<tr><td colspan="4" class="r"><b>Parts total</b></td><td class="r"><b>${money(r.parts.reduce((s, p) => s + p.qty * p.price, 0))}</b></td></tr></table>` : '') +
       `<div class="sect">Job status</div><div style="margin-bottom:6px">${jsTag(jobStatusOf(r))}</div>` + ((r.statusHistory || []).length ? `<div class="tl">${r.statusHistory.slice().reverse().map(h => `<div><b>${esc(JS_LBL[h.status] || h.status)}</b> <span>${fmtDT(h.at)}${h.by ? ' · ' + esc(h.by) : ''}</span></div>`).join('')}</div>` : '') +
@@ -1171,8 +1200,30 @@ async function openReport(id) {
       `<div class="sect">Billing</div>` + ((j.invoices || []).length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">${j.invoices.map(v => `<button type="button" class="btn s" data-bill="${v.id}" title="${esc(v.docCode || '')}">Invoice #${esc(v.invoiceNo)}${v.docCode ? ' · ' + esc(v.docCode) : ''} · ${money(v.total)} · ${v.status === 'paid' ? 'Paid' : 'Unpaid'}</button>`).join('')}</div>` : '<div class="eq" style="margin-bottom:8px">Not invoiced yet.</div>') +
       `<button type="button" class="btn p" id="repInvoice">${(j.invoices || []).length ? 'Create another invoice' : 'Create invoice from this report'}</button>`;
     $('#ivDrawer').hidden = true; $('#drawer').hidden = $('#shade').hidden = false;
+    loadRelated(r);
   } catch (e) { toast(e.message); }
 }
+/* related reports: the same machine (serial, linked by hand, or same make + model for this customer) and the rest of this customer's reports */
+let relData = null;
+async function loadRelated(r) {
+  const box = $('#dRel'); if (!box) return;
+  try {
+    const j = await api('related_reports', { id: r.id }); if (openR?.id !== r.id) return; relData = j;
+    const HOW = { serial: 'same S/N', linked: '🔗 linked', same: 'same make & model' };
+    const item = (x, unlink) => `<div class="ri" data-rep="${esc(x.id)}">${rtBadge(x.type)}<b>#${esc(x.invoiceNo)}</b><span>${fmtD(x.date)}</span>${jsTag(x.status)}${x.how && HOW[x.how] ? `<span class="how">${HOW[x.how]}</span>` : ''}${unlink && x.how === 'linked' ? `<button type="button" class="x" data-unlink="${esc(x.id)}" title="Unlink">×</button>` : ''}
+      <div class="eq">${esc([x.make, x.model].filter(Boolean).join(' ') || 'No equipment')}${x.serial ? ' · S/N ' + esc(x.serial) : ''} · ${esc(x.tech || '')}${x.faults.length ? ' · ' + esc(x.faults.slice(0, 2).join('; ')) : x.services.length ? ' · ✓ ' + esc(x.services.slice(0, 3).join(', ')) : ''}</div></div>`;
+    const cand = j.customer;
+    box.innerHTML = `<h4>This machine (${j.machine.length})</h4>` + (j.machine.map(x => item(x, true)).join('') || '<div class="eq">No other reports of this machine yet.</div>')
+      + `<h4>Other reports of ${esc(r.customerName || 'this customer')} (${cand.length})</h4>` + (cand.map(x => item(x)).join('') || '<div class="eq">No other reports of this customer.</div>')
+      + (cand.length ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><select id="relPick" style="max-width:100%"><option value="">🔗 Same machine as… (choose a report of this customer)</option>${cand.map(x => `<option value="${esc(x.id)}">#${esc(x.invoiceNo)} · ${fmtD(x.date)} · ${esc(rtName(x.type))} · ${esc([x.make, x.model].filter(Boolean).join(' ') || 'no equipment')}${x.serial ? ' · S/N ' + esc(x.serial) : ''}</option>`).join('')}</select><button type="button" class="btn s" id="relLink">Link</button></div>` : '');
+  } catch (e) { box.innerHTML = `<div class="eq">${esc(e.message)}</div>`; }
+}
+document.addEventListener('click', async e => {
+  const un = e.target.closest('#dRel [data-unlink]');
+  if (un) { e.stopPropagation(); if (!confirm('Unlink these two reports? They will no longer show as the same machine.')) return; try { await api('report_link', { a: openR.id, b: un.dataset.unlink, on: false }); loadRelated(openR); } catch (x) { toast(x.message); } return; }
+  if (e.target.closest('#relLink')) { const v = $('#relPick').value; if (!v) { toast('Choose the report of the same machine'); return; } try { await api('report_link', { a: openR.id, b: v, on: true }); toast('Linked as the same machine'); loadRelated(openR); } catch (x) { toast(x.message); } return; }
+  const ri = e.target.closest('#dRel .ri'); if (ri && !e.target.closest('select,button')) openReport(ri.dataset.rep);
+});
 const closeDrawer = () => { $('#drawer').hidden = $('#ivDrawer').hidden = $('#shade').hidden = true; openR = null; openIv = null; };
 $('#dClose').onclick = closeDrawer; $('#shade').onclick = closeDrawer;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); $$('.modal').forEach(m => m.hidden = true); } });
@@ -1813,7 +1864,7 @@ async function equipModal(serial, eq, cust) {
     const rep = Object.entries(faults).filter(([, n]) => n > 1);
     $('#eqHist').innerHTML = (rep.length ? `<div class="hcard" style="background:#fff4e0;border-color:#f1d38a"><b>Repeated faults:</b> ${rep.map(([f, n]) => `${esc(f)} (${n}×)`).join(', ')}</div>` : '')
       + h.map(x => `<div class="hcard"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="linkbtn" data-rep="${esc(x.id)}">#${esc(x.invoiceNo)}</button><b>${fmtD(x.date)}</b>
-        ${jsTag(x.status)}${x.type === 'maintenance' ? ' <span class="tag off">Equipment service</span>' : ''}
+        ${rtBadge(x.type)} ${jsTag(x.status)}
         <span class="eq">${esc(x.tech || '')} · ${esc(x.customer || '')}${x.hour ? ' · ' + esc(x.hour) + ' h' : ''}</span></div>
         ${x.faults.length ? `<ul>${x.faults.map(f => `<li>${esc(f)}</li>`).join('')}</ul>` : ''}${x.correction ? `<div style="margin-top:6px;font-size:14px;white-space:pre-wrap">${esc(x.correction)}</div>` : ''}${(x.services || []).length ? `<div style="margin-top:6px;font-size:14px">✓ ${esc(x.services.join(', '))}</div>` : ''}
         ${x.parts.length ? `<div class="eq" style="margin-top:6px">Parts: ${esc(x.parts.join(', '))}${x.partsTotal ? ' — ' + money(x.partsTotal) : ''}</div>` : ''}</div>`).join('');
@@ -2453,7 +2504,7 @@ async function ivLoadWO(keep) {
   const sel = $('#ivWO'), name = $('#ivCust').value.trim(), want = keep ?? sel.value;
   try { ivWORows = name ? (await api('reports_list', { q: name, limit: 40, offset: 0 })).rows.filter(r => String(r.customer_name || '').toLowerCase() === name.toLowerCase()) : []; } catch { ivWORows = []; }
   if (ivReportId && !ivWORows.some(r => r.id === ivReportId) && ivEdit?.reportNo) ivWORows.unshift({ id: ivReportId, invoice_no: null, label: '#' + ivEdit.reportNo });
-  sel.innerHTML = `<option value="">— Choose the work order —</option>` + ivWORows.map(r => `<option value="${esc(r.id)}">${esc(r.label || `#${docNo(r.invoice_no)} · ${fmtD(r.job_date)} · ${[r.make, r.model].filter(Boolean).join(' ') || (r.report_type === 'maintenance' ? 'Equipment service' : 'Service report')}`)}</option>`).join('')
+  sel.innerHTML = `<option value="">— Choose the work order —</option>` + ivWORows.map(r => `<option value="${esc(r.id)}">${esc(r.label || `#${docNo(r.invoice_no)} · ${fmtD(r.job_date)} · ${r.report_type === 'maintenance' ? '⚙ Equipment Service' : '🔧 Field Service'}${[r.make, r.model].filter(Boolean).length ? ' · ' + [r.make, r.model].filter(Boolean).join(' ') : ''}`)}</option>`).join('')
     + `<option value="none">Sale without a service report (parts / counter sale)</option>`;
   sel.value = want && [...sel.options].some(o => o.value === want) ? want : '';
   ivCodePreview();

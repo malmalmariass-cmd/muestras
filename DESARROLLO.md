@@ -275,6 +275,28 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
 - **Developer tools → Download backup first** descarga el respaldo con el **PIN de desarrolladora**, el mismo que se escribió para abrir las herramientas. No pide el PIN del supervisor.
 - **Settings → Download full backup** sigue pidiendo el PIN del supervisor.
 
+## Field Service vs Equipment Service en el panel
+
+- Cada reporte lleva una etiqueta de color en la lista, en el historial del equipo y en los reportes relacionados:
+  - **🔧 Field Service**, en azul: reparaciones;
+  - **⚙ Equipment Service**, en verde: mantenimiento.
+- La fila tiene una franja del mismo color y la ventana del reporte un borde arriba.
+- Arriba de la tabla hay botones **All / 🔧 Field Service Reports / ⚙ Equipment Service Reports** con cuántos hay de cada uno. Cuentan con los demás filtros aplicados.
+- Technician notes se ve en los dos tipos de reporte.
+
+## Reportes de la misma máquina y del mismo cliente
+
+- **Automático:** son de la misma máquina los reportes:
+  - con el mismo número de serie;
+  - enlazados a mano;
+  - o, si no hay serie, del mismo cliente con la misma marca y modelo.
+- **La app pregunta:** al elegir el cliente, si el reporte no tiene serie, la tablet muestra las máquinas de ese cliente ("¿Es una de estas máquinas?"). Al tocar una se llenan marca, modelo y serie, y el reporte queda enlazado. "Otra máquina" cierra la pregunta.
+- **Manual en el panel:** en la ventana del reporte, en **Related reports**, se elige "Same machine as…" con otro reporte del cliente. Solo el supervisor puede desenlazar (×).
+- **Dónde se ve:**
+  - **Panel → Related reports:** "This machine" y "Other reports of este cliente". Al tocar uno, se abre.
+  - **Tablet:** en el número de serie, "🛠 N servicios anteriores"; en el cliente, "📋 N reportes más de este cliente". Abren la misma hoja con fallas, correcciones, servicios, partes y notas.
+- Servidor: tabla `report_links` (esquema v13); acciones `related_reports`, `customer_machines` y `report_link`. El reporte guarda `links` con los reportes elegidos en la tablet.
+
 ## Notas de voz → reporte (app del técnico)
 
 - Tarjeta **🎙 Voice notes** arriba del reporte, en los dos tipos (Field Service Report y Equipment Service Report).
@@ -287,11 +309,7 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
   - Las fallas se agregan. En el reporte de equipo se marcan los servicios del checklist y los que no están en él se agregan.
   - Las partes mencionadas y todo lo que no tiene campo van a **Technician notes**. Nada se pierde.
   - Las notas usadas quedan marcadas: si se graban más, se usan solo las nuevas.
-- **Sin API (por defecto):** la app lee **palabras clave** en inglés o español: cliente/customer, marca, modelo, serie, horas, fecha, salí/empecé/terminé, millas, falla … corrección …, servicio, partes, estado, nota. La lista está en la tarjeta, en "Words the app understands". Una palabra clave que va después de un artículo o de "próximo/next" se toma como parte de la frase, no como campo.
-- **Con Claude (opcional):** si `api/config.php` tiene `ANTHROPIC_API_KEY`, el mismo botón manda las notas a Claude (acción `voice_fill`) y no hacen falta palabras clave.
-  - Usa salidas estructuradas (JSON schema) con el modelo `claude-opus-5-5` y `fallbacks: "default"`. Escribe los textos en inglés.
-  - Máximo 30 llenados por técnico por hora. Cada llenado queda en el registro de actividad, con los tokens usados.
-  - Si Claude no responde o no hay internet, se usan las palabras clave.
+- **Sin IA y sin internet:** la app lee **palabras clave** en inglés o español: cliente/customer, marca, modelo, serie, horas, fecha, salí/empecé/terminé, millas, falla … corrección …, servicio, partes, estado, nota. La lista está en la tarjeta, en "Words the app understands". Una palabra clave que va después de un artículo o de "próximo/next" se toma como parte de la frase, no como campo. El texto queda en el idioma en que se dijo.
 - **Technician notes** ahora aparece en los dos tipos de reporte y se imprime en el PDF de los dos (`pdf.js` v10).
 
 ## Sin internet (app del técnico)
