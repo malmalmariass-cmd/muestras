@@ -275,6 +275,25 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
 - **Developer tools → Download backup first** descarga el respaldo con el **PIN de desarrolladora**, el mismo que se escribió para abrir las herramientas. No pide el PIN del supervisor.
 - **Settings → Download full backup** sigue pidiendo el PIN del supervisor.
 
+## Notas de voz → reporte (app del técnico)
+
+- Tarjeta **🎙 Voice notes** arriba del reporte, en los dos tipos (Field Service Report y Equipment Service Report).
+  - **Record a note**: graba y escribe en vivo lo que se oye. Cada grabación es una nota aparte. Si Chrome se detiene por una pausa, sigue escuchando hasta que el técnico toque **Stop**.
+  - EN/ES elige el idioma en que habla el técnico. **Write a note** es para escribirla a mano.
+  - Las notas se guardan con el reporte (`report.voiceNotes`) y no salen en el PDF.
+- La voz se convierte en texto con el reconocimiento de voz del propio Chrome: no usa clave ni tiene costo, pero necesita señal.
+- **Fill the report with the notes** muestra primero los cambios y solo se aplican al tocar **Fill the report**.
+  - Solo se llenan los campos vacíos. Si una nota dice algo distinto de lo que ya tiene el reporte, eso va a las notas y el campo no cambia.
+  - Las fallas se agregan. En el reporte de equipo se marcan los servicios del checklist y los que no están en él se agregan.
+  - Las partes mencionadas y todo lo que no tiene campo van a **Technician notes**. Nada se pierde.
+  - Las notas usadas quedan marcadas: si se graban más, se usan solo las nuevas.
+- **Sin API (por defecto):** la app lee **palabras clave** en inglés o español: cliente/customer, marca, modelo, serie, horas, fecha, salí/empecé/terminé, millas, falla … corrección …, servicio, partes, estado, nota. La lista está en la tarjeta, en "Words the app understands". Una palabra clave que va después de un artículo o de "próximo/next" se toma como parte de la frase, no como campo.
+- **Con Claude (opcional):** si `api/config.php` tiene `ANTHROPIC_API_KEY`, el mismo botón manda las notas a Claude (acción `voice_fill`) y no hacen falta palabras clave.
+  - Usa salidas estructuradas (JSON schema) con el modelo `claude-opus-5-5` y `fallbacks: "default"`. Escribe los textos en inglés.
+  - Máximo 30 llenados por técnico por hora. Cada llenado queda en el registro de actividad, con los tokens usados.
+  - Si Claude no responde o no hay internet, se usan las palabras clave.
+- **Technician notes** ahora aparece en los dos tipos de reporte y se imprime en el PDF de los dos (`pdf.js` v10).
+
 ## Sin internet (app del técnico)
 - `sw.js` guarda la app en la tablet (páginas, scripts, motor de PDF, iconos): abre sin señal. La API nunca se guarda ahí.
 - El motor de PDF (jsPDF 2.5.1) va dentro de la app: `vendor/jspdf.umd.min.js` (antes venía de internet).
