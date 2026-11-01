@@ -2,9 +2,12 @@ import os, re, subprocess, sys, json
 sys.path.insert(0, os.path.dirname(__file__))
 from script import CHAPTERS
 
-SRC = sys.argv[1]
-FREEZE = sys.argv[2]
-OUT = sys.argv[3]
+# usage: build.py OUT SRC1 FREEZE1 [SRC2 FREEZE2 ...]
+OUT = sys.argv[1]
+SRCS = {i + 1: sys.argv[2 + 2 * i] for i in range((len(sys.argv) - 2) // 2)}
+FREEZES = {i + 1: sys.argv[3 + 2 * i] for i in range((len(sys.argv) - 2) // 2)}
+SRC = SRCS[1]
+VOICE, VSPEED = "af_heart", 0.92
 W = os.path.join(os.path.dirname(__file__), "work"); os.makedirs(W, exist_ok=True)
 FONT = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
 FONTB = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
@@ -28,15 +31,18 @@ def dur(p):
     return float(run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", p]).strip())
 
 # --- idle periods (freezes) detected by ffmpeg freezedetect
-fr, cur = [], None
-for line in open(FREEZE):
-    m = re.search(r"freeze_start=([\d.]+)", line)
-    if m: cur = float(m.group(1))
-    m = re.search(r"freeze_end=([\d.]+)", line)
-    if m and cur is not None: fr.append((cur, float(m.group(1)))); cur = None
-if cur is not None: fr.append((cur, 1e9))
+def load_freezes(path):
+    fr, cur = [], None
+    for line in open(path):
+        m = re.search(r"freeze_start=([\d.]+)", line)
+        if m: cur = float(m.group(1))
+        m = re.search(r"freeze_end=([\d.]+)", line)
+        if m and cur is not None: fr.append((cur, float(m.group(1)))); cur = None
+    if cur is not None: fr.append((cur, 1e9))
+    return fr
+FRS = {k: load_freezes(v) for k, v in FREEZES.items()}
 
-def keep_intervals(a, b):
+def keep_intervals(a, b, fr):
     """Range [a,b] minus idle time (each pause shortened to KEEP_FREEZE)."""
     out, t = [], a
     for s, e in fr:
@@ -48,12 +54,20 @@ def keep_intervals(a, b):
     if t < b: out.append((t, b))
     return [(x, y) for x, y in out if y - x > 0.05]
 
-def tts(text, path):
-    # flite (offline) voice, cleaned up a bit
-    raw = path + ".raw.wav"
-    run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"flite=textfile={text}:voice=slt", raw])
-    run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af",
-         "highpass=f=90,lowpass=f=7000,atempo=0.97,aresample=48000", "-ac", "1", path])
+def tts_all():
+    """Neural voice (Kokoro-82M, offline) for every sentence, in one batch."""
+    jobs = []
+    for ci, ch in enumerate(CHAPTERS):
+        for si, line in enumerate(ch["lines"]):
+            p = f"{W}/c{ci}_{si}.wav"
+            if not os.path.exists(p): jobs.append(f"{p}.raw.wav\t{line}")
+    if jobs:
+        r = subprocess.run([sys.executable, "-I", os.path.join(os.path.dirname(os.path.abspath(__file__)), "kvoice.py"),
+                            VOICE, str(VSPEED)], input="\n".join(jobs) + "\n", text=True, capture_output=True)
+        if r.returncode: print(r.stderr[-3000:]); sys.exit(1)
+        for j in jobs:
+            raw = j.split("\t")[0]
+            run(["ffmpeg", "-v", "error", "-y", "-i", raw, "-af", "highpass=f=70,aresample=48000", "-ac", "1", raw[:-8]])
 
 def esc(s):
     return s.replace("\\", "\\\\").replace(":", "\\:").replace("'", "’").replace("%", "\\%")
@@ -65,14 +79,14 @@ def wrap(s, n=92):
         else: cur = (cur + " " + w).strip()
     lines.append(cur); return lines
 
+tts_all()
 segs = []
 srt, clock = [], 0.0
 for ci, ch in enumerate(CHAPTERS):
     # 1) narration audio, sentence by sentence
     parts, timings, t = [], [], LEAD
     for si, line in enumerate(ch["lines"]):
-        tf = f"{W}/c{ci}_{si}.txt"; open(tf, "w").write(line)
-        wav = f"{W}/c{ci}_{si}.wav"; tts(tf, wav)
+        wav = f"{W}/c{ci}_{si}.wav"
         d = dur(wav); timings.append((t, t + d, line)); parts.append((wav, t)); t += d + GAP
     A = t - GAP + TAIL
     inputs, mix = [], []
@@ -95,7 +109,8 @@ for ci, ch in enumerate(CHAPTERS):
         run(["ffmpeg", "-v", "error", "-y", "-i", f"{W}/bgframe.png", "-filter_complex", fc, "-map", "[vo]",
              "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", vid])
     else:
-        keeps = [iv for a, b in ch["ranges"] for iv in keep_intervals(a, b)]
+        src_n = ch.get("src", 1)
+        keeps = [iv for a, b in ch["ranges"] for iv in keep_intervals(a, b, FRS[src_n])]
         V = sum(y - x for x, y in keeps)
         speed = min(max(V / max(A, 0.1), 1.0), MAX_SPEED)
         Vs = V / speed
@@ -116,7 +131,7 @@ for ci, ch in enumerate(CHAPTERS):
               f"drawbox=x=0:y={BAND_Y}:w=1920:h=3:color=0xF5C542:t=fill,"
               f"drawtext=fontfile={FONTB}:text='{esc(ch['title'])}':fontsize=22:fontcolor=0xF5C542:x=24:y={BAND_Y+12},"
               + ",".join(dt) + ",format=yuv420p[vo]")
-        run(["ffmpeg", "-v", "error", "-y", "-i", SRC, "-filter_complex", fc, "-map", "[vo]",
+        run(["ffmpeg", "-v", "error", "-y", "-i", SRCS[src_n], "-filter_complex", fc, "-map", "[vo]",
              "-t", f"{A_final:.3f}", "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", vid])
         print(f"{ch['title']}: raw {sum(b-a for a,b in ch['ranges']):.0f}s -> idle-trimmed {V:.1f}s, speed x{speed:.2f}, final {A_final:.1f}s")
         A = A_final

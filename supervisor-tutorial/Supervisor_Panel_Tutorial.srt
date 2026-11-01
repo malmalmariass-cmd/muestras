@@ -1,188 +1,328 @@
 1
-00:00:00,500 --> 00:00:03,306
+00:00:00,500 --> 00:00:02,791
 Welcome to the Supervisor Panel.
 
 2
-00:00:03,306 --> 00:00:11,015
-In this short guide you will learn how to manage reports, jobs, invoices, customers, inventory and your team.
+00:00:02,791 --> 00:00:12,698
+In this guide, you will learn how to review reports, schedule jobs, handle parts requests, create invoices, and manage your customers and your team.
 
 3
-00:00:11,015 --> 00:00:14,110
+00:00:12,698 --> 00:00:15,693
 The main menu is always at the top of the screen.
 
 4
-00:00:14,866 --> 00:00:18,833
+00:00:16,444 --> 00:00:19,951
 Open Reports and Jobs, then Service reports.
 
 5
-00:00:18,833 --> 00:00:23,402
+00:00:19,951 --> 00:00:23,522
 Every report sent from the technicians' tablets appears here.
 
 6
-00:00:23,402 --> 00:00:29,900
-The yellow box warns you about empty or duplicate reports. You can open, keep, or delete them.
+00:00:23,522 --> 00:00:30,528
+The yellow box warns you about empty or duplicate reports. You can open them, keep them, or delete them.
 
 7
-00:00:29,900 --> 00:00:36,192
-Use the search and filters to find a report, or export the list with Export C S V.
+00:00:30,528 --> 00:00:37,043
+Use the search and the filters to find a report, or click Export CSV to download the list.
 
 8
-00:00:36,942 --> 00:00:41,704
-To add a team member, go to Employees and click Add employee.
+00:00:37,810 --> 00:00:40,123
+Click a report number to open it.
 
 9
-00:00:41,704 --> 00:00:44,738
-Type the full name and an Employee I D.
+00:00:40,123 --> 00:00:48,366
+You will see the customer, the daily time record, the services performed, the parts requested, the job status, and the signatures.
 
 10
-00:00:44,738 --> 00:00:50,601
-Choose the role: Technician or Supervisor, and set a P I N of four to eight digits.
+00:00:48,366 --> 00:00:52,727
+At the top, you can download the PDF, email it, or delete it.
 
 11
-00:00:50,601 --> 00:00:55,432
-Keep Active checked so the person can sign in on the tablet, then click Save.
+00:00:52,727 --> 00:00:58,005
+At the bottom, you can email the office copy, or create an invoice from this report.
 
 12
-00:00:56,182 --> 00:01:00,754
-To schedule a visit, open Jobs and appointments and click New job.
+00:00:58,755 --> 00:01:04,375
+Sometimes the technician asks to change the customer's data, for example a new email.
 
 13
-00:01:00,754 --> 00:01:05,626
-Pick a saved customer, or type a new name, and assign a technician.
+00:01:04,375 --> 00:01:09,204
+Review the change in the yellow box, and click Approve and update the customer.
 
 14
-00:01:06,382 --> 00:01:10,533
-Check the box if the customer agrees to WhatsApp reminders.
+00:01:09,204 --> 00:01:13,608
+You can also open the full history of the machine by its serial number.
 
 15
-00:01:11,283 --> 00:01:14,024
-Set the appointment date and time.
+00:01:14,358 --> 00:01:19,380
+When the work is done, scroll down to Signatures and click Sign as supervisor.
 
 16
-00:01:14,783 --> 00:01:20,601
-For regular maintenance, choose how often the job repeats, for example every week.
+00:01:19,380 --> 00:01:23,783
+Sign with your mouse, your finger, or a pen. Click Clear to try again.
 
 17
-00:01:21,351 --> 00:01:25,364
-Fill in the address, the customer's WhatsApp and email.
+00:01:23,783 --> 00:01:29,701
+Then click Accept signature. The report is signed, and the job is marked as complete.
 
 18
-00:01:25,364 --> 00:01:32,699
-You can also add the machine make, model, serial number, work order and instructions for the technician.
+00:01:30,458 --> 00:01:33,709
+To delete a report, open it and click Delete.
 
 19
-00:01:33,451 --> 00:01:40,735
-Click Save job. The job appears in the list and on the technician's tablet, with the customer and equipment already filled in.
+00:01:33,709 --> 00:01:38,603
+Write the reason, and enter your supervisor PIN. Both are required.
 
 20
-00:01:41,485 --> 00:01:46,010
-To bill a customer, go to Invoices and click New invoice.
+00:01:38,603 --> 00:01:44,031
+In-house parts go back to stock, and a copy of the report stays in the activity log.
 
 21
-00:01:46,010 --> 00:01:52,351
-Choose who pays: the customer directly, or a person paying for a company you already serve.
+00:01:44,791 --> 00:01:48,768
+To add a team member, go to Employees and click Add employee.
 
 22
-00:01:52,351 --> 00:01:56,148
-In the second case, pick the company from the list.
+00:01:48,768 --> 00:01:51,614
+Type the full name and an employee ID.
 
 23
-00:01:56,898 --> 00:02:01,956
-Address, phone and email fill in automatically. You can correct them here.
+00:01:51,614 --> 00:01:57,319
+Choose the role, Technician or Supervisor, and set a PIN of four to eight digits.
 
 24
-00:02:01,956 --> 00:02:06,046
-Keep the box checked to update the customer's information.
+00:01:57,319 --> 00:02:02,362
+Keep Active checked so the person can sign in on the tablet. Then click Save.
 
 25
-00:02:06,798 --> 00:02:13,264
-Now add what you are billing. Click Labor or service for hours of work, then enter the hours and the rate.
+00:02:03,125 --> 00:02:07,848
+To schedule a visit, open Jobs and appointments, and click New job.
 
 26
-00:02:14,014 --> 00:02:19,347
-Click In house part to add parts from your stock. Search the part number and click Add.
+00:02:07,848 --> 00:02:12,102
+Pick a saved customer, or type a new name, and assign a technician.
 
 27
-00:02:19,347 --> 00:02:25,381
-In house parts come out of the inventory automatically. Parts from a vendor go to Orders.
+00:02:12,858 --> 00:02:16,877
+Check this box if the customer agrees to WhatsApp reminders.
 
 28
-00:02:25,381 --> 00:02:29,855
-The subtotal, sales tax and total are calculated for you.
+00:02:17,627 --> 00:02:19,897
+Set the appointment date and time.
 
 29
-00:02:30,614 --> 00:02:37,383
-When a company pays, write the name of the contact person. The invoice will say Attention, this person.
+00:02:20,738 --> 00:02:26,421
+For regular maintenance, choose how often the job repeats. For example, every week.
 
 30
-00:02:37,383 --> 00:02:42,701
-Click Save invoice. If something is missing, a red message tells you what to fix.
+00:02:27,171 --> 00:02:30,828
+Fill in the address, and the customer's WhatsApp and email.
 
 31
-00:02:43,451 --> 00:02:51,186
-Every invoice needs a work order. If there is no service report, choose Sale without a service report.
+00:02:30,828 --> 00:02:37,834
+You can also add the machine's make, model, and serial number, the work order, and instructions for the technician.
 
 32
-00:02:51,951 --> 00:02:58,755
-If you leave an invoice without saving, a yellow banner reminds you. Open it to finish, or delete it.
+00:02:38,584 --> 00:02:46,934
+Click Save job. The job appears in the list, and on the technician's tablet, with the customer and the equipment already filled in.
 
 33
-00:02:58,755 --> 00:03:02,634
-Unsaved drafts are deleted after twenty four hours.
+00:02:47,684 --> 00:02:52,109
+If a technician asks to cancel a job, it is highlighted in the list.
 
 34
-00:03:03,384 --> 00:03:07,031
-Parts and Orders shows the parts your technicians ask for.
+00:02:52,109 --> 00:02:58,027
+Open it, read the request at the bottom, and click Approve to cancel the job, or Decline.
 
 35
-00:03:07,031 --> 00:03:11,881
-Set the prices and send the quote. When the customer says yes, approve it.
+00:02:58,784 --> 00:03:00,990
+Open any job to change it.
 
 36
-00:03:11,881 --> 00:03:17,286
-In house parts are reserved for two hours, and vendor parts go to Orders to vendors.
+00:03:00,990 --> 00:03:05,010
+To move the visit, pick a new date and time, and click Reschedule.
 
 37
-00:03:18,051 --> 00:03:24,135
-Customers lists everyone you work with, with their contacts, reports and last service.
+00:03:05,010 --> 00:03:11,696
+From here you can also send a WhatsApp reminder, cancel the job, or mark the follow-up visit as done.
 
 38
-00:03:24,135 --> 00:03:30,582
-Click Import Excel or Word to load a list from a file or a photo. You can download a template first.
+00:03:11,696 --> 00:03:17,528
+A cancelled job can be reopened, or deleted. Click Save job to keep your changes.
 
 39
-00:03:30,582 --> 00:03:36,995
-Click Add customer to create one by hand. You can add extra contacts and mark frequent customers.
+00:03:18,284 --> 00:03:22,730
+To give the job to another technician, just choose a new name and save.
 
 40
-00:03:37,751 --> 00:03:43,880
-Inventory shows every part in stock, its price, quantity and total stock value.
+00:03:22,730 --> 00:03:25,704
+To remove a job completely, click Delete.
 
 41
-00:03:43,880 --> 00:03:50,472
-Equipment history groups every machine by serial number, so you can see all the work done on it.
+00:03:26,454 --> 00:03:30,367
+To bill a customer, go to Invoices, and click New invoice.
 
 42
-00:03:51,222 --> 00:03:54,310
-Statistics gives you a quick view of the business.
+00:03:30,367 --> 00:03:36,434
+Choose who pays: the customer directly, or a person paying for a company you already serve.
 
 43
-00:03:54,310 --> 00:04:00,717
-Choose a period and a technician to see reports, hours worked, top customers and parts used.
+00:03:36,434 --> 00:03:39,536
+In the second case, pick the company from the list.
 
 44
-00:04:02,089 --> 00:04:09,093
-Finally, Settings lets you set the next invoice number, the default sales tax and the labor rate per hour.
+00:03:40,288 --> 00:03:45,096
+The address, phone, and email fill in automatically. You can correct them here.
 
 45
-00:04:09,093 --> 00:04:14,110
-From here you can also download a full backup or export all data to Excel.
+00:03:45,096 --> 00:03:48,668
+Keep the box checked to update the customer's information.
 
 46
-00:04:14,860 --> 00:04:18,885
-That's it. You are ready to use the Supervisor Panel.
+00:03:49,421 --> 00:03:56,299
+Now add what you are billing. Click Labor or service for hours of work, then enter the hours and the rate.
 
 47
-00:04:18,885 --> 00:04:23,904
-Remember: click Tips at the top of the screen any time you need help.
+00:03:57,054 --> 00:04:02,503
+Click In-house part to add parts from your stock. Search the part number, and click Add.
+
+48
+00:04:02,503 --> 00:04:08,037
+In-house parts come out of the inventory automatically. Parts from a vendor go to Orders.
+
+49
+00:04:08,037 --> 00:04:12,206
+The subtotal, sales tax, and total are calculated for you.
+
+50
+00:04:12,955 --> 00:04:19,535
+When a company pays, write the name of the contact person. The invoice will say: attention, this person.
+
+51
+00:04:19,535 --> 00:04:24,983
+Click Save invoice. If something is missing, a red message tells you what to fix.
+
+52
+00:04:25,733 --> 00:04:33,123
+Every invoice needs a work order. Choose the service report from the list, or choose Sale without a service report.
+
+53
+00:04:33,873 --> 00:04:40,581
+If you leave an invoice without saving, a yellow banner reminds you. Open it to finish, or delete it.
+
+54
+00:04:40,581 --> 00:04:44,131
+Unsaved drafts are deleted after twenty-four hours.
+
+55
+00:04:44,880 --> 00:04:48,644
+Parts and Orders shows the parts your technicians ask for.
+
+56
+00:04:48,644 --> 00:04:54,007
+In-house parts are reserved for two hours, and vendor parts go to Orders to vendors.
+
+57
+00:04:54,757 --> 00:05:00,718
+Click a request to open it. You will see the technician, the customer, the machine, and the parts.
+
+58
+00:05:00,718 --> 00:05:06,465
+Check the unit price and change it if needed. You can also add a line, or choose a vendor.
+
+59
+00:05:06,465 --> 00:05:12,277
+Write a message for the technician. For example: available now, full payment required.
+
+60
+00:05:12,277 --> 00:05:17,597
+Then click Send quote to technician. The technician shows the quote to the customer.
+
+61
+00:05:18,357 --> 00:05:25,171
+When the customer accepts, open the request and click: Customer said yes, approve and reserve parts.
+
+62
+00:05:25,171 --> 00:05:30,769
+The parts are reserved for two hours. Use the buttons to extend the time if you need more.
+
+63
+00:05:30,769 --> 00:05:33,765
+When you are ready to bill, click Create invoice.
+
+64
+00:05:34,524 --> 00:05:39,973
+The new invoice opens with the customer, the parts, and the prices already filled in.
+
+65
+00:05:39,973 --> 00:05:44,184
+The reference shows the parts request number, so you can always trace it.
+
+66
+00:05:44,934 --> 00:05:49,188
+In Work order, choose the service report that these parts belong to.
+
+67
+00:05:49,188 --> 00:05:55,511
+If the parts were sold on their own, choose Sale without a service report. Then click Save invoice.
+
+68
+00:05:56,267 --> 00:06:05,492
+The invoice is saved, and opens on screen. From here you can edit it, download the PDF, print it, or send it by email or WhatsApp.
+
+69
+00:06:05,492 --> 00:06:10,962
+When the customer pays, enter the amount, the method, and the date, and click Record payment.
+
+70
+00:06:11,712 --> 00:06:16,948
+Customers lists everyone you work with, with their contacts, reports, and last service.
+
+71
+00:06:16,948 --> 00:06:24,231
+Click Import Excel or Word to load a list from a file, or from a photo. You can download a template first.
+
+72
+00:06:24,231 --> 00:06:31,045
+Click Add customer to create one by hand. You can add extra contacts, and mark frequent customers.
+
+73
+00:06:31,795 --> 00:06:35,025
+To edit a customer, search the name, and click it.
+
+74
+00:06:35,025 --> 00:06:42,863
+Update the details and click Save. From here you can also schedule a job, or create a new invoice for this customer.
+
+75
+00:06:43,629 --> 00:06:49,973
+Inventory shows every part in stock, with its price, its quantity, and the total stock value.
+
+76
+00:06:49,973 --> 00:06:55,891
+Equipment history groups every machine by serial number, so you can see all the work done on it.
+
+77
+00:06:56,642 --> 00:06:59,701
+Statistics gives you a quick view of the business.
+
+78
+00:06:59,701 --> 00:07:06,088
+Choose a period and a technician, to see reports, hours worked, top customers, and parts used.
+
+79
+00:07:07,508 --> 00:07:14,301
+Finally, Settings lets you set the next invoice number, the default sales tax, and the labor rate per hour.
+
+80
+00:07:14,301 --> 00:07:19,600
+From here you can also download a full backup, or export all your data to Excel.
+
+81
+00:07:20,350 --> 00:07:23,666
+That's it. You are ready to use the Supervisor Panel.
+
+82
+00:07:23,666 --> 00:07:27,877
+Remember, click Tips at the top of the screen any time you need help.
 
