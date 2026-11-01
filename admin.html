@@ -49,6 +49,12 @@ h1{font-size:22px;margin:0 0 4px}
 .tm ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}.tm li{font-size:14px;line-height:1.35}
 .tm li a{color:var(--navy);cursor:pointer;text-decoration:underline}.tm .nums{display:flex;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}.tm .nums b{color:var(--ink)}
 .actf{display:flex;flex-wrap:wrap;gap:6px}.actf button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}.actf button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.wop{position:relative}.wop input{width:100%;padding-right:40px}.wop .wot{position:absolute;right:4px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:13px;color:var(--muted);cursor:pointer;padding:8px}
+.wom{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 30px rgba(10,16,30,.18);max-height:340px;overflow:auto;padding:4px}
+.wom .g{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+.wom .it{padding:8px 10px;border-radius:8px;cursor:pointer;line-height:1.3}.wom .it:hover,.wom .it.hi{background:#eef3ff}.wom .it.sel{outline:2px solid var(--navy)}
+.wom .it b{color:var(--navy)}.wom .it small{display:block;color:var(--muted);font-size:12.5px}.wom .it.none{border-bottom:1px solid var(--line);margin-bottom:4px}
+.wom .em{padding:10px;color:var(--muted)}
 .tl .d{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
 .tl .ev{display:flex;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;cursor:pointer;background:#fff}
 .tl .ev:hover{border-color:var(--navy)}.tl .ev .ic{font-size:18px}.tl .ev small{display:block;color:var(--muted)}.tl .ev.fut{background:#f3f7ff}
@@ -570,7 +576,10 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
       <div class="row3"><div><label>Phone</label><input id="ivPhone" type="tel"></div><div><label>WhatsApp</label><input id="ivWa" type="tel" placeholder="+1 786 555 0101"></div><div><label>Email</label><input id="ivEmail" type="email"></div></div>
       <label class="chk"><input type="checkbox" id="ivSaveCust" checked> <span id="ivSaveCustL">Save this customer's information in Customers</span></label>
       <div class="fsect">Invoice</div>
-      <div class="row"><div><label>Work order (service report) — required</label><select id="ivWO"></select></div>
+      <div class="row"><div><label>Service report this invoice is for — required</label>
+        <div class="wop"><input id="ivWOq" autocomplete="off" placeholder="Search: report #, customer, technician, equipment, code…"><button type="button" id="ivWOtg" class="wot" tabindex="-1" aria-label="Show the list">▼</button>
+          <div id="ivWOm" class="wom" hidden></div></div>
+        <select id="ivWO" hidden></select></div>
         <div style="align-self:end;padding-bottom:9px" class="eq">Document code: <b id="ivCode">—</b></div></div>
       <div class="row4"><div><label>Invoice date</label><input id="ivDate" type="date"></div>
         <div><label>Terms</label><select id="ivTerms"><option value="Due upon receipt">Due upon receipt</option><option value="Net 15">Net 15</option><option value="Net 30">Net 30</option><option value="Net 45">Net 45</option><option value="">Custom due date</option></select></div>
@@ -2448,16 +2457,77 @@ function custInitials(n) {
   if (w.length === 1) return (w[0].replace(/[^A-Z]/g, '') || w[0]).slice(0, 4);
   return (w.filter(x => /^[A-Z]/.test(x)).map(x => x[0]).join('') || 'CUST').slice(0, 4);
 }
-let ivWORows = [];
-async function ivLoadWO(keep) {
-  const sel = $('#ivWO'), name = $('#ivCust').value.trim(), want = keep ?? sel.value;
-  try { ivWORows = name ? (await api('reports_list', { q: name, limit: 40, offset: 0 })).rows.filter(r => String(r.customer_name || '').toLowerCase() === name.toLowerCase()) : []; } catch { ivWORows = []; }
-  if (ivReportId && !ivWORows.some(r => r.id === ivReportId) && ivEdit?.reportNo) ivWORows.unshift({ id: ivReportId, invoice_no: null, label: '#' + ivEdit.reportNo });
-  sel.innerHTML = `<option value="">— Choose the work order —</option>` + ivWORows.map(r => `<option value="${esc(r.id)}">${esc(r.label || `#${docNo(r.invoice_no)} · ${fmtD(r.job_date)} · ${[r.make, r.model].filter(Boolean).join(' ') || (r.report_type === 'maintenance' ? 'Equipment service' : 'Service report')}`)}</option>`).join('')
-    + `<option value="none">Sale without a service report (parts / counter sale)</option>`;
+let ivWORows = [], ivWOCust = [], ivWOOther = [], ivWOHits = null;
+const WO_NONE = 'Not linked to a report — sale without a service report (parts / counter sale)';
+const woCode = r => r.invoice_no ? `${custInitials(r.customer_name || $('#ivCust').value)}-${docNo(r.invoice_no)}-${String(r.job_date || '').replace(/-/g, '')}` : '';
+const woType = r => r.report_type === 'maintenance' ? 'Equipment Service Report' : 'Field Service Report';
+const woLabel = r => r.label || `${woType(r)} #${docNo(r.invoice_no)} · ${fmtD(r.job_date)}`;
+/* the hidden <select id="ivWO"> keeps the chosen value ("" / report id / "none"); the search box and list sit on top of it */
+function ivWOSync(want) {
+  const sel = $('#ivWO');
+  sel.innerHTML = '<option value=""></option>' + ivWORows.map(r => `<option value="${esc(r.id)}"></option>`).join('') + '<option value="none"></option>';
   sel.value = want && [...sel.options].some(o => o.value === want) ? want : '';
-  ivCodePreview();
+  const r = ivWORows.find(x => x.id === sel.value);
+  if (document.activeElement !== $('#ivWOq')) $('#ivWOq').value = sel.value === 'none' ? WO_NONE : r ? `${woLabel(r)} · ${r.tech_name || ''}`.replace(/ · $/, '') : '';
 }
+const ivWOAdd = rows => rows.forEach(r => { if (!ivWORows.some(x => x.id === r.id)) ivWORows.push(r); });
+async function ivLoadWO(keep) {
+  const name = $('#ivCust').value.trim(), want = keep ?? $('#ivWO').value;
+  try {
+    const [mine, recent] = await Promise.all([name ? api('reports_list', { q: name, limit: 60, offset: 0 }) : { rows: [] }, api('reports_list', { limit: 40, offset: 0 })]);
+    ivWOCust = mine.rows.filter(r => String(r.customer_name || '').toLowerCase() === name.toLowerCase());
+    ivWOOther = recent.rows.filter(r => !ivWOCust.some(x => x.id === r.id));
+  } catch { ivWOCust = []; ivWOOther = []; }
+  ivWORows = []; ivWOAdd(ivWOCust); ivWOAdd(ivWOOther);
+  if (ivReportId && !ivWORows.some(r => r.id === ivReportId)) {
+    try { const j = await api('reports_list', { q: ivEdit?.reportNo || '', limit: 20, offset: 0 }); ivWOAdd(j.rows.filter(r => r.id === ivReportId)); } catch {}
+    if (!ivWORows.some(r => r.id === ivReportId) && ivEdit?.reportNo) ivWORows.unshift({ id: ivReportId, invoice_no: null, label: '#' + ivEdit.reportNo });
+  }
+  ivWOSync(want); ivCodePreview();
+  if (!$('#ivWOm').hidden) ivWORender();
+}
+function ivWORender() {
+  const m = $('#ivWOm'), cur = $('#ivWO').value;
+  const item = r => `<div class="it${r.id === cur ? ' sel' : ''}" data-v="${esc(r.id)}"><b>${esc(woLabel(r))}</b>${woCode(r) ? ' · ' + esc(woCode(r)) : ''}${r.tech_name ? ' · Tech: ' + esc(r.tech_name) : ''}
+    <small>${esc(r.customer_name || 'No customer')}${[r.make, r.model].filter(Boolean).length ? ' · ' + esc([r.make, r.model].filter(Boolean).join(' ')) : ''}${r.serial_no ? ' · S/N ' + esc(r.serial_no) : ''}</small></div>`;
+  let h = `<div class="it none${cur === 'none' ? ' sel' : ''}" data-v="none"><b>${esc(WO_NONE)}</b></div>`;
+  if (ivWOHits) h += ivWOHits.length ? `<div class="g">Search results</div>` + ivWOHits.map(item).join('') : '<div class="em">No report matches this search.</div>';
+  else {
+    if (ivWOCust.length) h += `<div class="g">${esc($('#ivCust').value.trim())} — this customer</div>` + ivWOCust.map(item).join('');
+    if (ivWOOther.length) h += `<div class="g">${ivWOCust.length ? 'Other recent reports' : 'Recent reports'}</div>` + ivWOOther.map(item).join('');
+    if (!ivWOCust.length && !ivWOOther.length) h += '<div class="em">No service reports yet.</div>';
+  }
+  m.innerHTML = h;
+}
+function ivWOOpen() { ivWORender(); $('#ivWOm').hidden = false; }
+function ivWOClose() { $('#ivWOm').hidden = true; ivWOHits = null; ivWOSync($('#ivWO').value); }
+function ivWOPick(v) {
+  const r = ivWORows.find(x => x.id === v);
+  if (r?.customer_name && !$('#ivCust').value.trim()) { $('#ivCust').value = r.customer_name; $('#ivCust').dispatchEvent(new Event('input', { bubbles: true })); $('#ivCust').dispatchEvent(new Event('change', { bubbles: true })); }   // bill the report's customer
+  ivWOSync(v); $('#ivWO').dispatchEvent(new Event('change'));
+  $('#ivWOm').hidden = true; ivWOHits = null; $('#ivWOq').blur(); ivWOSync(v);
+}
+let ivWOQT;
+$('#ivWOq').addEventListener('focus', () => { $('#ivWOq').select(); ivWOOpen(); });
+$('#ivWOq').addEventListener('input', () => {
+  clearTimeout(ivWOQT); const q = $('#ivWOq').value.trim();
+  if (!q) { ivWOHits = null; ivWOOpen(); return; }
+  ivWOQT = setTimeout(async () => {
+    try { const j = await api('reports_list', { q: q.replace(/^#/, ''), limit: 60, offset: 0 }); ivWOHits = j.rows; ivWOAdd(j.rows); } catch (e) { ivWOHits = []; }
+    if ($('#ivWOq').value.trim() === q) ivWOOpen();
+  }, 300);
+});
+$('#ivWOq').addEventListener('keydown', e => {
+  const its = [...$$('#ivWOm .it')], i = its.findIndex(x => x.classList.contains('hi'));
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if ($('#ivWOm').hidden) ivWOOpen(); const n = Math.max(0, Math.min(its.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1))); its.forEach((x, k) => x.classList.toggle('hi', k === n)); its[n]?.scrollIntoView({ block: 'nearest' }); }
+  else if (e.key === 'Enter') { e.preventDefault(); const it = its[i] || ($('#ivWOq').value.trim() ? its[1] : null); if (it) ivWOPick(it.dataset.v); }
+  else if (e.key === 'Escape') { e.stopPropagation(); ivWOClose(); $('#ivWOq').blur(); }
+});
+$('#ivWOm').addEventListener('mousedown', e => e.preventDefault());   // keep the focus in the box while choosing
+$('#ivWOm').addEventListener('click', e => { const it = e.target.closest('.it'); if (it) ivWOPick(it.dataset.v); });
+$('#ivWOtg').addEventListener('mousedown', e => e.preventDefault());
+$('#ivWOtg').onclick = () => { if ($('#ivWOm').hidden) { $('#ivWOq').focus(); } else { ivWOClose(); $('#ivWOq').blur(); } };
+$('#ivWOq').addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== $('#ivWOq')) ivWOClose(); }, 150));
 function ivCodePreview() {
   const v = $('#ivWO').value, r = ivWORows.find(x => x.id === v), date = ($('#ivDate').value || iso(new Date())).replace(/-/g, '');
   const wo = r?.invoice_no ? docNo(r.invoice_no) : r?.label ? r.label.slice(1) : v === 'none' ? (ivEdit?.invoiceNo || 'new no.') : '';
@@ -2591,7 +2661,7 @@ $('#ivSave').onclick = async () => {
   if (ivBillMode() === 'company' && !custMatch()) { $('#ivErr').textContent = 'Choose the company from the customer list (press ▼ to see all of them).'; $('#ivCust').focus(); return; }
   if (ivBillMode() === 'company' && !$('#ivAttnName').value.trim()) { $('#ivErr').textContent = 'Write the name of the person who pays for the company.'; $('#ivAttnName').focus(); return; }
   if (!ivLines.some(l => String(l.name || '').trim() && +l.qty > 0)) { $('#ivErr').textContent = 'Add at least one line (a part, labor or a service).'; return; }
-  if (!$('#ivWO').value) { $('#ivErr').textContent = 'Choose the work order (service report) this invoice is for, or “Sale without a service report”.'; $('#ivWO').focus(); return; }
+  if (!$('#ivWO').value) { $('#ivErr').textContent = 'Choose the service report this invoice is for, or “Not linked to a report”.'; $('#ivWOq').focus(); return; }
   const c = custMatch(), btn = $('#ivSave'); btn.disabled = true;
   try {
     const j = await api('invoice_save', { invoice: { id: ivEdit?.id || 0, customerId: c?.id || null, saveCustomer: $('#ivSaveCust').checked,
