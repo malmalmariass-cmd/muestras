@@ -1,6 +1,9 @@
 import os, re, subprocess, sys, json
 sys.path.insert(0, os.path.dirname(__file__))
-from script import CHAPTERS
+import importlib
+CHAPTERS = importlib.import_module(os.environ.get('TUT_SCRIPT', 'script')).CHAPTERS
+TUT_TITLE = os.environ.get('TUT_TITLE', 'Supervisor Panel Tutorial')
+TUT_APP = os.environ.get('TUT_APP', 'Supervisor Panel')
 
 # usage: build.py OUT SRC1 FREEZE1 [SRC2 FREEZE2 ...]
 OUT = sys.argv[1]
@@ -9,7 +12,7 @@ FREEZES = {i + 1: sys.argv[3 + 2 * i] for i in range((len(sys.argv) - 2) // 2)}
 SRC = SRCS[1]
 VOICE, VSPEED = "af_heart", 0.92
 LOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cher_logo.png")
-W = os.path.join(os.path.dirname(__file__), "work"); os.makedirs(W, exist_ok=True)
+W = os.path.join(os.path.dirname(__file__), os.environ.get("TUT_WORK", "work")); os.makedirs(W, exist_ok=True)
 FONT = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
 FONTB = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
 FPS = 30
@@ -103,8 +106,8 @@ for ci, ch in enumerate(CHAPTERS):
         bg = ("[0]scale=1920:-2,crop=1920:1080,boxblur=18:2,eq=brightness=-0.32:saturation=0.6,"
               f"loop=-1:1,fps={FPS},trim=0:{A:.3f},setpts=PTS-STARTPTS[v]")
         run(["ffmpeg", "-v", "error", "-y", "-ss", "200", "-i", SRC, "-frames:v", "1", f"{W}/bgframe.png"])
-        sub = "Cher Services LLC  •  How-to guide" if ci == 0 else "Cher Services LLC  •  Supervisor Panel"
-        title = "Supervisor Panel Tutorial" if ci == 0 else ch["title"]
+        sub = "Cher Services LLC  •  How-to guide" if ci == 0 else f"Cher Services LLC  •  {TUT_APP}"
+        title = TUT_TITLE if ci == 0 else ch["title"]
         fc = (bg + ";[1]scale=520:-1[lg];"
               "[v]drawbox=x=(iw-600)/2:y=190:w=600:h=270:color=white@0.96:t=fill,"
               "drawbox=x=(iw-600)/2:y=456:w=600:h=6:color=0xF9C917:t=fill[vb];[vb][lg]overlay=(W-w)/2:218,"

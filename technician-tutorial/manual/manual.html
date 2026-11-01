@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Technician App – User Manual | Cher Services LLC</title>
+<style>
+  @page { size: Letter; margin: 0.75in 0.7in 0.8in 0.7in; }
+  @page :first { margin: 0; }
+  :root{
+    --navy:#103775; --blue:#1C58A8; --yellow:#F9C917; --ink:#1d2433; --muted:#5d6678;
+    --line:#e3e8f1; --soft:#f3f6fb;
+  }
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ font-family:"Inter", "DejaVu Sans", sans-serif; color:var(--ink); font-size:10.5pt; line-height:1.5; margin:0; }
+  h1,h2,h3{ color:var(--navy); line-height:1.2; }
+  b, strong{ color:#0f1d3a; }
+  .ui{ display:inline-block; padding:0 6px; border-radius:4px; background:#e8eefb; color:var(--navy); font-weight:600; font-size:9.5pt; white-space:nowrap; }
+
+  /* ---------- cover ---------- */
+  .cover{ height:11in; width:8.5in; position:relative; overflow:hidden; page-break-after:always;
+    background:linear-gradient(160deg, #0b2a5e 0%, var(--navy) 45%, var(--blue) 100%); color:white; }
+  .cover .stripe{ position:absolute; left:0; right:0; height:14px; background:var(--yellow); }
+  .cover .logo-card{ position:absolute; top:1.3in; left:50%; transform:translateX(-50%); background:white; border-radius:18px;
+    padding:28px 44px 22px; box-shadow:0 18px 40px rgba(0,0,0,.25); border-bottom:6px solid var(--yellow); }
+  .cover .logo-card img{ width:3.6in; display:block; }
+  .cover .title{ position:absolute; top:4.15in; width:100%; text-align:center; }
+  .cover .kicker{ color:var(--yellow); letter-spacing:.25em; font-weight:700; font-size:11pt; text-transform:uppercase; }
+  .cover h1{ color:white; font-size:40pt; margin:.15in 0 .1in; font-weight:800; }
+  .cover .subtitle{ font-size:14pt; opacity:.9; }
+  .cover .shot{ position:absolute; bottom:1.25in; left:50%; transform:translateX(-50%) rotate(-2deg); width:6.2in; border-radius:10px;
+    border:5px solid white; box-shadow:0 22px 50px rgba(0,0,0,.35); }
+  .cover .foot{ position:absolute; bottom:.42in; width:100%; text-align:center; font-size:9.5pt; opacity:.85; }
+
+  /* ---------- toc ---------- */
+  .toc{ page-break-after:always; }
+  .toc h2{ font-size:22pt; margin:0 0 .15in; }
+  .toc ol{ list-style:none; padding:0; margin:0; counter-reset:t; }
+  .toc li{ display:flex; align-items:center; gap:14px; padding:6px 0; border-bottom:1px solid var(--line); font-size:12pt; }
+  .toc .n{ width:28px; height:28px; border-radius:50%; background:var(--navy); color:white; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none; }
+  .toc .d{ color:var(--muted); font-size:9.5pt; }
+  .intro-box{ margin-top:.3in; background:var(--soft); border-left:5px solid var(--yellow); padding:14px 18px; border-radius:6px; }
+  .menu-strip{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+
+  /* ---------- sections ---------- */
+  section.chapter{ page-break-before:always; }
+  .ch-head{ display:flex; align-items:center; gap:16px; padding:16px 20px; border-radius:10px;
+    background:linear-gradient(120deg, var(--navy), var(--blue)); color:white; margin-bottom:16px; position:relative; overflow:hidden; }
+  .ch-head::after{ content:""; position:absolute; right:-30px; top:0; bottom:0; width:120px; background:var(--yellow); transform:skewX(-18deg); opacity:.95; }
+  .ch-head .num{ font-size:30pt; font-weight:800; color:var(--yellow); line-height:1; min-width:48px; }
+  .ch-head h2{ color:white; margin:0; font-size:19pt; }
+  .ch-head .where{ font-size:9.5pt; opacity:.9; margin-top:3px; }
+  h3{ break-after:avoid-page; page-break-after:avoid; font-size:13pt; margin:18px 0 6px; padding-bottom:4px; border-bottom:2px solid var(--yellow); display:inline-block; }
+  p{ margin:6px 0; orphans:3; widows:3; }
+  h3 + p, h3 + ol, h3 + ul{ break-before:avoid-page; }
+  ol.steps{ break-inside:avoid; counter-reset:s; list-style:none; padding:0; margin:8px 0; }
+  ol.steps > li{ counter-increment:s; position:relative; padding:3px 0 3px 34px; }
+  ol.steps > li::before{ content:counter(s); position:absolute; left:0; top:3px; width:22px; height:22px; border-radius:50%;
+    background:var(--yellow); color:var(--navy); font-weight:800; font-size:9.5pt; display:flex; align-items:center; justify-content:center; }
+  ul{ margin:6px 0; padding-left:20px; }
+  ul li{ margin:2px 0; }
+  ul li::marker{ color:var(--blue); }
+  figure{ margin:12px 0 14px; page-break-inside:avoid; }
+  figure img{ width:auto; max-width:100%; max-height:3.25in; margin:0 auto; border-radius:8px; border:1px solid var(--line); box-shadow:0 4px 14px rgba(16,55,117,.12); display:block; }
+  figure.half img{ max-height:2.6in; }
+  figcaption{ font-size:8.8pt; color:var(--muted); margin-top:5px; text-align:center; font-style:italic; }
+  .tip, .note{ page-break-inside:avoid; border-radius:8px; padding:10px 14px 10px 46px; margin:12px 0; position:relative; font-size:10pt; }
+  .tip{ background:#fff8dc; border:1px solid #f3dd85; }
+  .note{ background:#eaf1fd; border:1px solid #c6d7f5; }
+  .tip::before, .note::before{ position:absolute; left:12px; top:9px; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11pt; }
+  .tip::before{ content:"★"; background:var(--yellow); color:var(--navy); }
+  .note::before{ content:"i"; background:var(--blue); color:white; font-family:Georgia, serif; }
+  .tip b:first-child, .note b:first-child{ color:var(--navy); }
+  .keep{ page-break-inside:avoid; }
+
+  /* ---------- quick ref ---------- */
+  table.qr{ width:100%; border-collapse:collapse; margin-top:10px; font-size:10pt; }
+  table.qr th{ background:var(--navy); color:white; text-align:left; padding:8px 10px; }
+  table.qr td{ padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.qr tr:nth-child(even) td{ background:var(--soft); }
+  table.qr td:first-child{ font-weight:600; color:var(--navy); width:42%; }
+
+  .back{ page-break-before:always; text-align:center; padding-top:2.6in; }
+  .back img{ width:3in; }
+  .back p{ color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="stripe" style="top:0"></div>
+  <div class="logo-card"><img src="../img/cher-logo.png" alt="Cher Services LLC"></div>
+  <div class="title">
+    <div class="kicker">User Manual</div>
+    <h1>Technician App</h1>
+    <div class="subtitle">Step-by-step guide for field technicians</div>
+  </div>
+  <img class="shot" src="../img/t07-report-header.jpg" alt="">
+  <div class="foot">Cher Services LLC &nbsp;•&nbsp; Version 1.0 &nbsp;•&nbsp; November 2026</div>
+  <div class="stripe" style="bottom:0"></div>
+</div>
+
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><span class="n">1</span><div>Sign in<div class="d">Employee ID, PIN and language</div></div></li>
+    <li><span class="n">2</span><div>My jobs<div class="d">Job details, postpone, reschedule, reminders, cancel requests</div></div></li>
+    <li><span class="n">3</span><div>Field service report<div class="d">Customer, machine, time record, faults, parts, status and signatures</div></div></li>
+    <li><span class="n">4</span><div>History<div class="d">Open, view, copy and sync your reports</div></div></li>
+    <li><span class="n">5</span><div>Equipment service report<div class="d">Maintenance checklist and follow-up visits</div></div></li>
+    <li><span class="n">6</span><div>Parts requests<div class="d">Track, edit and cancel your requests</div></div></li>
+  </ol>
+  <div class="intro-box">
+    <b>Getting around.</b> The menu is always at the top of the screen:
+    <div class="menu-strip">
+      <span class="ui">Jobs</span><span class="ui">Field Service Report</span><span class="ui">Equipment Service Report</span><span class="ui">Parts Requests</span><span class="ui">History</span>
+    </div>
+    <p style="margin-top:8px">The green dot shows you are signed in. Use <span class="ui">EN</span> / <span class="ui">ES</span> to change the language, <span class="ui">Tips</span> for help, and <span class="ui">Sign out</span> when you finish.
+    At the bottom of every report you will find <span class="ui">New</span>, <span class="ui">Save</span> and <span class="ui">Send / PDF</span>.
+    A narrated video version of this manual is also available: <i>Technician_App_Tutorial.mp4</i>.</p>
+  </div>
+</div>
+
+<!-- 1 -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">01</div><div><h2>Sign in</h2><div class="where">Service Report → Technician</div></div></div>
+  <ol class="steps">
+    <li>Tap <span class="ui">Technician</span>.</li>
+    <li>Type your <b>Employee ID</b> (for example <i>MS26</i>).</li>
+    <li>Enter your <b>PIN</b> with the keypad. <span class="ui">C</span> clears it and <span class="ui">⌫</span> deletes one digit.</li>
+    <li>Tap <span class="ui">Sign in</span>.</li>
+  </ol>
+  <figure class="half"><img src="../img/t01-sign-in.jpg"><figcaption>The sign-in screen.</figcaption></figure>
+  <div class="tip"><b>Tip:</b> check <b>Tutorial mode</b> to get an explanation of each section while you use the app. Choose <b>English</b> or <b>Español</b> at the bottom.</div>
+  <div class="note"><b>Your ID and PIN</b> are created by your supervisor. Ask them if you forget your PIN.</div>
+</section>
+
+<!-- 2 -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">02</div><div><h2>My jobs</h2><div class="where">Jobs</div></div></div>
+  <p><b>Jobs</b> shows the visits the office assigned to you, grouped by day. Tap <span class="ui">Refresh</span> to load new jobs.</p>
+  <figure><img src="../img/t02-my-jobs.jpg"><figcaption>Your jobs for the coming days.</figcaption></figure>
+  <h3>Job details</h3>
+  <p>Tap a job to see the <b>instructions from the office</b>, the appointment, the address with a <b>Map</b> link and the customer's contact.
+     Tap <span class="ui">Start report</span> or <span class="ui">Equipment service</span> to open the report with the customer already filled in.</p>
+  <figure><img src="../img/t03-job-details.jpg"><figcaption>Job details and actions.</figcaption></figure>
+  <h3>Postpone or reschedule</h3>
+  <ul>
+    <li><span class="ui">Postpone (same day)</span> — choose a new time today and tap <span class="ui">Confirm</span>.</li>
+    <li><span class="ui">Reschedule</span> — choose a new date and time and tap <span class="ui">Confirm</span>.</li>
+  </ul>
+  <figure class="half"><img src="../img/t05-reschedule.jpg"><figcaption>Rescheduling a job. The message "Job updated" confirms it.</figcaption></figure>
+  <h3>WhatsApp reminder</h3>
+  <p>Tap <span class="ui">WhatsApp reminder</span> to remind the customer about the visit.</p>
+  <h3>Ask to cancel</h3>
+  <p>If the customer cancels, tap <span class="ui">Ask to cancel</span>, write <b>why it should be cancelled</b> and tap <span class="ui">Confirm</span>. Your supervisor approves the cancellation.</p>
+  <figure class="half"><img src="../img/t06-ask-cancel.jpg"><figcaption>Asking the office to cancel a job.</figcaption></figure>
+</section>
+
+<!-- 3 -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">03</div><div><h2>Field service report</h2><div class="where">Field Service Report — repairs and fixes</div></div></div>
+  <h3>Customer and job</h3>
+  <ol class="steps">
+    <li>Open <span class="ui">Field Service Report</span> (or <span class="ui">Start report</span> from a job).</li>
+    <li>Choose the <b>Customer name</b> from the list. A report number is reserved for you automatically.</li>
+    <li>Check the address, WhatsApp and email. Your <b>Employee ID</b> is filled in for you.</li>
+    <li>Write any <b>Instructions</b> or notes for the job.</li>
+  </ol>
+  <figure><img src="../img/t07-report-header.jpg"><figcaption>The top of the Field Service Report.</figcaption></figure>
+  <div class="note"><b>Registered customers:</b> only the supervisor can change their data. If something changed, update it in the report — your change goes with the report so the supervisor can approve it.</div>
+  <figure><img src="../img/t08-customer-registered.jpg"><figcaption>Customer data filled in automatically.</figcaption></figure>
+
+  <h3>Related serial numbers</h3>
+  <p>Enter the machine's <b>Model</b>, <b>Serial No.</b> and <b>Make</b>, plus the <b>Hour</b> meter reading, <b>Location</b> and <b>Delivery date</b>.</p>
+  <figure><img src="../img/t09-serial-numbers.jpg"><figcaption>Machine information.</figcaption></figure>
+
+  <h3>Daily time record</h3>
+  <p>For each day, enter the <b>Date</b>, the time you <b>Left the shop</b>, <b>Started</b> and <b>Completed</b> the job, and the <b>Mileage</b>. Tap <span class="ui">+ Add day</span> for jobs that take more than one day; tap <b>✕</b> to remove a day.</p>
+  <figure><img src="../img/t10-time-record.jpg"><figcaption>A job recorded over two days.</figcaption></figure>
+
+  <h3>Faults</h3>
+  <p>Describe each problem in <b>Fault 1</b>, <b>Fault 2</b>… (tap <span class="ui">+ Add</span>). Tap <span class="ui">+ Add correction</span> to explain how you fixed it.</p>
+  <figure><img src="../img/t11-faults.jpg"><figcaption>Faults, parts and status.</figcaption></figure>
+
+  <h3>Parts &amp; materials</h3>
+  <ol class="steps">
+    <li>Tap <span class="ui">+ Request parts</span>.</li>
+    <li>Choose <span class="ui">In stock (shop)</span> or <span class="ui">Order from vendor</span>.</li>
+    <li>Search the part, set the quantity with <b>–</b> / <b>+</b> and tap <span class="ui">Add</span>. Use <b>+ Other shop material</b> for items not in inventory.</li>
+    <li>Add an optional <b>note for the supervisor</b> and tap <span class="ui">Send to supervisor</span>.</li>
+  </ol>
+  <figure><img src="../img/t12-request-parts.jpg"><figcaption>Requesting parts from the shop.</figcaption></figure>
+  <div class="note"><b>What happens next:</b> the request appears in the report as <i>Waiting for supervisor</i>. The supervisor prepares the quote; you show it to the customer.</div>
+
+  <h3>Status and customer comment</h3>
+  <p>Tap the current status: <span class="ui">Job in progress</span> <span class="ui">Awaiting parts</span> <span class="ui">Follow up repair</span> <span class="ui">Return to client</span> <span class="ui">Complete</span>. Each change is saved in the <b>Status history</b>.
+     The customer can write a comment before signing. Tap <span class="ui">Schedule follow-up check</span> if the machine needs another visit.</p>
+  <figure><img src="../img/t13-status-comment.jpg"><figcaption>Status, customer comment and signatures.</figcaption></figure>
+
+  <h3>Signatures and sending</h3>
+  <ol class="steps">
+    <li>Tap a signature box: <b>Serviceman</b>, <b>Supervisor</b> or <b>Customer</b>.</li>
+    <li>Sign with your finger or a stylus. Tap <span class="ui">Clear</span> to try again, then <span class="ui">Accept signature</span>.</li>
+    <li>Tap <span class="ui">Send / PDF</span>. The report goes to the office and the invoice number is assigned.</li>
+  </ol>
+  <figure class="half"><img src="../img/t14-signature-pad.jpg"><figcaption>The full-screen signature pad.</figcaption></figure>
+  <figure><img src="../img/t15-sent-office.jpg"><figcaption>"Sent to office · invoice assigned".</figcaption></figure>
+  <div class="tip"><b>Tip:</b> the office copy is emailed automatically when the customer signs. Tap <span class="ui">Save</span> to keep working later, or <span class="ui">New</span> to start a blank report.</div>
+</section>
+
+<!-- 4 -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">04</div><div><h2>History</h2><div class="where">History → My reports</div></div></div>
+  <ul>
+    <li>Search by invoice, customer, serial or model.</li>
+    <li><span class="ui">Open</span> to continue a report, <span class="ui">PDF</span> to view it, <span class="ui">Copy</span> to start a new report with the same customer and machine.</li>
+    <li>Tags show whether a report is <b>signed</b> and <b>in office</b>.</li>
+    <li><span class="ui">Sync now</span> sends your reports right away; <span class="ui">Download my reports from the office</span> brings them back to this tablet.</li>
+  </ul>
+  <figure><img src="../img/t16-history.jpg"><figcaption>My reports.</figcaption></figure>
+  <div class="note"><b>Offline friendly:</b> reports are saved on the tablet and sent to the office automatically when there is internet. Invoice numbers are assigned by the office on sync.</div>
+</section>
+
+<!-- 5 -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">05</div><div><h2>Equipment service report</h2><div class="where">Equipment Service Report — maintenance</div></div></div>
+  <p>Use this report for maintenance visits. Fill in the customer, the machine and the time record as in the field service report.</p>
+  <h3>Services performed</h3>
+  <p>Check every service you did — for example <i>Change engine oil</i>, <i>Change hydraulic filter</i>, <i>Grease all points</i>, <i>Check tires / tracks</i>. Add a note under each one if needed, and tap <span class="ui">+ Other service</span> for anything not on the list.</p>
+  <figure><img src="../img/t17-equipment-services.jpg"><figcaption>The maintenance checklist.</figcaption></figure>
+  <h3>Schedule a follow-up check</h3>
+  <ol class="steps">
+    <li>Tap <span class="ui">Schedule follow-up check</span>.</li>
+    <li>Choose the <b>Date</b> and <b>Time</b> and write <b>What to check</b>.</li>
+    <li>Check <b>The customer agrees to a WhatsApp reminder</b> if they agree.</li>
+    <li>Tap <span class="ui">Schedule visit</span>. The visit appears in Jobs, highlighted the day before and on the day.</li>
+  </ol>
+  <figure class="half"><img src="../img/t18-follow-up.jpg"><figcaption>Scheduling the next visit.</figcaption></figure>
+  <h3>Sign and save</h3>
+  <p>Collect the signatures and tap <span class="ui">Save</span> or <span class="ui">Send / PDF</span>.</p>
+  <figure><img src="../img/t19-equipment-signature.jpg"><figcaption>Signatures captured on the equipment report.</figcaption></figure>
+</section>
+
+<!-- 6 -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">06</div><div><h2>Parts requests</h2><div class="where">Parts Requests → My parts requests</div></div></div>
+  <p>Every parts request you sent appears here with its status (for example <i>Waiting for supervisor</i>), the customer and the machine.</p>
+  <figure><img src="../img/t20-parts-requests.jpg"><figcaption>My parts requests.</figcaption></figure>
+  <ul>
+    <li><span class="ui">Edit</span> to change a request, or <span class="ui">Ask to cancel</span>.</li>
+    <li><span class="ui">+ New request</span> to ask for parts without a report.</li>
+    <li><span class="ui">Vendors</span> to see the supplier list, <span class="ui">Refresh</span> to see the latest answers.</li>
+  </ul>
+</section>
+
+<!-- Quick ref -->
+<section class="chapter">
+  <div class="ch-head"><div class="num">✓</div><div><h2>Quick reference</h2><div class="where">The most common tasks at a glance</div></div></div>
+  <table class="qr">
+    <tr><th>I want to…</th><th>Do this</th></tr>
+    <tr><td>See today's visits</td><td>Jobs → tap the job</td></tr>
+    <tr><td>Start a report from a job</td><td>Jobs → job → Start report / Equipment service</td></tr>
+    <tr><td>Move a visit</td><td>Jobs → job → Postpone (same day) or Reschedule → Confirm</td></tr>
+    <tr><td>Remind the customer</td><td>Jobs → job → WhatsApp reminder</td></tr>
+    <tr><td>Cancel a visit</td><td>Jobs → job → Ask to cancel → reason → Confirm</td></tr>
+    <tr><td>Record my hours</td><td>Report → Daily time record → + Add day</td></tr>
+    <tr><td>Ask for parts</td><td>Report → Parts &amp; materials → + Request parts → Send to supervisor</td></tr>
+    <tr><td>Book the next visit</td><td>Report → Schedule follow-up check → Schedule visit</td></tr>
+    <tr><td>Get signatures</td><td>Report → Signatures → tap a box → Accept signature</td></tr>
+    <tr><td>Send the report</td><td>Send / PDF</td></tr>
+    <tr><td>Reuse a past report</td><td>History → Copy</td></tr>
+    <tr><td>Send reports now</td><td>History → Sync now</td></tr>
+  </table>
+  <div class="tip" style="margin-top:18px"><b>Before you leave the site:</b> check the time record, the status and all signatures, then tap <b>Send / PDF</b>.</div>
+</section>
+
+<div class="back">
+  <img src="../img/cher-logo.png" alt="Cher Services LLC">
+  <h2 style="margin-top:.3in">Technician App — User Manual</h2>
+  <p>Cher Services LLC</p>
+</div>
+
+</body>
+</html>

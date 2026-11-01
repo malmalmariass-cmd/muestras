@@ -53,7 +53,7 @@
   h3{ break-after:avoid-page; page-break-after:avoid; font-size:13pt; margin:18px 0 6px; padding-bottom:4px; border-bottom:2px solid var(--yellow); display:inline-block; }
   p{ margin:6px 0; orphans:3; widows:3; }
   h3 + p, h3 + ol, h3 + ul{ break-before:avoid-page; }
-  ol.steps{ counter-reset:s; list-style:none; padding:0; margin:8px 0; }
+  ol.steps{ break-inside:avoid; counter-reset:s; list-style:none; padding:0; margin:8px 0; }
   ol.steps > li{ counter-increment:s; position:relative; padding:3px 0 3px 34px; }
   ol.steps > li::before{ content:counter(s); position:absolute; left:0; top:3px; width:22px; height:22px; border-radius:50%;
     background:var(--yellow); color:var(--navy); font-weight:800; font-size:9.5pt; display:flex; align-items:center; justify-content:center; }

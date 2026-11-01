@@ -1,0 +1,176 @@
+1
+00:00:00,500 --> 00:00:03,431
+Welcome to the Cher Services technician app.
+
+2
+00:00:03,431 --> 00:00:11,397
+In this guide, you will learn how to sign in, manage your jobs, fill in service reports, request parts, and collect signatures.
+
+3
+00:00:12,147 --> 00:00:15,291
+Choose Technician, then type your employee ID.
+
+4
+00:00:15,291 --> 00:00:18,670
+Enter your PIN with the keypad, and tap Sign in.
+
+5
+00:00:18,670 --> 00:00:22,477
+You can switch the app between English and Spanish at any time.
+
+6
+00:00:23,227 --> 00:00:26,307
+Jobs shows the visits the office assigned to you.
+
+7
+00:00:26,307 --> 00:00:34,487
+Tap a job to see the instructions from the office, the appointment time, the address with a map link, and the customer's contact.
+
+8
+00:00:34,487 --> 00:00:40,597
+Tap Start report, or Equipment service, to open the report with the customer already filled in.
+
+9
+00:00:41,360 --> 00:00:48,558
+If you need more time, tap Postpone to choose a new time on the same day, or Reschedule to pick another date.
+
+10
+00:00:48,558 --> 00:00:52,236
+Then tap Confirm. The office sees the change right away.
+
+11
+00:00:52,993 --> 00:00:57,738
+Tap WhatsApp reminder to send the customer a reminder about the visit.
+
+12
+00:00:58,493 --> 00:01:03,707
+If the customer cancels, tap Ask to cancel, write the reason, and tap Confirm.
+
+13
+00:01:03,707 --> 00:01:07,833
+The request goes to your supervisor, who approves the cancellation.
+
+14
+00:01:08,593 --> 00:01:12,442
+To fill in a repair report, open Field Service Report.
+
+15
+00:01:12,442 --> 00:01:17,762
+Choose the customer from the list. A report number is reserved for you automatically.
+
+16
+00:01:18,526 --> 00:01:22,951
+The customer's address, WhatsApp, and email fill in automatically.
+
+17
+00:01:22,951 --> 00:01:30,746
+If the customer's data has changed, update it here. Your change goes with the report, so the supervisor can approve it.
+
+18
+00:01:31,496 --> 00:01:36,497
+In Related serial numbers, enter the machine's model, serial number, and make.
+
+19
+00:01:36,497 --> 00:01:40,623
+Add the hour meter reading, the location, and the delivery date.
+
+20
+00:01:42,263 --> 00:01:50,443
+In Daily time record, enter the date, the time you left the shop, when you started, and when you completed the job, plus the mileage.
+
+21
+00:01:50,443 --> 00:01:53,737
+Tap Add day for jobs that take more than one day.
+
+22
+00:01:54,497 --> 00:02:00,927
+In Faults, describe each problem you found. Tap Add correction to explain what you did to fix it.
+
+23
+00:02:01,677 --> 00:02:04,309
+Need parts? Tap Request parts.
+
+24
+00:02:04,309 --> 00:02:13,022
+Choose In stock to take parts from the shop, or Order from vendor. Set the quantity, tap Add, and then tap Send to supervisor.
+
+25
+00:02:13,022 --> 00:02:17,575
+The supervisor prepares the quote, and you will see the answer in the report.
+
+26
+00:02:18,325 --> 00:02:25,629
+Set the job status: job in progress, awaiting parts, follow-up repair, return to client, or complete.
+
+27
+00:02:25,629 --> 00:02:31,846
+The customer can write a comment here. Tap Schedule follow-up check if the machine needs another visit.
+
+28
+00:02:32,596 --> 00:02:38,748
+In Signatures, tap a box to sign with your finger or a stylus. Then tap Accept signature.
+
+29
+00:02:38,748 --> 00:02:45,093
+Ask the customer to sign too. The office copy is emailed automatically when the customer signs.
+
+30
+00:02:45,843 --> 00:02:52,507
+When you finish, tap Send PDF. The report goes to the office, and the invoice number is assigned.
+
+31
+00:02:53,258 --> 00:02:58,984
+History shows all your reports. Search by invoice, customer, serial, or model.
+
+32
+00:02:58,984 --> 00:03:07,035
+Tap Open to continue a report, PDF to view it, or Copy to start a new report with the same customer and machine.
+
+33
+00:03:07,035 --> 00:03:15,513
+Reports are saved on the tablet, and sync with the office automatically when there is internet. Tap Sync now to send them right away.
+
+34
+00:03:16,263 --> 00:03:19,578
+For maintenance, open Equipment Service Report.
+
+35
+00:03:19,578 --> 00:03:28,781
+Fill in the customer and the machine, then check every service you performed, for example change engine oil, or change hydraulic filter.
+
+36
+00:03:28,781 --> 00:03:32,267
+Tap Other service to add anything that is not on the list.
+
+37
+00:03:33,029 --> 00:03:36,601
+To book the next visit, tap Schedule follow-up check.
+
+38
+00:03:36,601 --> 00:03:44,481
+Choose the date and time, write what to check, mark if the customer agrees to a WhatsApp reminder, and tap Schedule visit.
+
+39
+00:03:44,481 --> 00:03:47,626
+The visit appears in your Jobs, and in the office.
+
+40
+00:03:48,376 --> 00:03:53,569
+Collect the signatures, and tap Save, or Send PDF to send it to the office.
+
+41
+00:03:55,043 --> 00:04:01,580
+Parts Requests shows every request you sent, and its status, for example waiting for supervisor.
+
+42
+00:04:01,580 --> 00:04:10,954
+Tap Edit to change a request, or Ask to cancel. Tap New request to ask for parts without a report, and Vendors to see the supplier list.
+
+43
+00:04:11,710 --> 00:04:14,791
+That's it. You are ready to use the technician app.
+
+44
+00:04:14,791 --> 00:04:18,938
+Remember, tap Tips at the top of the screen any time you need help.
+
