@@ -8,6 +8,7 @@ SRCS = {i + 1: sys.argv[2 + 2 * i] for i in range((len(sys.argv) - 2) // 2)}
 FREEZES = {i + 1: sys.argv[3 + 2 * i] for i in range((len(sys.argv) - 2) // 2)}
 SRC = SRCS[1]
 VOICE, VSPEED = "af_heart", 0.92
+LOGO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cher_logo.png")
 W = os.path.join(os.path.dirname(__file__), "work"); os.makedirs(W, exist_ok=True)
 FONT = "/usr/share/fonts/opentype/inter/Inter-Regular.otf"
 FONTB = "/usr/share/fonts/opentype/inter/Inter-Bold.otf"
@@ -102,11 +103,14 @@ for ci, ch in enumerate(CHAPTERS):
         bg = ("[0]scale=1920:-2,crop=1920:1080,boxblur=18:2,eq=brightness=-0.32:saturation=0.6,"
               f"loop=-1:1,fps={FPS},trim=0:{A:.3f},setpts=PTS-STARTPTS[v]")
         run(["ffmpeg", "-v", "error", "-y", "-ss", "200", "-i", SRC, "-frames:v", "1", f"{W}/bgframe.png"])
-        sub = "Supervisor Panel  •  How-to guide" if ci == 0 else "Supervisor Panel"
+        sub = "Cher Services LLC  •  How-to guide" if ci == 0 else "Cher Services LLC  •  Supervisor Panel"
         title = "Supervisor Panel Tutorial" if ci == 0 else ch["title"]
-        fc = (bg + f";[v]drawtext=fontfile={FONTB}:text='{esc(title)}':fontsize=84:fontcolor=white:x=(w-tw)/2:y=(h-th)/2-50,"
-              f"drawtext=fontfile={FONT}:text='{esc(sub)}':fontsize=38:fontcolor=0xF5C542:x=(w-tw)/2:y=(h)/2+40,format=yuv420p[vo]")
-        run(["ffmpeg", "-v", "error", "-y", "-i", f"{W}/bgframe.png", "-filter_complex", fc, "-map", "[vo]",
+        fc = (bg + ";[1]scale=520:-1[lg];"
+              "[v]drawbox=x=(iw-600)/2:y=190:w=600:h=270:color=white@0.96:t=fill,"
+              "drawbox=x=(iw-600)/2:y=456:w=600:h=6:color=0xF9C917:t=fill[vb];[vb][lg]overlay=(W-w)/2:218,"
+              f"drawtext=fontfile={FONTB}:text='{esc(title)}':fontsize=84:fontcolor=white:x=(w-tw)/2:y=560,"
+              f"drawtext=fontfile={FONT}:text='{esc(sub)}':fontsize=38:fontcolor=0xF9C917:x=(w-tw)/2:y=680,format=yuv420p[vo]")
+        run(["ffmpeg", "-v", "error", "-y", "-i", f"{W}/bgframe.png", "-i", LOGO, "-filter_complex", fc, "-map", "[vo]",
              "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", vid])
     else:
         src_n = ch.get("src", 1)
@@ -128,8 +132,8 @@ for ci, ch in enumerate(CHAPTERS):
               f"color=c=0x15202E:s=1920x1080:r={FPS}:d={A_final:.3f}[bg];"
               f"[bg][app]overlay={VX}:{VY}:shortest=1,"
               f"drawbox=x=0:y={BAND_Y}:w=1920:h={1080-BAND_Y}:color=0x0E1622:t=fill,"
-              f"drawbox=x=0:y={BAND_Y}:w=1920:h=3:color=0xF5C542:t=fill,"
-              f"drawtext=fontfile={FONTB}:text='{esc(ch['title'])}':fontsize=22:fontcolor=0xF5C542:x=24:y={BAND_Y+12},"
+              f"drawbox=x=0:y={BAND_Y}:w=1920:h=3:color=0xF9C917:t=fill,"
+              f"drawtext=fontfile={FONTB}:text='{esc(ch['title'])}':fontsize=22:fontcolor=0xF9C917:x=24:y={BAND_Y+12},"
               + ",".join(dt) + ",format=yuv420p[vo]")
         run(["ffmpeg", "-v", "error", "-y", "-i", SRCS[src_n], "-filter_complex", fc, "-map", "[vo]",
              "-t", f"{A_final:.3f}", "-r", str(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", vid])

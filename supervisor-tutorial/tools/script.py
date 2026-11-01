@@ -4,7 +4,7 @@ list of (start, end) source ranges in seconds, and narration sentences."""
 
 CHAPTERS = [
     {"title": "Welcome", "card": True, "lines": [
-        "Welcome to the Supervisor Panel.",
+        "Welcome to the Cher Services Supervisor Panel.",
         "In this guide, you will learn how to review reports, schedule jobs, handle parts requests, create invoices, and manage your customers and your team.",
         "The main menu is always at the top of the screen."]},
 
@@ -93,6 +93,10 @@ CHAPTERS = [
     {"title": "6. Parts & Orders", "src": 1, "ranges": [(402.0, 420.0)], "lines": [
         "Parts and Orders shows the parts your technicians ask for.",
         "In-house parts are reserved for two hours, and vendor parts go to Orders to vendors."]},
+    {"title": "6. Parts & Orders", "src": 3, "ranges": [(128.0, 166.0)], "lines": [
+        "Orders to vendors lists the parts you need to buy from a supplier.",
+        "To save a supplier, open Vendors and click Add vendor.",
+        "Enter the company name, the contact person, phone, WhatsApp, and email, and your account number with that vendor. Then click Save vendor."]},
     {"title": "6. Parts & Orders", "src": 2, "ranges": [(252.0, 318.0)], "lines": [
         "Click a request to open it. You will see the technician, the customer, the machine, and the parts.",
         "Check the unit price and change it if needed. You can also add a line, or choose a vendor.",
@@ -112,23 +116,44 @@ CHAPTERS = [
         "The invoice is saved, and opens on screen. From here you can edit it, download the PDF, print it, or send it by email or WhatsApp.",
         "When the customer pays, enter the amount, the method, and the date, and click Record payment."]},
 
-    # ---------------- 7. Customers
-    {"title": "7. Customers", "src": 1, "ranges": [(420.0, 448.0)], "lines": [
+    # ---------------- 7. Manage invoices
+    {"title": "7. Manage invoices", "src": 3, "ranges": [(24.0, 33.0)], "lines": [
+        "If you leave changes to an invoice without saving, a yellow banner appears at the top of every page. Click Open to go back to it."]},
+    {"title": "7. Manage invoices", "src": 3, "ranges": [(33.0, 52.0)], "lines": [
+        "To change an invoice, open it and click Edit.",
+        "In Work order, open the list and choose the service report this invoice belongs to. Each report shows its number, its date, and the machine.",
+        "Then click Save invoice."]},
+    {"title": "7. Manage invoices", "src": 3, "ranges": [(52.0, 64.0)], "lines": [
+        "When the customer pays, go to Payments. Enter the amount, the method, the date, and a note, such as a check or reference number. Then click Record payment.",
+        "Payments are not collected in the app. Here, you only record what the customer paid."]},
+    {"title": "7. Manage invoices", "src": 3, "ranges": [(64.0, 88.0)], "lines": [
+        "In Status, you can change the invoice status, for example to Paid, and add a note. Click Update status.",
+        "Every change is saved in the status history, with the date and the person who made it."]},
+    {"title": "7. Manage invoices", "src": 3, "ranges": [(88.0, 108.0)], "lines": [
+        "To cancel an invoice, click Void invoice. In-house parts go back to stock, and the invoice is marked as void."]},
+    {"title": "7. Manage invoices", "src": 3, "ranges": [(108.0, 124.0)], "lines": [
+        "To remove an invoice completely, click Delete. Write the reason, and enter your supervisor PIN. A copy stays in the activity log."]},
+
+    # ---------------- 8. Customers
+    {"title": "8. Customers", "src": 1, "ranges": [(420.0, 448.0)], "lines": [
         "Customers lists everyone you work with, with their contacts, reports, and last service.",
         "Click Import Excel or Word to load a list from a file, or from a photo. You can download a template first.",
         "Click Add customer to create one by hand. You can add extra contacts, and mark frequent customers."]},
-    {"title": "7. Customers", "src": 2, "ranges": [(320.0, 342.0)], "lines": [
+    {"title": "8. Customers", "src": 2, "ranges": [(320.0, 342.0)], "lines": [
         "To edit a customer, search the name, and click it.",
         "Update the details and click Save. From here you can also schedule a job, or create a new invoice for this customer."]},
 
-    # ---------------- 8-10
-    {"title": "8. Inventory & Equipment", "src": 1, "ranges": [(448.0, 466.0)], "lines": [
+    {"title": "8. Customers", "src": 3, "ranges": [(168.0, 196.0)], "lines": [
+        "From a customer's card, click Schedule job to open a new job with the customer's details already filled in. Or click New invoice to bill them right away."]},
+
+    # ---------------- 9-11
+    {"title": "9. Inventory & Equipment", "src": 1, "ranges": [(448.0, 466.0)], "lines": [
         "Inventory shows every part in stock, with its price, its quantity, and the total stock value.",
         "Equipment history groups every machine by serial number, so you can see all the work done on it."]},
-    {"title": "9. Statistics", "src": 1, "ranges": [(466.0, 500.0)], "lines": [
+    {"title": "10. Statistics", "src": 1, "ranges": [(466.0, 500.0)], "lines": [
         "Statistics gives you a quick view of the business.",
         "Choose a period and a technician, to see reports, hours worked, top customers, and parts used."]},
-    {"title": "10. Settings", "src": 1, "ranges": [(512.0, 526.0), (0.0, 5.0)], "lines": [
+    {"title": "11. Settings", "src": 1, "ranges": [(512.0, 526.0), (0.0, 5.0)], "lines": [
         "Finally, Settings lets you set the next invoice number, the default sales tax, and the labor rate per hour.",
         "From here you can also download a full backup, or export all your data to Excel."]},
 

@@ -1,328 +1,384 @@
 1
-00:00:00,500 --> 00:00:02,791
-Welcome to the Supervisor Panel.
+00:00:00,500 --> 00:00:03,601
+Welcome to the Cher Services Supervisor Panel.
 
 2
-00:00:02,791 --> 00:00:12,698
+00:00:03,601 --> 00:00:13,509
 In this guide, you will learn how to review reports, schedule jobs, handle parts requests, create invoices, and manage your customers and your team.
 
 3
-00:00:12,698 --> 00:00:15,693
+00:00:13,509 --> 00:00:16,504
 The main menu is always at the top of the screen.
 
 4
-00:00:16,444 --> 00:00:19,951
+00:00:17,266 --> 00:00:20,774
 Open Reports and Jobs, then Service reports.
 
 5
-00:00:19,951 --> 00:00:23,522
+00:00:20,774 --> 00:00:24,345
 Every report sent from the technicians' tablets appears here.
 
 6
-00:00:23,522 --> 00:00:30,528
+00:00:24,345 --> 00:00:31,351
 The yellow box warns you about empty or duplicate reports. You can open them, keep them, or delete them.
 
 7
-00:00:30,528 --> 00:00:37,043
+00:00:31,351 --> 00:00:37,866
 Use the search and the filters to find a report, or click Export CSV to download the list.
 
 8
-00:00:37,810 --> 00:00:40,123
+00:00:38,633 --> 00:00:40,946
 Click a report number to open it.
 
 9
-00:00:40,123 --> 00:00:48,366
+00:00:40,946 --> 00:00:49,189
 You will see the customer, the daily time record, the services performed, the parts requested, the job status, and the signatures.
 
 10
-00:00:48,366 --> 00:00:52,727
+00:00:49,189 --> 00:00:53,550
 At the top, you can download the PDF, email it, or delete it.
 
 11
-00:00:52,727 --> 00:00:58,005
+00:00:53,550 --> 00:00:58,828
 At the bottom, you can email the office copy, or create an invoice from this report.
 
 12
-00:00:58,755 --> 00:01:04,375
+00:00:59,578 --> 00:01:05,197
 Sometimes the technician asks to change the customer's data, for example a new email.
 
 13
-00:01:04,375 --> 00:01:09,204
+00:01:05,197 --> 00:01:10,027
 Review the change in the yellow box, and click Approve and update the customer.
 
 14
-00:01:09,204 --> 00:01:13,608
+00:01:10,027 --> 00:01:14,430
 You can also open the full history of the machine by its serial number.
 
 15
-00:01:14,358 --> 00:01:19,380
+00:01:15,181 --> 00:01:20,203
 When the work is done, scroll down to Signatures and click Sign as supervisor.
 
 16
-00:01:19,380 --> 00:01:23,783
+00:01:20,203 --> 00:01:24,606
 Sign with your mouse, your finger, or a pen. Click Clear to try again.
 
 17
-00:01:23,783 --> 00:01:29,701
+00:01:24,606 --> 00:01:30,524
 Then click Accept signature. The report is signed, and the job is marked as complete.
 
 18
-00:01:30,458 --> 00:01:33,709
+00:01:31,281 --> 00:01:34,532
 To delete a report, open it and click Delete.
 
 19
-00:01:33,709 --> 00:01:38,603
+00:01:34,532 --> 00:01:39,426
 Write the reason, and enter your supervisor PIN. Both are required.
 
 20
-00:01:38,603 --> 00:01:44,031
+00:01:39,426 --> 00:01:44,854
 In-house parts go back to stock, and a copy of the report stays in the activity log.
 
 21
-00:01:44,791 --> 00:01:48,768
+00:01:45,614 --> 00:01:49,591
 To add a team member, go to Employees and click Add employee.
 
 22
-00:01:48,768 --> 00:01:51,614
+00:01:49,591 --> 00:01:52,437
 Type the full name and an employee ID.
 
 23
-00:01:51,614 --> 00:01:57,319
+00:01:52,437 --> 00:01:58,142
 Choose the role, Technician or Supervisor, and set a PIN of four to eight digits.
 
 24
-00:01:57,319 --> 00:02:02,362
+00:01:58,142 --> 00:02:03,185
 Keep Active checked so the person can sign in on the tablet. Then click Save.
 
 25
-00:02:03,125 --> 00:02:07,848
+00:02:03,948 --> 00:02:08,671
 To schedule a visit, open Jobs and appointments, and click New job.
 
 26
-00:02:07,848 --> 00:02:12,102
+00:02:08,671 --> 00:02:12,925
 Pick a saved customer, or type a new name, and assign a technician.
 
 27
-00:02:12,858 --> 00:02:16,877
+00:02:13,681 --> 00:02:17,700
 Check this box if the customer agrees to WhatsApp reminders.
 
 28
-00:02:17,627 --> 00:02:19,897
+00:02:18,450 --> 00:02:20,720
 Set the appointment date and time.
 
 29
-00:02:20,738 --> 00:02:26,421
+00:02:21,561 --> 00:02:27,244
 For regular maintenance, choose how often the job repeats. For example, every week.
 
 30
-00:02:27,171 --> 00:02:30,828
+00:02:27,994 --> 00:02:31,651
 Fill in the address, and the customer's WhatsApp and email.
 
 31
-00:02:30,828 --> 00:02:37,834
+00:02:31,651 --> 00:02:38,657
 You can also add the machine's make, model, and serial number, the work order, and instructions for the technician.
 
 32
-00:02:38,584 --> 00:02:46,934
+00:02:39,407 --> 00:02:47,757
 Click Save job. The job appears in the list, and on the technician's tablet, with the customer and the equipment already filled in.
 
 33
-00:02:47,684 --> 00:02:52,109
+00:02:48,507 --> 00:02:52,932
 If a technician asks to cancel a job, it is highlighted in the list.
 
 34
-00:02:52,109 --> 00:02:58,027
+00:02:52,932 --> 00:02:58,850
 Open it, read the request at the bottom, and click Approve to cancel the job, or Decline.
 
 35
-00:02:58,784 --> 00:03:00,990
+00:02:59,607 --> 00:03:01,813
 Open any job to change it.
 
 36
-00:03:00,990 --> 00:03:05,010
+00:03:01,813 --> 00:03:05,832
 To move the visit, pick a new date and time, and click Reschedule.
 
 37
-00:03:05,010 --> 00:03:11,696
+00:03:05,832 --> 00:03:12,518
 From here you can also send a WhatsApp reminder, cancel the job, or mark the follow-up visit as done.
 
 38
-00:03:11,696 --> 00:03:17,528
+00:03:12,518 --> 00:03:18,351
 A cancelled job can be reopened, or deleted. Click Save job to keep your changes.
 
 39
-00:03:18,284 --> 00:03:22,730
+00:03:19,107 --> 00:03:23,553
 To give the job to another technician, just choose a new name and save.
 
 40
-00:03:22,730 --> 00:03:25,704
+00:03:23,553 --> 00:03:26,527
 To remove a job completely, click Delete.
 
 41
-00:03:26,454 --> 00:03:30,367
+00:03:27,277 --> 00:03:31,190
 To bill a customer, go to Invoices, and click New invoice.
 
 42
-00:03:30,367 --> 00:03:36,434
+00:03:31,190 --> 00:03:37,257
 Choose who pays: the customer directly, or a person paying for a company you already serve.
 
 43
-00:03:36,434 --> 00:03:39,536
+00:03:37,257 --> 00:03:40,359
 In the second case, pick the company from the list.
 
 44
-00:03:40,288 --> 00:03:45,096
+00:03:41,110 --> 00:03:45,919
 The address, phone, and email fill in automatically. You can correct them here.
 
 45
-00:03:45,096 --> 00:03:48,668
+00:03:45,919 --> 00:03:49,490
 Keep the box checked to update the customer's information.
 
 46
-00:03:49,421 --> 00:03:56,299
+00:03:50,244 --> 00:03:57,122
 Now add what you are billing. Click Labor or service for hours of work, then enter the hours and the rate.
 
 47
-00:03:57,054 --> 00:04:02,503
+00:03:57,877 --> 00:04:03,326
 Click In-house part to add parts from your stock. Search the part number, and click Add.
 
 48
-00:04:02,503 --> 00:04:08,037
+00:04:03,326 --> 00:04:08,860
 In-house parts come out of the inventory automatically. Parts from a vendor go to Orders.
 
 49
-00:04:08,037 --> 00:04:12,206
+00:04:08,860 --> 00:04:13,028
 The subtotal, sales tax, and total are calculated for you.
 
 50
-00:04:12,955 --> 00:04:19,535
+00:04:13,778 --> 00:04:20,357
 When a company pays, write the name of the contact person. The invoice will say: attention, this person.
 
 51
-00:04:19,535 --> 00:04:24,983
+00:04:20,357 --> 00:04:25,806
 Click Save invoice. If something is missing, a red message tells you what to fix.
 
 52
-00:04:25,733 --> 00:04:33,123
+00:04:26,556 --> 00:04:33,946
 Every invoice needs a work order. Choose the service report from the list, or choose Sale without a service report.
 
 53
-00:04:33,873 --> 00:04:40,581
+00:04:34,696 --> 00:04:41,403
 If you leave an invoice without saving, a yellow banner reminds you. Open it to finish, or delete it.
 
 54
-00:04:40,581 --> 00:04:44,131
+00:04:41,403 --> 00:04:44,953
 Unsaved drafts are deleted after twenty-four hours.
 
 55
-00:04:44,880 --> 00:04:48,644
+00:04:45,703 --> 00:04:49,466
 Parts and Orders shows the parts your technicians ask for.
 
 56
-00:04:48,644 --> 00:04:54,007
+00:04:49,466 --> 00:04:54,830
 In-house parts are reserved for two hours, and vendor parts go to Orders to vendors.
 
 57
-00:04:54,757 --> 00:05:00,718
-Click a request to open it. You will see the technician, the customer, the machine, and the parts.
+00:04:55,580 --> 00:04:59,663
+Orders to vendors lists the parts you need to buy from a supplier.
 
 58
-00:05:00,718 --> 00:05:06,465
-Check the unit price and change it if needed. You can also add a line, or choose a vendor.
+00:04:59,663 --> 00:05:03,363
+To save a supplier, open Vendors and click Add vendor.
 
 59
-00:05:06,465 --> 00:05:12,277
-Write a message for the technician. For example: available now, full payment required.
+00:05:03,363 --> 00:05:11,969
+Enter the company name, the contact person, phone, WhatsApp, and email, and your account number with that vendor. Then click Save vendor.
 
 60
-00:05:12,277 --> 00:05:17,597
-Then click Send quote to technician. The technician shows the quote to the customer.
+00:05:12,719 --> 00:05:18,680
+Click a request to open it. You will see the technician, the customer, the machine, and the parts.
 
 61
-00:05:18,357 --> 00:05:25,171
-When the customer accepts, open the request and click: Customer said yes, approve and reserve parts.
+00:05:18,680 --> 00:05:24,427
+Check the unit price and change it if needed. You can also add a line, or choose a vendor.
 
 62
-00:05:25,171 --> 00:05:30,769
-The parts are reserved for two hours. Use the buttons to extend the time if you need more.
+00:05:24,427 --> 00:05:30,238
+Write a message for the technician. For example: available now, full payment required.
 
 63
-00:05:30,769 --> 00:05:33,765
-When you are ready to bill, click Create invoice.
+00:05:30,238 --> 00:05:35,559
+Then click Send quote to technician. The technician shows the quote to the customer.
 
 64
-00:05:34,524 --> 00:05:39,973
-The new invoice opens with the customer, the parts, and the prices already filled in.
+00:05:36,319 --> 00:05:43,133
+When the customer accepts, open the request and click: Customer said yes, approve and reserve parts.
 
 65
-00:05:39,973 --> 00:05:44,184
-The reference shows the parts request number, so you can always trace it.
+00:05:43,133 --> 00:05:48,731
+The parts are reserved for two hours. Use the buttons to extend the time if you need more.
 
 66
-00:05:44,934 --> 00:05:49,188
-In Work order, choose the service report that these parts belong to.
+00:05:48,731 --> 00:05:51,726
+When you are ready to bill, click Create invoice.
 
 67
-00:05:49,188 --> 00:05:55,511
-If the parts were sold on their own, choose Sale without a service report. Then click Save invoice.
+00:05:52,486 --> 00:05:57,934
+The new invoice opens with the customer, the parts, and the prices already filled in.
 
 68
-00:05:56,267 --> 00:06:05,492
-The invoice is saved, and opens on screen. From here you can edit it, download the PDF, print it, or send it by email or WhatsApp.
+00:05:57,934 --> 00:06:02,146
+The reference shows the parts request number, so you can always trace it.
 
 69
-00:06:05,492 --> 00:06:10,962
-When the customer pays, enter the amount, the method, and the date, and click Record payment.
+00:06:02,896 --> 00:06:07,150
+In Work order, choose the service report that these parts belong to.
 
 70
-00:06:11,712 --> 00:06:16,948
-Customers lists everyone you work with, with their contacts, reports, and last service.
+00:06:07,150 --> 00:06:13,473
+If the parts were sold on their own, choose Sale without a service report. Then click Save invoice.
 
 71
-00:06:16,948 --> 00:06:24,231
-Click Import Excel or Word to load a list from a file, or from a photo. You can download a template first.
+00:06:14,229 --> 00:06:23,454
+The invoice is saved, and opens on screen. From here you can edit it, download the PDF, print it, or send it by email or WhatsApp.
 
 72
-00:06:24,231 --> 00:06:31,045
-Click Add customer to create one by hand. You can add extra contacts, and mark frequent customers.
+00:06:23,454 --> 00:06:28,924
+When the customer pays, enter the amount, the method, and the date, and click Record payment.
 
 73
-00:06:31,795 --> 00:06:35,025
-To edit a customer, search the name, and click it.
+00:06:29,674 --> 00:06:38,109
+If you leave changes to an invoice without saving, a yellow banner appears at the top of every page. Click Open to go back to it.
 
 74
-00:06:35,025 --> 00:06:42,863
-Update the details and click Save. From here you can also schedule a job, or create a new invoice for this customer.
+00:06:38,874 --> 00:06:42,104
+To change an invoice, open it and click Edit.
 
 75
-00:06:43,629 --> 00:06:49,973
-Inventory shows every part in stock, with its price, its quantity, and the total stock value.
+00:06:42,104 --> 00:06:51,563
+In Work order, open the list and choose the service report this invoice belongs to. Each report shows its number, its date, and the machine.
 
 76
-00:06:49,973 --> 00:06:55,891
-Equipment history groups every machine by serial number, so you can see all the work done on it.
+00:06:51,563 --> 00:06:53,428
+Then click Save invoice.
 
 77
-00:06:56,642 --> 00:06:59,701
-Statistics gives you a quick view of the business.
+00:06:54,178 --> 00:07:03,957
+When the customer pays, go to Payments. Enter the amount, the method, the date, and a note, such as a check or reference number. Then click Record payment.
 
 78
-00:06:59,701 --> 00:07:06,088
-Choose a period and a technician, to see reports, hours worked, top customers, and parts used.
+00:07:03,957 --> 00:07:09,385
+Payments are not collected in the app. Here, you only record what the customer paid.
 
 79
-00:07:07,508 --> 00:07:14,301
-Finally, Settings lets you set the next invoice number, the default sales tax, and the labor rate per hour.
+00:07:10,145 --> 00:07:17,065
+In Status, you can change the invoice status, for example to Paid, and add a note. Click Update status.
 
 80
-00:07:14,301 --> 00:07:19,600
-From here you can also download a full backup, or export all your data to Excel.
+00:07:17,065 --> 00:07:22,685
+Every change is saved in the status history, with the date and the person who made it.
 
 81
-00:07:20,350 --> 00:07:23,666
-That's it. You are ready to use the Supervisor Panel.
+00:07:23,445 --> 00:07:30,963
+To cancel an invoice, click Void invoice. In-house parts go back to stock, and the invoice is marked as void.
 
 82
-00:07:23,666 --> 00:07:27,877
+00:07:31,713 --> 00:07:41,151
+To remove an invoice completely, click Delete. Write the reason, and enter your supervisor PIN. A copy stays in the activity log.
+
+83
+00:07:41,913 --> 00:07:47,148
+Customers lists everyone you work with, with their contacts, reports, and last service.
+
+84
+00:07:47,148 --> 00:07:54,431
+Click Import Excel or Word to load a list from a file, or from a photo. You can download a template first.
+
+85
+00:07:54,431 --> 00:08:01,245
+Click Add customer to create one by hand. You can add extra contacts, and mark frequent customers.
+
+86
+00:08:01,996 --> 00:08:05,226
+To edit a customer, search the name, and click it.
+
+87
+00:08:05,226 --> 00:08:13,064
+Update the details and click Save. From here you can also schedule a job, or create a new invoice for this customer.
+
+88
+00:08:13,829 --> 00:08:23,928
+From a customer's card, click Schedule job to open a new job with the customer's details already filled in. Or click New invoice to bill them right away.
+
+89
+00:08:24,678 --> 00:08:31,023
+Inventory shows every part in stock, with its price, its quantity, and the total stock value.
+
+90
+00:08:31,023 --> 00:08:36,941
+Equipment history groups every machine by serial number, so you can see all the work done on it.
+
+91
+00:08:37,691 --> 00:08:40,750
+Statistics gives you a quick view of the business.
+
+92
+00:08:40,750 --> 00:08:47,138
+Choose a period and a technician, to see reports, hours worked, top customers, and parts used.
+
+93
+00:08:48,558 --> 00:08:55,350
+Finally, Settings lets you set the next invoice number, the default sales tax, and the labor rate per hour.
+
+94
+00:08:55,350 --> 00:09:00,650
+From here you can also download a full backup, or export all your data to Excel.
+
+95
+00:09:01,400 --> 00:09:04,715
+That's it. You are ready to use the Supervisor Panel.
+
+96
+00:09:04,715 --> 00:09:08,926
 Remember, click Tips at the top of the screen any time you need help.
 
