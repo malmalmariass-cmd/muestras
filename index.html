@@ -995,7 +995,7 @@ function saveDraft() { LS.set(draftKey(report.type), report); }
 function getDraft(type) {
   const d = LS.get(draftKey(type), null); if (d) return d;
   const old = LS.get(type === 'maintenance' ? 'cher.draft.maint' : 'cher.draft', null);   // saved by older versions
-  return old && old.employeeId === me() ? old : null;
+  return ownR(old) ? old : null;
 }
 document.addEventListener('click', e => { if (e.target.id === 'toast') e.target.classList.remove('on'); });
 /* pop-up messages stay long enough to read: 5 s, plus a little per word (up to 15 s); a tap closes them */
@@ -1428,6 +1428,8 @@ let requests = reqForRole(LS.get('cher.requests', []));
 /* offline queue is shared by everyone who signs in on this tablet: each entry carries its owner,
    and a technician only sees / sends their own (so nothing goes out under another person's session) */
 const isMine = q => !q.employeeId || q.employeeId === me();
+/* a report this technician works on: their own, or one of another technician the office gave them a job / follow-up for */
+const ownR = r => !!r && (r.employeeId === me() || (!!me() && r.grantedTo === me()));
 const reqQueue = () => LS.get('cher.reqQueue', []).filter(isMine);
 const setReqQueue = mine => LS.set('cher.reqQueue', LS.get('cher.reqQueue', []).filter(q => !isMine(q)).concat(mine));
 function allRequests() { return reqQueue().map(q => Object.assign({}, q, { status: 'queued', no: '' })).concat(requests); }
@@ -1514,7 +1516,7 @@ async function updateBadges() {
   const seen = LS.get('cher.reqSeen', {});
   setC('#reqCnt', requests.filter(q => ['quoted', 'accepted', 'approved', 'declined', 'invoiced'].includes(q.status) && seen[q.id] !== q.updatedAt).length + reqQueue().length);
   try {
-    const mine = (await DB.all()).filter(r => r.employeeId === me()), pend = mine.filter(r => !r.synced);
+    const mine = (await DB.all()).filter(ownR), pend = mine.filter(r => !r.synced);
     setT('#histTot', mine.length); setC('#histCnt', pend.length);
     setC('#formCnt', pend.filter(r => r.type !== 'maintenance').length); setC('#maintCnt', pend.filter(r => r.type === 'maintenance').length);
   } catch {}
@@ -1729,7 +1731,7 @@ function renderOffice() {
 
 /* ---------------- save / sync ---------------- */
 async function save(silent) {
-  report.updatedAt = new Date().toISOString(); report.synced = false; report.employeeId = me();
+  report.updatedAt = new Date().toISOString(); report.synced = false; if (!report.grantedTo || report.employeeId === me()) report.employeeId = me();
   await DB.put(clone(report)); updateBadges();
   rememberCustomer(); saveDraft(); dirty = false; updateStatus(); renderOffice();
   if (!silent) toast(t('saved'));
@@ -1742,12 +1744,12 @@ async function syncAll(manual) {
   syncing = (async () => {
     again = false;
     try {
-      const mine = (await DB.all()).filter(r => r.employeeId === me());
+      const mine = (await DB.all()).filter(ownR);
       const pend = mine.filter(r => !r.synced);
       if (pend.length) setDot('wait');
       let newInv = 0;
       for (const r of pend) {
-        const sentAt = r.updatedAt, hadInv = !!r.invoiceNo && !r.reservedAt;
+        const sentAt = r.updatedAt, hadInv = !!r.invoiceNo && (!r.reservedAt || !!r.docCode);   // a report saved before already has its document code
         const j = await api('save_report', { report: r });
         if (j.locked) {   // signed and locked: the office copy wins over changes made on this tablet
           const o = normalize(Object.assign(forRole(j.report), { synced: true })); await DB.put(o);
@@ -2138,9 +2140,21 @@ function renderJobs() {
     });
   });
 }
+/* opening an old report: take the office's latest copy first (another tablet or the supervisor may have added to it),
+   unless this tablet has changes not sent yet. Without internet the copy on the tablet opens. */
+async function freshCopy(id, local) {
+  if (!navigator.onLine || !session || session.offline || (local && !local.synced)) return local || null;
+  try {
+    const j = await api('report_latest', { id }); if (!j.report) return local || null;
+    const o = normalize(Object.assign(forRole(j.report), { synced: true }));
+    if (local?.officeSentAt && !o.officeSentAt) o.officeSentAt = local.officeSentAt;
+    if (o.employeeId !== me()) o.grantedTo = me();
+    await DB.put(o); return o;
+  } catch { return local || null; }
+}
 async function startJob(j, type) {
   if (j.reportId) {
-    let r = await DB.get(j.reportId);
+    let r = await freshCopy(j.reportId, await DB.get(j.reportId));
     if (!r) { try { const m = await api('my_reports'); for (const x of forRole(m.reports)) { const loc = await DB.get(x.id); if (!loc) { x.synced = true; await DB.put(x); } } r = await DB.get(j.reportId); } catch {} }
     if (r) {
       report = normalize(r); dirty = false;
@@ -2367,7 +2381,7 @@ function payWatch() {
 /* ---------------- history ---------------- */
 async function renderHist() {
   const q = $('#search').value.trim().toLowerCase();
-  const all = (await DB.all()).filter(r => r.employeeId === me() || !r.employeeId).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  const all = (await DB.all()).filter(r => ownR(r) || !r.employeeId).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
   const list = all.filter(r => !q || [r.invoiceNo, r.customerName, r.serialNo, r.model, r.make, r.workOrder].join(' ').toLowerCase().includes(q));
   const box = $('#histList');
   if (!list.length) { box.innerHTML = `<div class="empty">${esc(all.length ? t('noMatch') : t('noReportsYet'))}</div>`; return; }
@@ -2384,7 +2398,7 @@ async function renderHist() {
     d.querySelector('small').textContent = [r.make, r.model, r.serialNo && 'S/N ' + r.serialNo].filter(Boolean).join(' · ') + ' — ' + new Date(r.updatedAt || r.createdAt).toLocaleDateString();
     d.querySelector('.acts').onclick = async e => {
       const a = e.target.dataset.a; if (!a) return;
-      if (a === 'open') { report = normalize(r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); refreshLock(); }
+      if (a === 'open') { const fr = await freshCopy(r.id, await DB.get(r.id) || r); report = normalize(fr || r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); refreshLock(); }
       if (a === 'pdf') sharePdf(withReqParts(r));
       if (a === 'dup') { const n = blankReport(r.type); n.employeeId = me(); ['customerName', 'address1', 'address2', 'address3', 'customerWhatsapp', 'customerEmail', 'model', 'serialNo', 'make', 'location'].forEach(k => n[k] = r[k]); report = n; dirty = true; saveDraft(); render(); show(n.type === 'maintenance' ? 'maint' : 'form'); toast(t('copied')); }
       if (a === 'del' && isSup()) {
@@ -2401,9 +2415,10 @@ $('#syncNow').onclick = () => syncAll(true);
    when History opens (at most every 2 minutes); reports not sent yet from this tablet are never overwritten. */
 let histPulled = 0;
 async function pullMine(manual) {
-  if (!manual && Date.now() - histPulled < 120000) return; histPulled = Date.now();
+  if (!manual && Date.now() - histPulled < 15000) return; histPulled = Date.now();
   const j = await api('my_reports'); let n = 0;
-  for (const r of forRole(j.reports)) { const loc = await DB.get(r.id); if (!loc || (loc.synced && (loc.updatedAt || '') <= (r.updatedAt || ''))) { if (!loc || JSON.stringify(loc) !== JSON.stringify({ ...r, synced: true })) n++; r.synced = true; if (loc?.officeSentAt && !r.officeSentAt) r.officeSentAt = loc.officeSentAt; await DB.put(r); } }
+  // a copy already sent is replaced by the office's (the office may have added to it); changes not sent yet are never touched
+  for (const r of forRole(j.reports)) { const loc = await DB.get(r.id); if (!loc || loc.synced) { r.synced = true; if (loc?.officeSentAt && !r.officeSentAt) r.officeSentAt = loc.officeSentAt; if (!loc || JSON.stringify(loc) !== JSON.stringify(r)) n++; await DB.put(r); } }
   if (n && !$('#viewHist').hidden) renderHist();
   return n;
 }
@@ -2417,7 +2432,7 @@ function useType(type) {
   if (report && report.type === type) return;
   if (report) saveDraft();
   const d = getDraft(type);
-  if (d && d.employeeId === me()) report = normalize(d); else { report = blankReport(type); report.employeeId = me(); }
+  if (ownR(d)) report = normalize(d); else { report = blankReport(type); report.employeeId = me(); }
   dirty = false;
   try { render(); }
   catch (e) {   // a draft this version cannot show: keep a copy and open a clean report, so the tab always opens
@@ -2546,7 +2561,7 @@ async function offlineLogin(code, pin) {
 }
 async function signOut(expired) {
   if (!expired) {
-    const pend = (await DB.all()).filter(r => !r.synced && r.employeeId === me()).length;
+    const pend = (await DB.all()).filter(r => !r.synced && ownR(r)).length;
     if (pend && !confirm(t('pendingSignOut', { n: pend }))) return;
     if (dirty) await save(true);
     try { await api('logout'); } catch {}
@@ -2566,9 +2581,9 @@ function startSession() {
   const hasJobs = jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled');
   const v0 = LS.get('cher.view', hasJobs ? 'jobs' : 'form');
   const d = getDraft(v0 === 'maint' ? 'maintenance' : 'repair');
-  if (d && d.employeeId === me()) { report = normalize(d); render(); } else { report = null; useType(v0 === 'maint' ? 'maintenance' : 'repair'); }
+  if (ownR(d)) { report = normalize(d); render(); } else { report = null; useType(v0 === 'maint' ? 'maintenance' : 'repair'); }
   show(v0);
-  pullCustomers(); pullInventory(); pullServices(); pullRequests();
+  pullCustomers(); pullInventory(); pullServices(); pullRequests(); pullMine(true).catch(() => {});
   pullJobs().then(() => { if (!LS.get('cher.view', null) && jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled')) show('jobs'); });
   syncAll(); checkUnsaved();
   api('me').then(j => { if (j.idleMinutes) idleMin = j.idleMinutes; }).catch(() => {});

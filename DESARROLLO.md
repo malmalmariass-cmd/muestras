@@ -312,6 +312,15 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
 - **Sin IA y sin internet:** la app lee **palabras clave** en inglés o español: cliente/customer, marca, modelo, serie, horas, fecha, salí/empecé/terminé, millas, falla … corrección …, servicio, partes, estado, nota. La lista está en la tarjeta, en "Words the app understands". Una palabra clave que va después de un artículo o de "próximo/next" se toma como parte de la frase, no como campo. El texto queda en el idioma en que se dijo.
 - **Technician notes** ahora aparece en los dos tipos de reporte y se imprime en el PDF de los dos (`pdf.js` v10).
 
+## Abrir un reporte viejo siempre trae lo último
+
+- **Al abrir un reporte guardado** (desde History, desde un trabajo o desde una visita de seguimiento), la tablet trae primero la copia de la oficina (acción `report_latest`). Así aparece lo que se agregó en otra tablet o en el panel, por ejemplo la firma del supervisor.
+  - Si la tablet tiene cambios sin enviar, se abren esos y no se reemplazan.
+  - Sin internet se abre la copia de la tablet.
+- **History** se actualiza al abrirlo (como máximo cada 15 s) y al iniciar sesión. Las copias ya enviadas se reemplazan por las de la oficina.
+- **Seguimiento por otro técnico:** si el trabajo o la visita de seguimiento de un reporte se asigna a otro técnico, ese técnico abre el reporte **original** y puede agregarle cosas mientras el trabajo esté abierto (`job_grants`). El reporte sigue siendo del técnico que lo hizo.
+- Volver a guardar un reporte viejo ya no muestra "factura asignada".
+
 ## Sin internet (app del técnico)
 - `sw.js` guarda la app en la tablet (páginas, scripts, motor de PDF, iconos): abre sin señal. La API nunca se guarda ahí.
 - El motor de PDF (jsPDF 2.5.1) va dentro de la app: `vendor/jspdf.umd.min.js` (antes venía de internet).
