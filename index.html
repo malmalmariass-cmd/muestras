@@ -366,7 +366,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
       <div id="jobBanner" class="office" hidden style="margin-top:12px"></div>
     </div>
 
-    <div class="card" id="voiceCard">
+    <div class="card" id="voiceCard" hidden>
       <div class="rowhead"><h2 data-t="vcTitle">🎙 Voice notes</h2><div class="seg2" id="vcLang" title="Language you speak"><button type="button" data-l="en">EN</button><button type="button" data-l="es">ES</button></div></div>
       <p class="hint" style="margin-top:-4px" data-t="vcHint">Talk while you work: each recording is a separate note. When you finish, tap “Fill the report” — the fields fill themselves and what has no place goes to Technician notes. You check everything before it is applied.</p>
       <div class="vcbar"><button class="btn p" type="button" id="vcRec">● <span data-t="vcRec">Record a note</span></button><button class="btn s" type="button" id="vcWrite">✎ <span data-t="vcWrite">Write a note</span></button></div>
@@ -765,7 +765,7 @@ const I18N = {
     newJobHint: 'Schedule a visit for yourself (for example a follow-up or a customer who called).', saveJob: 'Save job', jobSaved: 'Job saved',
     startReport: 'Start report', openReport: 'Open report', today: 'Today', tomorrow: 'Tomorrow', overdue: 'Overdue', noJobs: 'No jobs assigned. New jobs from the office appear here.',
     st_scheduled: 'Scheduled', st_in_progress: 'In progress', st_done: 'Done', st_cancelled: 'Cancelled', jobFrom: 'Job for {cust} · {d}', repeats: 'Repeats',
-    custReports: '📋 {n} other report(s) of this customer — view', thisMachine: 'This machine', otherCust: 'Other reports of {c}', whichMachine: 'Is it one of these machines of {c}?',
+    repDeleted: 'Report #{n} was deleted by the office.', custReports: '📋 {n} other report(s) of this customer — view', thisMachine: 'This machine', otherCust: 'Other reports of {c}', whichMachine: 'Is it one of these machines of {c}?',
     machInfo: '{n} report(s) · last {d}', otherMachine: 'Another machine', sameAs: 'Same machine as report #{n} {m}', linkedMachine: 'Linked to the machine of report #{n}',
     equipHistory: 'Related reports', prevServices: '🛠 {n} previous service(s) — view', noHistory: 'No other reports of this machine yet.', histFor: 'Serial {s}',
     partsUsed: 'Parts', repairDone: 'Repair completed', repairNotDone: 'Not completed',
@@ -845,7 +845,7 @@ const I18N = {
     newJobHint: 'Agenda una visita para ti (por ejemplo, un seguimiento o un cliente que llamó).', saveJob: 'Guardar trabajo', jobSaved: 'Trabajo guardado',
     startReport: 'Iniciar reporte', openReport: 'Abrir reporte', today: 'Hoy', tomorrow: 'Mañana', overdue: 'Atrasados', noJobs: 'No tienes trabajos asignados. Los trabajos nuevos de la oficina aparecerán aquí.',
     st_scheduled: 'Programado', st_in_progress: 'En proceso', st_done: 'Terminado', st_cancelled: 'Cancelado', jobFrom: 'Trabajo de {cust} · {d}', repeats: 'Se repite',
-    custReports: '📋 {n} reporte(s) más de este cliente — ver', thisMachine: 'Esta máquina', otherCust: 'Otros reportes de {c}', whichMachine: '¿Es una de estas máquinas de {c}?',
+    repDeleted: 'La oficina borró el reporte #{n}.', custReports: '📋 {n} reporte(s) más de este cliente — ver', thisMachine: 'Esta máquina', otherCust: 'Otros reportes de {c}', whichMachine: '¿Es una de estas máquinas de {c}?',
     machInfo: '{n} reporte(s) · último {d}', otherMachine: 'Otra máquina', sameAs: 'Misma máquina que el reporte #{n} {m}', linkedMachine: 'Enlazado a la máquina del reporte #{n}',
     equipHistory: 'Reportes relacionados', prevServices: '🛠 {n} servicio(s) anterior(es) — ver', noHistory: 'Todavía no hay otros reportes de esta máquina.', histFor: 'Serie {s}',
     partsUsed: 'Repuestos', repairDone: 'Reparación completada', repairNotDone: 'No completada',
@@ -1222,9 +1222,17 @@ Object.assign(I18N.es, {
   vcF_customerName: 'Cliente', vcF_location: 'Ubicación', vcF_make: 'Marca', vcF_model: 'Modelo', vcF_serialNo: 'Número de serie', vcF_hour: 'Horas', vcF_time: 'Registro de horas',
   vcF_faults: 'Falla', vcF_services: 'Servicio hecho', vcF_status: 'Estado del trabajo', vcF_notes: 'Notas del técnico', vcWritePh: 'Escribe lo que hiciste, encontraste o necesitas…',
 });
+let VOICE_NOTES = !!LS.get('cher.voiceOn', false);   // turned on/off by the office in Developer tools (the tablet learns it from 'me', and remembers it offline)
+function refreshFeatures() {
+  return api('me').then(j => {
+    if (j.idleMinutes) idleMin = j.idleMinutes;
+    const v = !!j.voiceNotes; if (v !== VOICE_NOTES) { VOICE_NOTES = v; LS.set('cher.voiceOn', v); if (!v && vcOn) vcStop(); if (window.report) renderVoice(); }
+  }).catch(() => {});
+}
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let vcLang = LS.get('cher.voiceLang', LANG), vcRecog = null, vcOn = false, vcFinal = '';
 function renderVoice() {
+  $('#voiceCard').hidden = !VOICE_NOTES; if (!VOICE_NOTES) return;
   $$('#vcLang button').forEach(b => b.classList.toggle('on', b.dataset.l === vcLang));
   const list = report.voiceNotes || [], box = $('#vcList'); box.innerHTML = '';
   list.forEach((n, i) => {
@@ -1916,7 +1924,7 @@ function techNotify(msg, tag) {
   toast(msg);
   try { if ('Notification' in window && Notification.permission === 'granted' && document.hidden) new Notification('Cher Services', { body: msg, tag, icon: 'icons/icon-192.png' }); } catch {}
 }
-setInterval(() => { if (session && navigator.onLine) { pullJobs(); pullRequests(); } }, 120000);   // check the office every 2 minutes
+setInterval(() => { if (session && navigator.onLine && !session.offline) { pullJobs(); pullRequests(); pullCustomers(); pullInventory(); pullServices(); pullMine(true).catch(() => {}); refreshFeatures(); } }, 120000);   // check the office every 2 minutes: what it added, changed or deleted
 $('#btnNew').onclick = async () => {
   const started = report && report.startedAt && !report.updatedAt && !isLocked(report);
   if (!isSup() && started) await save(true);   // technicians don't discard reports: the current one is saved first
@@ -2142,10 +2150,18 @@ function renderJobs() {
 }
 /* opening an old report: take the office's latest copy first (another tablet or the supervisor may have added to it),
    unless this tablet has changes not sent yet. Without internet the copy on the tablet opens. */
+/* a report the office deleted: if it is the one on screen and has no unsent changes, the screen moves to a new report */
+function goneFromOffice(r) {
+  if (report?.id !== r.id || dirty) return;
+  toast(t('repDeleted', { n: r.invoiceNo || '' }));
+  try { localStorage.removeItem(draftKey(r.type)); } catch {}
+  report = blankReport(r.type); report.employeeId = me(); render();
+}
 async function freshCopy(id, local) {
   if (!navigator.onLine || !session || session.offline || (local && !local.synced)) return local || null;
   try {
-    const j = await api('report_latest', { id }); if (!j.report) return local || null;
+    const j = await api('report_latest', { id });
+    if (!j.report) { if (local?.synced) { await DB.del(id); toast(t('repDeleted', { n: local.invoiceNo || '' })); renderHist(); } return null; }   // deleted in the office
     const o = normalize(Object.assign(forRole(j.report), { synced: true }));
     if (local?.officeSentAt && !o.officeSentAt) o.officeSentAt = local.officeSentAt;
     if (o.employeeId !== me()) o.grantedTo = me();
@@ -2398,7 +2414,7 @@ async function renderHist() {
     d.querySelector('small').textContent = [r.make, r.model, r.serialNo && 'S/N ' + r.serialNo].filter(Boolean).join(' · ') + ' — ' + new Date(r.updatedAt || r.createdAt).toLocaleDateString();
     d.querySelector('.acts').onclick = async e => {
       const a = e.target.dataset.a; if (!a) return;
-      if (a === 'open') { const fr = await freshCopy(r.id, await DB.get(r.id) || r); report = normalize(fr || r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); refreshLock(); }
+      if (a === 'open') { const fr = await freshCopy(r.id, await DB.get(r.id) || r); if (!fr && r.synced) return; report = normalize(fr || r); saveDraft(); dirty = false; render(); show(report.type === 'maintenance' ? 'maint' : 'form'); refreshLock(); }
       if (a === 'pdf') sharePdf(withReqParts(r));
       if (a === 'dup') { const n = blankReport(r.type); n.employeeId = me(); ['customerName', 'address1', 'address2', 'address3', 'customerWhatsapp', 'customerEmail', 'model', 'serialNo', 'make', 'location'].forEach(k => n[k] = r[k]); report = n; dirty = true; saveDraft(); render(); show(n.type === 'maintenance' ? 'maint' : 'form'); toast(t('copied')); }
       if (a === 'del' && isSup()) {
@@ -2419,6 +2435,8 @@ async function pullMine(manual) {
   const j = await api('my_reports'); let n = 0;
   // a copy already sent is replaced by the office's (the office may have added to it); changes not sent yet are never touched
   for (const r of forRole(j.reports)) { const loc = await DB.get(r.id); if (!loc || loc.synced) { r.synced = true; if (loc?.officeSentAt && !r.officeSentAt) r.officeSentAt = loc.officeSentAt; if (!loc || JSON.stringify(loc) !== JSON.stringify(r)) n++; await DB.put(r); } }
+  // reports the office deleted: gone from this tablet too (only copies already sent; unsent work is never removed)
+  if (Array.isArray(j.ids)) { const keep = new Set(j.ids); for (const r of await DB.all()) if (r.synced && r.employeeId === me() && !r.grantedTo && !keep.has(r.id)) { await DB.del(r.id); goneFromOffice(r); n++; } }
   if (n && !$('#viewHist').hidden) renderHist();
   return n;
 }
@@ -2586,7 +2604,7 @@ function startSession() {
   pullCustomers(); pullInventory(); pullServices(); pullRequests(); pullMine(true).catch(() => {});
   pullJobs().then(() => { if (!LS.get('cher.view', null) && jobsCache.some(j => j.status !== 'done' && j.status !== 'cancelled')) show('jobs'); });
   syncAll(); checkUnsaved();
-  api('me').then(j => { if (j.idleMinutes) idleMin = j.idleMinutes; }).catch(() => {});
+  refreshFeatures();
 }
 
 /* ---------------- install prompt ---------------- */

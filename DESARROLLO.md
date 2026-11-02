@@ -297,7 +297,20 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
   - **Tablet:** en el número de serie, "🛠 N servicios anteriores"; en el cliente, "📋 N reportes más de este cliente". Abren la misma hoja con fallas, correcciones, servicios, partes y notas.
 - Servidor: tabla `report_links` (esquema v13); acciones `related_reports`, `customer_machines` y `report_link`. El reporte guarda `links` con los reportes elegidos en la tablet.
 
+## Lo que se borra en el panel también desaparece de la tablet
+
+- Cada 2 minutos, al abrir History y al iniciar sesión, la tablet pregunta qué reportes del técnico siguen existiendo (`my_reports` devuelve `ids`) y quita los que la oficina borró.
+  - Solo quita copias ya enviadas; un reporte con cambios sin enviar nunca se borra.
+  - Si el reporte borrado estaba abierto en pantalla y sin cambios, avisa "La oficina borró el reporte #…" y abre uno nuevo.
+- Al abrir un reporte que ya no existe en la oficina, la tablet avisa y lo quita.
+- Clientes, inventario y checklist de servicios también se actualizan cada 2 minutos, no solo al iniciar sesión. Trabajos y solicitudes de partes ya se actualizaban así.
+
 ## Notas de voz → reporte (app del técnico)
+
+> **Apagadas por defecto.** Se encienden y apagan en el panel → **Developer tools** (con el PIN de desarrolladora) → "🎙 Voice notes on the tablets".
+> - Cada tablet toma el cambio en menos de 2 minutos y lo recuerda sin internet.
+> - El supervisor o un técnico no pueden cambiarlo sin ese PIN.
+> - Servidor: ajuste `voice_notes`, acción `feature_set`; la acción `me` dice si están encendidas.
 
 - Tarjeta **🎙 Voice notes** arriba del reporte, en los dos tipos (Field Service Report y Equipment Service Report).
   - **Record a note**: graba y escribe en vivo lo que se oye. Cada grabación es una nota aparte. Si Chrome se detiene por una pausa, sigue escuchando hasta que el técnico toque **Stop**.

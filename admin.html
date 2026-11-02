@@ -822,6 +822,8 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
     </div>
     <div id="devBody" hidden>
       <div class="acts" style="justify-content:flex-start;align-items:center;margin:0 0 12px"><span>Developer tools are <b id="devOnOff">—</b></span><button type="button" class="btn s" id="devToggle"></button></div>
+      <div class="acts" style="justify-content:flex-start;align-items:center;margin:0 0 12px;flex-wrap:wrap"><span>🎙 Voice notes on the tablets are <b id="vnOnOff">—</b></span><button type="button" class="btn s" id="vnToggle"></button>
+        <span class="sub" style="margin:0;flex-basis:100%">Technicians record notes while they work and the report fills itself from key words (no AI, no cost). Every tablet picks the change up within 2 minutes.</span></div>
       <div id="devTools">
       <div class="subtabs" id="devTabs"><button type="button" data-d="load" class="on">Load test</button><button type="button" data-d="reset">Reset data</button><button type="button" data-d="export">Export data</button><button type="button" data-d="tutorial">Tutorials</button></div>
       <div id="devLoad" class="form">
@@ -2674,7 +2676,14 @@ $('#cuInv').onclick = () => { const c = custEdit; closeModal('#custModal'); invo
 /* The developer PIN lives only in api/config.php (DEV_PIN) and the server checks it on every developer action.
    The supervisor turns the tools on or off; while they are on, a bar under the header shows it. */
 let devPin = '', devOn = false;
+let vnOn = false;
+function vnRender() { $('#vnOnOff').textContent = vnOn ? 'ON' : 'OFF'; $('#vnOnOff').style.color = vnOn ? 'var(--ok)' : 'var(--muted)'; $('#vnToggle').textContent = vnOn ? 'Turn off' : 'Turn on'; $('#vnToggle').className = 'btn ' + (vnOn ? 'd' : 'p'); }
+$('#vnToggle').onclick = async () => {
+  try { const j = await api('feature_set', { pin: devPin, feature: 'voice_notes', on: !vnOn }); vnOn = !!j.on; vnRender(); toast(vnOn ? 'Voice notes ON for the tablets' : 'Voice notes OFF for the tablets'); }
+  catch (e) { toast(e.message); }
+};
 function devRender() {
+  vnRender();
   $('#devOnOff').textContent = devOn ? 'ON' : 'OFF'; $('#devOnOff').style.color = devOn ? 'var(--warn)' : 'var(--ok)';
   $('#devToggle').textContent = devOn ? 'Turn off' : 'Turn on'; $('#devToggle').className = 'btn ' + (devOn ? 'd' : 'p');
   $('#devTools').hidden = !devOn; $('#devBar').hidden = !devOn; $('#devState').textContent = devOn ? 'ON' : 'OFF';
@@ -2689,7 +2698,7 @@ $('#devBtn').onclick = () => openDev();
 $('#devBar').onclick = e => { if (e.target.closest('#tutRec')) return; const b = e.target.closest('[data-dev]'); if (!b) return; if (b.dataset.dev === 'off') { openDev(); if (devPin) $('#devToggle').click(); } else openDev(b.dataset.dev); };
 $('#devUnlock').onclick = async () => {
   $('#devErr').textContent = '';
-  try { const j = await api('dev_check', { pin: $('#devPin').value.trim() }); devPin = $('#devPin').value.trim(); devOn = !!j.enabled; $('#devLock').hidden = true; $('#devBody').hidden = false; devRender(); }
+  try { const j = await api('dev_check', { pin: $('#devPin').value.trim() }); devPin = $('#devPin').value.trim(); devOn = !!j.enabled; vnOn = !!j.voiceNotes; $('#devLock').hidden = true; $('#devBody').hidden = false; devRender(); }
   catch (e) { $('#devErr').textContent = /Unknown action/i.test(e.message) ? 'Upload the new api/api.php to the server first.' : e.message; }
 };
 $('#devPin').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#devUnlock').click(); } });
