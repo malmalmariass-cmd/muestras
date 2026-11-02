@@ -305,6 +305,44 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
 - Al abrir un reporte que ya no existe en la oficina, la tablet avisa y lo quita.
 - Clientes, inventario y checklist de servicios también se actualizan cada 2 minutos, no solo al iniciar sesión. Trabajos y solicitudes de partes ya se actualizaban así.
 
+## Equipo propio de Cher Services (★ In-house)
+
+- **Cher Services LLC existe como cliente** (esquema v14, con la dirección de la empresa). Los reportes de máquinas de la empresa se hacen a nombre de ese cliente.
+- **En la tablet:** al elegir ese cliente aparece "★ Equipo propio — una máquina de Cher Services".
+- **En el panel:**
+  - Esos reportes llevan **★ In-house** en la lista.
+  - En **Equipment** las máquinas propias salen con ★ y fondo amarillo claro. Hay botones **All / ★ In-house / Customers' equipment** con cuántas hay de cada una.
+  - Las máquinas propias **sin número de serie** también aparecen, agrupadas por marca y modelo, y abren su historial.
+
+## Revisar antes de enviar (técnico y supervisor)
+
+- **Tablet:** "Enviar correo" y "Enviar WhatsApp" muestran primero el PDF exacto que recibe el cliente. Ahí se puede incluir o no las fotos. Solo se envía al tocar "✔ Está bien — enviar"; "Volver" cancela.
+  - Si la tablet no puede mostrar PDF dentro de la app (algunas Android), el botón "Abrir el PDF" lo abre para revisarlo.
+- **Panel:** la ventana de envío de reportes y facturas muestra el PDF a la derecha. Se envía exactamente ese PDF.
+
+## Facturas: PO / SO, forma de pago y revisión
+
+- **Campos nuevos:** **Customer PO #**, **Sales order (SO) #** y **How will the customer pay?** (On account / Check / Cash / Zelle / Card / ACH).
+- **En el PDF:** sale "Customer PO / SO" en el recuadro de datos y "Payment: …" al inicio de las notas.
+- **Dónde más se ven:** en la ventana de la factura y en la lista ("PO …"). El buscador de facturas también encuentra por PO.
+- **"Review and save":** antes de guardar se ve un resumen (cliente, a quién se envía, reporte, PO/SO, pago, totales), las advertencias y el PDF.
+  - **Advertencias:** sin email ni WhatsApp; "a cuenta" sin PO; líneas en $0; forma de pago sin elegir; total en $0 (válido para garantías).
+  - **Bloquea guardar** solo si la fecha de vencimiento es anterior a la fecha de la factura.
+- Facturar un reporte ya agregaba la mano de obra con las horas del reporte. Sigue igual, y "+ Labor / service" sirve para servicios sueltos.
+
+## Fotos del reporte
+
+- **En la tablet:** en "📷 Fotos para el cliente" se agregan hasta 12 fotos, cada una con tipo (Antes / Daño encontrado / Después / Otra) y descripción.
+  - Se achican en la tablet (lado mayor 1600 px, JPEG ≈ 200–300 KB) y se guardan en un almacén propio de la tablet, no en el borrador.
+  - Al sincronizar suben al servidor (`photo_upload`) a `api/files/photos/<reporte>/`, carpeta cerrada a la web. El reporte guarda solo su descripción.
+- **En el PDF:** salen como páginas al final, dos por página con su descripción (`pdf-codes.js`).
+- **Quién las ve y envía:**
+  - Otra tablet o el técnico de un seguimiento las descarga de la oficina (`photo_get`).
+  - El panel las muestra en el reporte (se pueden descargar) y las incluye en el PDF, en el correo y en la copia de la oficina.
+- **Espacio:** en Settings se ve cuánto ocupan. "Delete old photos" borra con PIN las fotos de reportes de más de 6/12/24/36 meses; los reportes quedan.
+  - Al borrar un reporte se borran sus fotos.
+  - Las fotos no van en el respaldo .sql.
+
 ## Notas de voz → reporte (app del técnico)
 
 > **Apagadas por defecto.** Se encienden y apagan en el panel → **Developer tools** (con el PIN de desarrolladora) → "🎙 Voice notes on the tablets".

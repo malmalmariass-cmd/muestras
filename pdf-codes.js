@@ -27,9 +27,38 @@
     doc.setPage(last);
   };
   const buildReport = window.buildPdf, buildInvoice = window.buildInvoicePdf;
+  /* photos of the job (before / damage found / after): extra pages at the end, two per page with their caption.
+     The app passes them as r._photos = [{ data: 'data:image/jpeg;base64,…', kind, caption }] */
+  const PH_KIND = { before: 'Before', damage: 'Damage found', after: 'After', other: 'Photo' };
+  const imgSize = src => new Promise(ok => { const i = new Image(); i.onload = () => ok([i.naturalWidth, i.naturalHeight]); i.onerror = () => ok(null); i.src = src; });
+  async function photoPages(doc, r) {
+    const list = (r._photos || []).filter(p => p && /^data:image\/jpe?g;base64,/.test(p.data || ''));
+    if (!list.length) return;
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), L = 36, BW = W - 72, BH = (H - 150) / 2;
+    for (let i = 0; i < list.length; i++) {
+      if (i % 2 === 0) {
+        doc.addPage(); doc.setFillColor(18, 58, 140); doc.rect(0, 0, W, 6, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(18, 58, 140);
+        doc.text(`PHOTOS — Service report #${r.invoiceNo || ''}`, L, 40);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90, 107, 133);
+        doc.text([r.customerName, [r.make, r.model].filter(Boolean).join(' '), r.serialNo && 'S/N ' + r.serialNo].filter(Boolean).join('  ·  '), L, 56);
+      }
+      const p = list[i], top = 72 + (i % 2) * (BH + 30), sz = await imgSize(p.data);
+      if (sz) {
+        const k = Math.min(BW / sz[0], BH / sz[1]), w = sz[0] * k, h = sz[1] * k;
+        try { doc.addImage(p.data, 'JPEG', L + (BW - w) / 2, top, w, h); } catch {}
+        doc.setDrawColor(221, 227, 238); doc.rect(L + (BW - w) / 2, top, w, h);
+      }
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(22, 32, 46);
+      const label = `${i + 1}. ${PH_KIND[p.kind] || 'Photo'}${p.caption ? ': ' : ''}`;
+      doc.text(label, L, top + BH + 16);
+      if (p.caption) { doc.setFont('helvetica', 'normal'); doc.text(doc.splitTextToSize(String(p.caption), BW - doc.getTextWidth(label))[0], L + doc.getTextWidth(label), top + BH + 16); }
+    }
+  }
   if (buildReport) window.buildPdf = async r => {
     const doc = await buildReport(r), c = reportCode(r);
     if (c) stamp(doc, 'Code: ' + c, 78);   // under the invoice number box
+    await photoPages(doc, r);
     return doc;
   };
   // billed to a company, to the attention of the person who pays: "Attn: name" under the company, and their email / WhatsApp
@@ -41,8 +70,10 @@
     if (v.attn.email) c.email = v.attn.email; if (v.attn.whatsapp) { c.whatsapp = v.attn.whatsapp; c.phone = c.phone || ''; }
     return Object.assign({}, v, { customer: c });
   };
+  // how the customer pays goes first in the notes ("Payment: Check")
+  const withPay = v => v.payBy ? Object.assign({}, v, { notes: 'Payment: ' + v.payBy + (v.notes ? '\n' + v.notes : '') }) : v;
   if (buildInvoice) window.buildInvoicePdf = async v => {
-    const doc = await buildInvoice(withAttn(v)), c = invoiceCode(v);
+    const doc = await buildInvoice(withPay(withAttn(v))), c = invoiceCode(v);
     if (c) stamp(doc, `Work order #${v.workOrder || v.reportNo || v.invoiceNo}  ·  Code: ${c}`, 100);   // above the Bill to box
     return doc;
   };
