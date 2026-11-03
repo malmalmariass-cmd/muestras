@@ -296,6 +296,7 @@ textarea.grow{resize:none;overflow:hidden;min-height:46px;line-height:1.4}
 .sthist div{display:flex;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line)}
 .sthist div b{color:var(--ink);min-width:130px}
 .pvbox{height:min(62vh,640px);border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f3f5f9;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);padding:0}.pvbox iframe{width:100%;height:100%;border:0}
+.tnow{display:flex;gap:4px;align-items:center}.tnow input{flex:1;min-width:0}.tnow button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 7px;cursor:pointer;font-size:15px;line-height:1}
 .phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}.ph{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
 .ph .im{position:relative;aspect-ratio:4/3;background:#eef1f6;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}.ph img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
 .ph .x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:17px;cursor:pointer}.ph .st{position:absolute;left:6px;bottom:6px;font-size:11px;font-weight:700;background:rgba(255,255,255,.9);border-radius:6px;padding:2px 6px}
@@ -788,7 +789,7 @@ const I18N = {
     newJobHint: 'Schedule a visit for yourself (for example a follow-up or a customer who called).', saveJob: 'Save job', jobSaved: 'Job saved',
     startReport: 'Start report', openReport: 'Open report', today: 'Today', tomorrow: 'Tomorrow', overdue: 'Overdue', noJobs: 'No jobs assigned. New jobs from the office appear here.',
     st_scheduled: 'Scheduled', st_in_progress: 'In progress', st_done: 'Done', st_cancelled: 'Cancelled', jobFrom: 'Job for {cust} · {d}', repeats: 'Repeats',
-    pvTitle: 'Check the report before sending', pvBack: 'Back', pvOpen: 'Open the PDF', pvOkEmail: '✔ Looks good — send by email', pvOkWa: '✔ Looks good — send by WhatsApp', pvMaking: 'Preparing the PDF…',
+    nowTime: 'Now (this tablet\'s time)', pvTitle: 'Check the report before sending', pvBack: 'Back', pvOpen: 'Open the PDF', pvOkEmail: '✔ Looks good — send by email', pvOkWa: '✔ Looks good — send by WhatsApp', pvMaking: 'Preparing the PDF…',
     pvSub: 'This is exactly what the customer gets ({to}).', pvNoView: 'This tablet shows PDFs outside the app: tap “Open the PDF”, check it and come back here to send it.',
     phTitle: '📷 Photos for the customer', phAdd: 'Add photo', phHint: 'Before, damage found or after: they go to the customer with the report (extra pages at the end of the PDF). Up to 12.',
     ph_before: 'Before', ph_damage: 'Damage found', ph_after: 'After', ph_other: 'Other', phCap: 'Caption (optional)', phMax: 'At most 12 photos per report.', phWait: 'not sent yet', phDel: 'Remove this photo?',
@@ -873,7 +874,7 @@ const I18N = {
     newJobHint: 'Agenda una visita para ti (por ejemplo, un seguimiento o un cliente que llamó).', saveJob: 'Guardar trabajo', jobSaved: 'Trabajo guardado',
     startReport: 'Iniciar reporte', openReport: 'Abrir reporte', today: 'Hoy', tomorrow: 'Mañana', overdue: 'Atrasados', noJobs: 'No tienes trabajos asignados. Los trabajos nuevos de la oficina aparecerán aquí.',
     st_scheduled: 'Programado', st_in_progress: 'En proceso', st_done: 'Terminado', st_cancelled: 'Cancelado', jobFrom: 'Trabajo de {cust} · {d}', repeats: 'Se repite',
-    pvTitle: 'Revisa el reporte antes de enviarlo', pvBack: 'Volver', pvOpen: 'Abrir el PDF', pvOkEmail: '✔ Está bien — enviar por correo', pvOkWa: '✔ Está bien — enviar por WhatsApp', pvMaking: 'Preparando el PDF…',
+    nowTime: 'Ahora (la hora de esta tablet)', pvTitle: 'Revisa el reporte antes de enviarlo', pvBack: 'Volver', pvOpen: 'Abrir el PDF', pvOkEmail: '✔ Está bien — enviar por correo', pvOkWa: '✔ Está bien — enviar por WhatsApp', pvMaking: 'Preparando el PDF…',
     pvSub: 'Esto es exactamente lo que recibe el cliente ({to}).', pvNoView: 'Esta tablet abre los PDF fuera de la app: toca “Abrir el PDF”, revísalo y vuelve aquí para enviarlo.',
     phTitle: '📷 Fotos para el cliente', phAdd: 'Agregar foto', phHint: 'Antes, daño encontrado o después: van al cliente con el reporte (páginas extra al final del PDF). Hasta 12.',
     ph_before: 'Antes', ph_damage: 'Daño encontrado', ph_after: 'Después', ph_other: 'Otra', phCap: 'Descripción (opcional)', phMax: 'Máximo 12 fotos por reporte.', phWait: 'sin enviar', phDel: '¿Quitar esta foto?',
@@ -1193,7 +1194,13 @@ function renderTime() {
       const inp = document.createElement('input'); inp.type = ty; inp.value = row[k] || '';
       if (k === 'mileage') inp.inputMode = 'decimal';
       inp.addEventListener('input', () => { row[k] = inp.value; markDirty(); });
-      td.appendChild(inp); tr.appendChild(td);
+      if (ty === 'time') {   // one tap = this tablet's time now (it can still be changed by hand)
+        const w = document.createElement('div'); w.className = 'tnow';
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = '⏱'; b.title = t('nowTime');
+        b.onclick = () => { const d = new Date(); inp.value = row[k] = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); if (!row.date) row.date = todayISO(); markDirty(); renderTime(); };
+        w.append(inp, b); td.appendChild(w);
+      } else td.appendChild(inp);
+      tr.appendChild(td);
     });
     const td = document.createElement('td'); td.dataset.l = '';
     const x = document.createElement('button'); x.className = 'x'; x.type = 'button'; x.textContent = '×'; x.title = t('removeDay');
@@ -1407,7 +1414,7 @@ function vcTime(v) {
 }
 function vcDate(v) {
   if (/\b(hoy|today)\b/i.test(v)) return todayISO();
-  if (/\b(ayer|yesterday)\b/i.test(v)) { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().slice(0, 10); }
+  if (/\b(ayer|yesterday)\b/i.test(v)) { const d = new Date(); d.setDate(d.getDate() - 1); return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
   const m = v.match(/(\d{1,2})[\/-](\d{1,2})(?:[\/-](\d{2,4}))?/); if (!m) return '';
   const y = m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : String(new Date().getFullYear());
   return `${y}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;

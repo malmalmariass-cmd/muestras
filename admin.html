@@ -50,6 +50,9 @@ tr.rt-f td:first-child{box-shadow:inset 4px 0 #2f6fdc}tr.rt-e td:first-child{box
 .rtchips button[data-t="repair"].on{background:#1d4fb8;border-color:#1d4fb8}.rtchips button[data-t="maintenance"].on{background:#0e7a43;border-color:#0e7a43}
 .drawer.rt-f .dh{border-top:6px solid #2f6fdc}.drawer.rt-e .dh{border-top:6px solid #17a35e}
 .tag.inhouse{background:#fff3cd;color:#8a6100;border:1px solid #f1d38a}.star{color:#e0a800;font-size:16px}tr.inh td{background:#fffdf3}
+.dt{display:flex;gap:6px}.dt input[type=date]{flex:1.4;min-width:0}.dt input[type=time]{flex:1;min-width:0}
+.autobox{background:#f3f7ff;border:1px solid #cfdcf7;border-radius:12px;padding:10px 12px;margin:0 0 10px;font-size:14px}.autobox b{color:var(--navy)}.autobox .rate{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-weight:700}.autobox .rate input{width:110px}
+tr.auto td:first-child{box-shadow:inset 3px 0 #2f6fdc}
 .revgrid{display:grid;grid-template-columns:minmax(260px,1fr) 1.4fr;gap:16px;margin-top:12px}@media (max-width:900px){.revgrid{grid-template-columns:1fr}}
 .revpdf{min-height:520px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#f3f5f9}.revpdf iframe{width:100%;height:100%;min-height:520px;border:0}
 .chkl div{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.chkl .ok{color:var(--ok)}.chkl .wn{color:#a35b00}.chkl .er{color:var(--red)}
@@ -585,7 +588,7 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
 
 <!-- invoice drawer -->
 <aside class="drawer" id="ivDrawer" hidden>
-  <div class="dh"><h2 id="ivdTitle">Invoice</h2><button class="btn s" id="ivdEdit">Edit</button><button class="btn p" id="ivdPdf">PDF</button><button class="btn s" id="ivdPrint">Print</button><button class="btn s" id="ivdEmail">Email</button><button class="btn s" id="ivdWa">WhatsApp</button><button class="btn d" id="ivdDel">Delete</button><button class="btn s" id="ivdClose">✕</button></div>
+  <div class="dh"><h2 id="ivdTitle">Invoice</h2><button class="btn s" id="ivdEdit">Edit</button><button class="btn s" id="ivdPrev">👁 Preview</button><button class="btn p" id="ivdPdf">PDF</button><button class="btn s" id="ivdPrint">Print</button><button class="btn s" id="ivdEmail">Email</button><button class="btn s" id="ivdWa">WhatsApp</button><button class="btn d" id="ivdDel">Delete</button><button class="btn s" id="ivdClose">✕</button></div>
   <div class="db" id="ivdBody"></div>
 </aside>
 
@@ -608,13 +611,14 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
       <div class="fsect">Invoice</div>
       <div class="row"><div><label>Work order (service report) — required</label><select id="ivWO"></select></div>
         <div style="align-self:end;padding-bottom:9px" class="eq">Document code: <b id="ivCode">—</b></div></div>
-      <div class="row4"><div><label>Invoice date</label><input id="ivDate" type="date"></div>
+      <div class="row4"><div><label>Invoice date and time (this device's, can be changed)</label><div class="dt"><input id="ivDate" type="date"><input id="ivTime" type="time"></div></div>
         <div><label>Terms</label><select id="ivTerms"><option value="Due upon receipt">Due upon receipt</option><option value="Net 15">Net 15</option><option value="Net 30">Net 30</option><option value="Net 45">Net 45</option><option value="">Custom due date</option></select></div>
         <div><label>Due date</label><input id="ivDue" type="date"></div><div><label>Reference (the document code if empty)</label><input id="ivRef" placeholder="automatic"></div></div>
       <div class="row3"><div><label>Customer PO # (purchase order)</label><input id="ivPO" placeholder="The number the customer gives to pay" autocomplete="off"></div>
         <div><label>Sales order (SO) #</label><input id="ivSO" placeholder="If the customer uses one" autocomplete="off"></div>
         <div><label>How will the customer pay?</label><select id="ivPayBy"><option value="">— Not decided —</option><option>On account (PO / terms)</option><option>Check</option><option>Cash</option><option>Zelle</option><option>Credit / debit card</option><option>Bank transfer (ACH)</option></select></div></div>
       <div class="fsect">What are you billing?</div>
+      <div class="autobox" id="ivAuto" hidden></div>
       <div class="tablewrap"><table class="lines"><thead><tr><th style="width:110px">Part no.</th><th>Description</th><th style="width:80px" class="r">Qty</th><th style="width:64px">Unit</th><th style="width:100px" class="r">Unit price</th><th style="width:40px" title="Taxable">Tax</th><th style="width:100px" class="r">Amount</th><th style="width:40px"></th></tr></thead><tbody id="ivLines"></tbody></table></div>
       <div class="addrow">
         <button type="button" class="btn s" id="ivAddStock">+ In-house part</button>
@@ -758,6 +762,12 @@ tr.jday0>td{background:#e6f7ec}tr.jday1>td{background:#fff6d6}
 </div>
 
 <!-- employee modal -->
+<div class="modal" id="pvModal" hidden>
+  <div class="mc xl">
+    <div style="display:flex;align-items:center;gap:10px"><h2 id="pvTitle" style="margin:0;flex:1">Preview</h2><button type="button" class="btn s" id="pvDl">⬇ Download</button><button type="button" class="btn s" data-cancel>Close</button></div>
+    <div class="revpdf" id="pvBody" style="margin-top:12px;height:min(75vh,900px)"></div>
+  </div>
+</div>
 <div class="modal" id="ivRevModal" hidden>
   <div class="mc xl">
     <div style="display:flex;align-items:center;gap:10px"><h2 style="margin:0;flex:1">Review the invoice before saving</h2><button type="button" class="btn s" id="ivRevBack">← Back to edit</button></div>
@@ -1020,7 +1030,8 @@ async function api(action, data = {}) {
 const fmtD = d => { if (!d) return '—'; const [y, m, dd] = d.slice(0, 10).split('-'); return `${m}/${dd}/${y}`; };
 const fmtDT = d => d ? new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 const fmtN = (n, dp = 0) => Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
-const iso = d => d.toISOString().slice(0, 10);
+const iso = d => new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);   // the device's own date (not UTC: at night in Florida UTC is already tomorrow)
+const hhmm = (d = new Date()) => String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 /* report / invoice number as shown: 0045, or 1-005 after a test reset started series 1 (stored as 1000005) */
 const docNo = n => { n = +n || 0; const sr = Math.floor(n / 1e6), k = n % 1e6; return sr ? `${sr}-${String(k).padStart(3, '0')}` : String(k).padStart(4, '0'); };
 
@@ -2062,7 +2073,7 @@ async function openInvoice(id) {
     $('#ivdBody').innerHTML =
       `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="bigtot">${money(v.total)}</span>${ivTag(v)}${v.status !== 'void' && v.paidAmount > 0 ? `<span class="eq">Received ${money(v.paidAmount)} · balance <b>${money(v.balance)}</b></span>` : ''}</div>` +
       `<div class="sect">Bill to</div>` + kv([['Customer', `<b>${esc(c.name)}</b>`], ['Attn (pays for the company)', v.attn ? esc([v.attn.name, v.attn.email, v.attn.whatsapp].filter(Boolean).join(' · ')) : ''], ['Address', esc([c.address1, c.address2, c.address3].filter(Boolean).join('\n'))], ['Phone', esc(c.phone)], ['WhatsApp', esc(c.whatsapp)], ['Email', esc(c.email)]]) +
-      `<div class="sect">Details</div>` + kv([['Document code', `<b>${esc(v.docCode || '')}</b>`], ['Work order', esc(v.workOrder || '')], ['Invoice date', fmtD(v.date)], ['Due date', v.dueDate ? fmtD(v.dueDate) : 'On receipt'], ['Terms', esc(v.terms)], ['Reference', esc(v.reference)],
+      `<div class="sect">Details</div>` + kv([['Document code', `<b>${esc(v.docCode || '')}</b>`], ['Work order', esc(v.workOrder || '')], ['Invoice date', fmtD(v.date) + (v.time ? ' · ' + esc(v.time) : '')], ['Due date', v.dueDate ? fmtD(v.dueDate) : 'On receipt'], ['Terms', esc(v.terms)], ['Reference', esc(v.reference)],
         ['Customer PO', esc(v.po || '')], ['Sales order (SO)', esc(v.so || '')], ['Payment', esc(v.payBy || '')],
         ['Service report', v.reportNo ? `<button type="button" class="linkbtn" data-rep="${esc(v.reportId)}">#${esc(v.reportNo)}</button>` : ''], ['Parts request', v.requestId ? `<button type="button" class="linkbtn" data-req="${v.requestId}">PR-${String(v.requestId).padStart(4, '0')}</button>` : ''], ['Created by', esc(v.createdBy || '')], ['Last change', fmtDT(v.updatedAt)]]) +
       `<div class="sect">Lines</div><table class="mini"><tr><th>Part no.</th><th>Description</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr>${v.lines.map(l => `<tr><td>${esc(l.partNo || '')}</td><td>${esc(l.name)}${l.taxable ? ' <span class="eq">(T)</span>' : ''}${src(l)}</td><td class="r">${fmtN(l.qty, l.qty % 1 ? 2 : 0)} ${esc(l.unit || '')}</td><td class="r">${money(l.price)}</td><td class="r">${money(l.qty * l.price)}</td></tr>`).join('')}
@@ -2100,6 +2111,16 @@ async function ivPay(data) {
   try { const j = await api('invoice_payment', { id: openIv.id, ...data }); toast(data.deletePayment ? 'Payment removed' : 'Payment recorded'); openInvoice(j.invoice.id); if (current === 'invoices') loadInvoices(); }
   catch (e) { toast(e.message); }
 }
+/* preview: the PDF exactly as the customer gets it, without downloading or sending it */
+let pvUrl = null;
+async function showPreview(title, build, name) {
+  $('#pvTitle').textContent = title; $('#pvBody').innerHTML = '<div class="eq" style="padding:20px">Preparing the PDF…</div>'; openModal('#pvModal');
+  try {
+    const doc = await build(); if (pvUrl) URL.revokeObjectURL(pvUrl); pvUrl = URL.createObjectURL(doc.output('blob'));
+    $('#pvBody').innerHTML = pdfFrame(pvUrl, title); $('#pvDl').onclick = () => { const a = document.createElement('a'); a.href = pvUrl; a.download = name; a.click(); };
+  } catch (e) { $('#pvBody').innerHTML = `<div class="eq" style="padding:20px">${esc(e.message)}</div>`; }
+}
+$('#ivdPrev').onclick = () => { const v = openIv; if (v) showPreview(`Invoice #${v.invoiceNo} · ${v.customer.name}`, () => buildInvoicePdf(v), invoicePdfName(v)); };
 $('#ivdEdit').onclick = () => { const v = openIv; closeDrawer(); invoiceModal(v); };
 
 /* ---- invoice statistics ---- */
@@ -2522,7 +2543,7 @@ function ivDraftCollect(bare) {
   return { startedAt: bare ? '' : ivDraftStart || (ivDraftStart = new Date().toISOString()), editId: ivEdit?.id || 0, editNo: ivEdit?.invoiceNo || '', reportId: ivReportId, requestId: ivRequestId,
     customer: { name, address1: $('#ivA1').value, address2: $('#ivA2').value, address3: $('#ivA3').value, phone: $('#ivPhone').value, whatsapp: $('#ivWa').value, email: $('#ivEmail').value },
     date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, notes: $('#ivNotes').value, taxRate: $('#ivTax').value, lines: ivLines, attn: ivAttnVal(),
-    po: $('#ivPO').value, so: $('#ivSO').value, payBy: $('#ivPayBy').value };
+    po: $('#ivPO').value, so: $('#ivSO').value, payBy: $('#ivPayBy').value, time: $('#ivTime').value };
 }
 function ivAttnVal() { return ivBillMode() === 'company' && $('#ivAttnName').value.trim() ? { name: $('#ivAttnName').value.trim(), email: $('#ivAttnEmail').value.trim(), whatsapp: $('#ivAttnWa').value.trim() } : null; }
 function ivAttnFill(a) { $('#ivAttnName').value = a?.name || ''; $('#ivAttnEmail').value = a?.email || ''; $('#ivAttnWa').value = a?.whatsapp || ''; ivSetBill(a ? 'company' : 'self'); }
@@ -2554,7 +2575,7 @@ async function ivResume() {
   $('#ivCust').value = c.name || ''; $('#ivA1').value = c.address1 || ''; $('#ivA2').value = c.address2 || ''; $('#ivA3').value = c.address3 || '';
   $('#ivPhone').value = c.phone || ''; $('#ivWa').value = c.whatsapp || ''; $('#ivEmail').value = c.email || '';
   $('#ivDate').value = d.date || $('#ivDate').value; $('#ivDue').value = d.dueDate || $('#ivDue').value; $('#ivTerms').value = d.terms ?? ''; $('#ivRef').value = d.reference || '';
-  $('#ivPO').value = d.po || ''; $('#ivSO').value = d.so || ''; $('#ivPayBy').value = d.payBy || '';
+  $('#ivPO').value = d.po || ''; $('#ivSO').value = d.so || ''; $('#ivPayBy').value = d.payBy || ''; $('#ivTime').value = d.time || '';
   $('#ivNotes').value = d.notes || ''; $('#ivTax').value = d.taxRate ?? $('#ivTax').value; ivLines = (d.lines || []).map(l => ({ ...l })); ivAttnFill(d.attn); renderLines();
   ivDraftBase = null;
   await ivLoadWO(d.reportId || '');
@@ -2580,11 +2601,12 @@ async function invoiceModal(v, preset) {
   $('#ivCust').value = c.name || ''; $('#ivA1').value = c.address1 || ''; $('#ivA2').value = c.address2 || ''; $('#ivA3').value = c.address3 || '';
   $('#ivPhone').value = c.phone || ''; $('#ivWa').value = c.whatsapp || ''; $('#ivEmail').value = c.email || '';
   $('#ivSaveCust').checked = true; ivFilledFrom = null; ivAttnFill(d.attn || null);
-  $('#ivDate').value = d.date || iso(new Date());
+  $('#ivDate').value = d.date || iso(new Date()); $('#ivTime').value = d.time || (v ? '' : hhmm());   // a new invoice: this device's date and time now
   $('#ivTerms').value = d.terms ?? 'Due upon receipt'; if ($('#ivTerms').value !== (d.terms ?? 'Due upon receipt')) $('#ivTerms').value = '';
   if (d.dueDate) $('#ivDue').value = d.dueDate; else termsDue();
   $('#ivRef').value = d.reference || ''; $('#ivNotes').value = d.notes || '';
   $('#ivPO').value = d.po || ''; $('#ivSO').value = d.so || ''; $('#ivPayBy').value = d.payBy || '';
+  $('#ivAuto').hidden = true; $('#ivAuto').innerHTML = '';
   ivReportId = d.reportId || null; ivRequestId = v ? null : (d.requestId || null);
   if (d.requestId && !d.reportNo) { $('#ivFromRep').hidden = false; $('#ivFromRep').textContent = `From parts request PR-${String(d.requestId).padStart(4, '0')}`; }
   ivLines = (d.lines || []).map(l => ({ ...l, key: l.key || rkey(), price: l.price == null ? (ivSettings.laborRate || 0) : l.price }));
@@ -2617,7 +2639,38 @@ function ivCodePreview() {
   const wo = r?.invoice_no ? docNo(r.invoice_no) : r?.label ? r.label.slice(1) : v === 'none' ? (ivEdit?.invoiceNo || 'new no.') : '';
   $('#ivCode').textContent = wo ? `${custInitials($('#ivCust').value)}-${wo}-${date}` : '—';
 }
-$('#ivWO').onchange = () => { const v = $('#ivWO').value; ivReportId = v && v !== 'none' ? v : null; ivCodePreview(); };
+$('#ivWO').onchange = () => { const v = $('#ivWO').value; ivReportId = v && v !== 'none' ? v : null; ivCodePreview(); if (!ivEdit) ivAutoFill(ivReportId); };
+/* a service report chosen: its parts not billed yet and the labor (work summary, hours counted from the time record,
+   the hourly rate to fill in) are added as lines marked from the report; every line can be edited or deleted */
+let ivAutoT = 0;
+async function ivAutoFill(rid) {
+  const my = ++ivAutoT, box = $('#ivAuto');
+  ivLines = ivLines.filter(l => !l.auto);   // lines added from another report go away
+  if (!rid) { box.hidden = true; renderLines(); return; }
+  box.hidden = false; box.textContent = 'Reading the report…';
+  try {
+    const j = await api('report_billing', { id: rid }); if (my !== ivAutoT) return;
+    const rate = +(ivSettings.laborRate || 0) || +j.laborRate || 0;
+    const add = j.lines.map(l => ({ ...l, key: rkey(), auto: true }));
+    const left = Math.max(0, Math.round((j.hours - j.billedHours) * 100) / 100), needHours = !j.hours;
+    if (left > 0 || needHours) {
+      const what = `Labor${j.equipment ? ' — ' + j.equipment : ''}${j.work ? ': ' + j.work : ''}`;
+      add.push({ key: rkey(), itemId: null, partNo: '', name: what.length > 195 ? what.slice(0, 194) + '…' : what, qty: needHours ? 1 : left, unit: 'hr', price: rate, source: 'service', taxable: false, auto: true, labor: true });
+    }
+    ivLines = ivLines.filter(l => String(l.name || '').trim() || +l.price).concat(add); renderLines();
+    const parts = add.filter(l => !l.labor).length, lab = add.find(l => l.labor);
+    box.innerHTML = `<b>From service report #${esc(j.reportNo)}</b> — added ${parts ? `${parts} part(s) not billed yet${j.requests.length ? ' (incl. ' + esc(j.requests.join(', ')) + ')' : ''}` : 'no parts (nothing left to bill)'}`
+      + (lab ? ` and labor: ${needHours ? '<b style="color:#a35b00">no hours in the time record — write them in the line</b>' : `<b>${fmtN(lab.qty, 2)} h</b> from the time record${j.billedHours ? ` (${fmtN(j.billedHours, 2)} h already billed)` : ''}`}.` : j.hours ? `. Labor already billed (${fmtN(j.billedHours, 2)} h).` : '.')
+      + (j.otherInvoices.length ? `<div class="eq">Already billed on invoice(s) ${esc(j.otherInvoices.join(', '))} — only what is left was added.</div>` : '')
+      + (lab ? `<div class="rate">Labor rate $<input id="ivRate" type="number" min="0" step="0.01" value="${rate || ''}" placeholder="per hour"> / hour</div>` : '')
+      + `<div class="eq">Lines marked in blue come from the report: change or delete any of them (for example if something was already charged another way).</div>`;
+  } catch (e) { if (my === ivAutoT) box.textContent = e.message; }
+}
+document.addEventListener('input', e => {
+  if (e.target.id !== 'ivRate') return;
+  const r = Math.max(0, +e.target.value || 0); ivLines.forEach(l => { if (l.labor) l.price = r; }); renderLines();
+  const el = $('#ivRate'); if (el && document.activeElement !== el) el.focus();
+});
 $('#ivDate').addEventListener('change', ivCodePreview);
 let ivWOT; $('#ivCust').addEventListener('input', () => { clearTimeout(ivWOT); ivWOT = setTimeout(() => ivLoadWO(), 500); });
 function custMatch() { const n = $('#ivCust').value.trim().toLowerCase(); return n ? custCache.find(x => x.name.toLowerCase() === n) : null; }
@@ -2660,7 +2713,7 @@ function lineTag(l) {
   return '<div class="src service">Labor / service · no stock</div>';
 }
 function renderLines() {
-  $('#ivLines').innerHTML = ivLines.length ? ivLines.map((l, i) => `<tr data-i="${i}">
+  $('#ivLines').innerHTML = ivLines.length ? ivLines.map((l, i) => `<tr data-i="${i}"${l.auto ? ' class="auto" title="From the service report"' : ''}>
     <td><input type="text" data-f="partNo" value="${esc(l.partNo || '')}"></td>
     <td><input type="text" data-f="name" value="${esc(l.name || '')}" placeholder="Description"><div class="tagc">${lineTag(l)}</div></td>
     <td><input type="number" data-f="qty" min="0" step="any" value="${esc(l.qty)}" class="r"></td>
@@ -2759,7 +2812,8 @@ function ivPayload() {
   return { id: ivEdit?.id || 0, customerId: c?.id || null, saveCustomer: $('#ivSaveCust').checked,
     customer: { name, address1: $('#ivA1').value, address2: $('#ivA2').value, address3: $('#ivA3').value, phone: $('#ivPhone').value, whatsapp: $('#ivWa').value, email: $('#ivEmail').value },
     date: $('#ivDate').value, dueDate: $('#ivDue').value, terms: $('#ivTerms').value, reference: $('#ivRef').value, reportId: $('#ivWO').value !== 'none' ? $('#ivWO').value : null, noReport: $('#ivWO').value === 'none', requestId: ivRequestId,
-    lines: ivLines, taxRate: $('#ivTax').value || 0, notes: $('#ivNotes').value, attn: ivAttnVal(), po: $('#ivPO').value.trim(), so: $('#ivSO').value.trim(), payBy: $('#ivPayBy').value };
+    lines: ivLines, taxRate: $('#ivTax').value || 0, notes: $('#ivNotes').value, attn: ivAttnVal(), po: $('#ivPO').value.trim(), so: $('#ivSO').value.trim(), payBy: $('#ivPayBy').value, time: $('#ivTime').value,
+    fromRequests: [...new Set(ivLines.filter(l => l.fromReq && String(l.name || '').trim()).map(l => l.fromReq))] };
 }
 async function ivReview() {
   const v = ivPayload(), rate = Math.max(0, +v.taxRate || 0), ls = v.lines.filter(l => String(l.name || '').trim());
@@ -2769,7 +2823,7 @@ async function ivReview() {
   const rows = [['Customer', v.customer.name + (v.attn ? ' · Attn: ' + v.attn.name : '')], ['Send to', to.filter(Boolean).join(' · ') || '—'],
     ['Service report', v.noReport ? 'Not linked (sale without a report)' : wo ? '#' + docNo(wo.invoice_no) + ' · ' + fmtD(wo.job_date) : ivEdit?.reportNo ? '#' + ivEdit.reportNo : '—'],
     ['Customer PO / SO', [v.po && 'PO ' + v.po, v.so && 'SO ' + v.so].filter(Boolean).join(' · ') || '—'], ['Payment', v.payBy || 'Not decided'],
-    ['Date / terms', `${fmtD(v.date)} · ${v.terms || 'custom'}${v.dueDate ? ' · due ' + fmtD(v.dueDate) : ''}`],
+    ['Date / terms', `${fmtD(v.date)}${v.time ? ' ' + v.time : ''} · ${v.terms || 'custom'}${v.dueDate ? ' · due ' + fmtD(v.dueDate) : ''}`],
     ['Lines', `${ls.length} (${ls.filter(l => l.source === 'service' || l.source === 'labor' || !l.source).length} labor / service)`], ['Subtotal', money(sub)], ['Tax', `${money(tax)} (${rate}%)`], ['Total', money(total)]];
   $('#ivRevSum').innerHTML = `<dl class="kv">${rows.map(([k, x]) => `<dt>${esc(k)}</dt><dd>${k === 'Total' ? '<b>' + esc(x) + '</b>' : esc(x)}</dd>`).join('')}</dl>`;
   const chk = [];
@@ -2809,12 +2863,9 @@ $('#ivRevOk').onclick = async () => {
 async function invoiceFromReport(r) {
   await ensureCustomers();
   const c = custCache.find(x => x.name.toLowerCase() === String(r.customerName || '').trim().toLowerCase()) || {};
-  const hours = (r.time || []).reduce((s, t) => { const a = /^(\d{1,2}):(\d{2})/.exec(t?.started || ''), b = /^(\d{1,2}):(\d{2})/.exec(t?.completed || ''); if (!a || !b) return s; let d = (+b[1] * 60 + +b[2]) - (+a[1] * 60 + +a[2]); if (d < 0) d += 1440; return s + d / 60; }, 0);
-  const lines = (r.parts || []).filter(p => p && p.name && +p.qty > 0).map(p => ({ key: rkey(), itemId: p.itemId || null, partNo: p.partNo || '', name: p.name, qty: +p.qty, unit: p.unit || 'ea', price: +p.price || 0,
-    source: p.source === 'order' ? 'order' : (p.itemId ? 'stock' : 'service'), vendor: p.vendor || '', taxable: true, noStock: true }));
-  if (hours > 0) lines.push({ key: rkey(), itemId: null, partNo: '', name: `Labor${[r.make, r.model].filter(Boolean).length ? ' — ' + [r.make, r.model].filter(Boolean).join(' ') : ''}${r.serialNo ? ' S/N ' + r.serialNo : ''}`, qty: r2(hours), unit: 'hr', price: null, source: 'service', taxable: false });
-  invoiceModal(null, { customer: { name: r.customerName || '', address1: r.address1 || c.address1, address2: r.address2 || c.address2, address3: r.address3 || c.address3, phone: c.phone, whatsapp: r.customerWhatsapp || c.whatsapp, email: r.customerEmail || c.email },
-    lines, reference: r.workOrder ? 'WO ' + r.workOrder : '', reportId: r.id, reportNo: r.invoiceNo, notes: r.correction ? 'Work performed: ' + r.correction : '' });
+  await invoiceModal(null, { customer: { name: r.customerName || '', address1: r.address1 || c.address1, address2: r.address2 || c.address2, address3: r.address3 || c.address3, phone: c.phone, whatsapp: r.customerWhatsapp || c.whatsapp, email: r.customerEmail || c.email },
+    lines: [], reference: '', reportId: r.id, reportNo: r.invoiceNo, notes: '' });
+  await ivAutoFill(r.id);   // the report's parts not billed yet + labor with the hours of its time record
 }
 $('#cuInv').onclick = () => { const c = custEdit; closeModal('#custModal'); invoiceModal(null, { customer: c }); };
 

@@ -305,6 +305,17 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
 - Al abrir un reporte que ya no existe en la oficina, la tablet avisa y lo quita.
 - Clientes, inventario y checklist de servicios también se actualizan cada 2 minutos, no solo al iniciar sesión. Trabajos y solicitudes de partes ya se actualizaban así.
 
+## Fecha y hora del dispositivo; factura desde el reporte
+
+- **Fechas:** la fecha "de hoy" en el panel ahora es la del dispositivo. Antes usaba la hora universal (UTC) y después de las 8 p. m. en Florida ponía el día siguiente.
+- **Facturas:** las nuevas toman la **fecha y hora del dispositivo** y las dos se pueden cambiar. La hora se ve en la factura y en la revisión.
+- **Tablet:** en el registro de horas, ⏱ junto a cada hora pone la hora de la tablet; se puede cambiar a mano.
+- **Al elegir el reporte en una factura nueva** (o con "Create invoice from this report"), se agregan solos, marcados en azul (acción `report_billing`):
+  - las **partes del reporte que no se han cobrado**: las partes del reporte y las de sus solicitudes de partes cotizadas o aprobadas, menos lo ya cobrado en otras facturas de ese reporte;
+  - la **mano de obra**: "Labor — equipo S/N: resumen del trabajo" (fallas → correcciones, o servicios hechos), las **horas contadas del registro de horas** menos las ya cobradas, y la **tarifa por hora** (se cambia en la caja azul o en la línea).
+  - Todo se puede editar o borrar. Al guardar, las solicitudes de partes incluidas quedan como cobradas (`fromRequests`) para no cobrarlas dos veces.
+- **Factura guardada:** en su ventana, el botón **👁 Preview** muestra el PDF sin descargarlo ni enviarlo.
+
 ## Diseño de facturas y cotizaciones (como las de Wave, sin su marca)
 
 - Factura y cotización (QUOTE) usan el mismo diseño (`pdf-codes.js`, `waveDoc`):
