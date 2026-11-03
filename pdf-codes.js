@@ -70,37 +70,115 @@
     if (v.attn.email) c.email = v.attn.email; if (v.attn.whatsapp) { c.whatsapp = v.attn.whatsapp; c.phone = c.phone || ''; }
     return Object.assign({}, v, { customer: c });
   };
-  // how the customer pays goes first in the notes ("Payment: Check")
-  const withPay = v => v.payBy ? Object.assign({}, v, { notes: 'Payment: ' + v.payBy + (v.notes ? '\n' + v.notes : '') }) : v;
-  if (buildInvoice) window.buildInvoicePdf = async v => {
-    const doc = await buildInvoice(withPay(withAttn(v))), c = invoiceCode(v);
-    if (c) stamp(doc, `Work order #${v.workOrder || v.reportNo || v.invoiceNo}  ·  Code: ${c}`, 100);   // above the Bill to box
+  /* INVOICE and QUOTE in the company's usual layout (like its Wave invoices, without their mark):
+     logo + title and company on top, BILL TO and the details table, a yellow bar over the items, totals with the
+     amount due, Notes / Terms (payment instructions) and the footer text. The company lines, the payment
+     instructions (bank details) and the footer come from the panel (Settings → Invoice and quote details), so no
+     bank data lives in the code. */
+  const PROFILE_DEF = { name: 'CherServices LLC', street: '4136 NE 9th Street', city: 'Homestead, Florida 33033', country: 'United States', phone: '7868325586', email: '',
+    payInfo: '', footer: 'Please note that 50% deposit is needed on all jobs and the balance on completion. Any checks deposited for payments there will be a Five (5) days hold on goods and CherServices LLC will not take responsibility for delays. Thank you for your business!' };
+  const profile = () => { let p = window.CHER_INV; if (!p) try { p = JSON.parse(localStorage.getItem('cher.invProfile') || 'null'); } catch {} return Object.assign({}, PROFILE_DEF, p || {}); };
+  const usd = n => '$' + (Math.round((+n || 0) * 100) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const longDate = d => { if (!d) return ''; const x = new Date(String(d).slice(0, 10) + 'T12:00'); return isNaN(x) ? String(d) : x.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }); };
+  const logoSize = () => new Promise(ok => { if (typeof CHER_LOGO === 'undefined') return ok(null); const i = new Image(); i.onload = () => ok([i.naturalWidth, i.naturalHeight]); i.onerror = () => ok(null); i.src = CHER_LOGO; });
+  async function waveDoc(v, o) {
+    const { jsPDF } = window.jspdf, doc = new jsPDF({ unit: 'pt', format: 'letter', compress: true }), P = profile();
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), L = 26, R = W - 26;
+    const INK = [22, 22, 22], GREY = [110, 110, 110], LINE = [220, 220, 220], BAR = [236, 209, 48];
+    const t = (s, x, y, opt = {}) => { doc.setFont('helvetica', opt.bold ? 'bold' : 'normal'); doc.setFontSize(opt.size || 10); doc.setTextColor(...(opt.col || INK)); doc.text(String(s ?? ''), x, y, opt.align ? { align: opt.align } : undefined); };
+    // header: logo / title + company
+    const ls = await logoSize();
+    if (ls) { const w = 150, h = w * ls[1] / ls[0]; try { doc.addImage(CHER_LOGO, 'PNG', L + 8, 36 + Math.max(0, (70 - h) / 2), w, h); } catch {} }
+    t(o.title, R, 62, { size: 30, align: 'right' });
+    let y = 92; t(P.name, R, y, { bold: true, size: 10.5, align: 'right' });
+    [P.street, P.city, P.country].filter(Boolean).forEach(s => { y += 14; t(s, R, y, { align: 'right' }); });
+    if (P.phone || P.email) { y += 22; [P.phone, P.email].filter(Boolean).forEach((s, i) => { t(s, R, y + i * 14, { align: 'right' }); }); y += ([P.phone, P.email].filter(Boolean).length - 1) * 14; }
+    if (o.stamp) { y += 18; t(o.stamp, R, y, { bold: true, size: 12, align: 'right', col: o.stampCol || [16, 122, 67] }); }
+    y = Math.max(y + 18, 172); doc.setDrawColor(...LINE); doc.setLineWidth(0.8); doc.line(0, y, W, y);
+    // bill to (left) and the details table (right)
+    const top = y + 22, c = v.customer || {};
+    t('BILL TO', L, top, { col: GREY, size: 9.5 });
+    let by = top + 15; t(c.name, L, by, { bold: true, size: 10.5 });
+    const contact = [c.phone && 'Tel. ' + c.phone, c.whatsapp && c.whatsapp !== c.phone && 'WhatsApp ' + c.whatsapp].filter(Boolean).join('   ');
+    [c.address1, c.address2, c.address3, contact, c.email].filter(Boolean).slice(0, 6).forEach(s => { doc.setFontSize(10); by += 14; t(doc.splitTextToSize(String(s), 250)[0], L, by); });
+    const det = o.details.filter(d => d && d[1] !== '' && d[1] != null), kx = 430, vx = 438;
+    det.forEach(([k, val, hi], i) => {
+      const yy = top + i * 18;
+      if (hi) { doc.setFillColor(242, 242, 242); doc.rect(kx - 128, yy - 12, R - kx + 128, 18, 'F'); }
+      t(k + ':', kx, yy, { bold: true, align: 'right' }); t(doc.splitTextToSize(String(val), R - vx)[0], vx, yy, { bold: !!hi });
+    });
+    y = Math.max(by, top + (det.length - 1) * 18) + 26;
+    // items
+    const cx = { qty: 345, price: 470, amt: R - 10 }, DW = 270;
+    const head = yy => { doc.setFillColor(...BAR); doc.rect(0, yy, W, 30, 'F'); t('Items', L + 8, yy + 19, { bold: true }); t('Quantity', cx.qty, yy + 19, { bold: true, align: 'center' }); t('Price', cx.price, yy + 19, { bold: true, align: 'right' }); t('Amount', cx.amt, yy + 19, { bold: true, align: 'right' }); return yy + 30; };
+    y = head(y);
+    const lines = (v.lines || []).filter(l => String(l.name || '').trim());
+    for (const l of lines) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      const desc = doc.splitTextToSize([l.partNo, l.name].filter(Boolean).join(', '), DW), sub = l.vendor && l.source === 'order' ? ['Vendor: ' + l.vendor] : [];
+      const h = Math.max(1, desc.length) * 13 + sub.length * 11 + 16;
+      if (y + h > H - 150) { doc.addPage(); y = head(40); }
+      desc.forEach((s, k) => t(s, L + 8, y + 18 + k * 13));
+      sub.forEach((s, k) => t(s, L + 8, y + 18 + desc.length * 13 + k * 11, { size: 8.5, col: GREY }));
+      const q = +l.qty || 0; t((Number.isInteger(q) ? q : q.toFixed(2)) + (l.unit && !/^(ea|each|)$/i.test(l.unit) ? ' ' + l.unit : ''), cx.qty, y + 18, { align: 'center' });
+      t(usd(l.price), cx.price, y + 18, { align: 'right' }); t(usd(q * (+l.price || 0)), cx.amt, y + 18, { align: 'right' });
+      y += h;
+    }
+    doc.setDrawColor(...LINE); doc.setLineWidth(1.6); doc.line(0, y, W, y);
+    // totals
+    const tot = [], sub = +v.subtotal || lines.reduce((s, l) => s + (+l.qty || 0) * (+l.price || 0), 0), tax = +v.tax || 0, total = +v.total || sub + tax;
+    if (tax > 0) { tot.push(['Subtotal:', usd(sub)]); tot.push([`Sales tax ${+v.taxRate || 0}%:`, usd(tax)]); }
+    tot.push(['Total:', usd(total)]);
+    (o.payments || []).forEach(p => tot.push([`Payment on ${longDate(p.date)}${p.method ? ' (' + p.method + ')' : ''}:`, '-' + usd(p.amount)]));
+    if (y + 40 + tot.length * 22 > H - 120) { doc.addPage(); y = 40; }
+    y += 28; tot.forEach(([k, val]) => { t(k, cx.price - 2, y, { bold: true, align: 'right' }); t(val, cx.amt, y, { align: 'right' }); y += 22; });
+    doc.setDrawColor(...LINE); doc.setLineWidth(1.6); doc.line(cx.price - 140, y - 10, cx.amt, y - 10);
+    y += 14; t(o.dueLabel + ':', cx.price - 2, y, { bold: true, align: 'right' }); t(usd(o.due), cx.amt, y, { bold: true, align: 'right' });
+    // notes / terms
+    const notes = [o.notes, P.payInfo].map(s => String(s || '').trim()).filter(Boolean).join('\n\n');
+    if (notes) {   // flows on: what does not fit above the footer continues on the next page
+      y += 44; doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      const nl = doc.splitTextToSize(notes, W - 2 * L - 120), bottom = H - 72;
+      if (y + 40 > bottom) { doc.addPage(); y = 50; }
+      t('Notes / Terms', L, y, { bold: true, col: [80, 80, 80] }); y += 17;
+      for (const s of nl) { if (y > bottom) { doc.addPage(); y = 50; } t(s, L, y, { col: [80, 80, 80] }); y += 14; }
+    }
+    // footer on every page
+    const n = doc.getNumberOfPages();
+    for (let pg = 1; pg <= n; pg++) {
+      doc.setPage(pg); doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5);
+      const fl = P.footer ? doc.splitTextToSize(P.footer, W - 2 * L) : [];
+      fl.forEach((s, k) => t(s, W / 2, H - 28 - (fl.length - 1 - k) * 13, { col: GREY, size: 9.5, align: 'center' }));
+      if (n > 1) t(`Page ${pg} of ${n}`, R, H - 12, { size: 8, col: GREY, align: 'right' });
+    }
+    doc.setPage(n);
+    doc.setProperties({ title: `${P.name} — ${o.title === 'QUOTE' ? 'Quote' : 'Invoice'} ${v.invoiceNo || ''}`, author: P.name });
     return doc;
+  }
+  window.buildInvoicePdf = async v0 => {
+    const v = withAttn(v0), po = [v.po, v.so && (v.po ? 'SO ' + v.so : v.so)].filter(Boolean).join(' / ');
+    const paid = +v.paidAmount || (v.payments || []).reduce((s, p) => s + (+p.amount || 0), 0), total = +v.total || 0, due = v.status === 'void' ? 0 : Math.max(0, Math.round((total - paid) * 100) / 100);
+    const code = invoiceCode(v);
+    const notes = [v.payBy && 'Payment: ' + v.payBy, v.notes].filter(Boolean).join('\n');
+    return waveDoc(v, {
+      title: 'INVOICE',
+      stamp: v.status === 'void' ? 'VOID' : paid > 0 && due === 0 ? 'PAID' : '', stampCol: v.status === 'void' ? [208, 2, 27] : [16, 122, 67],
+      details: [['Invoice Number', v.invoiceNo], ['P.O./S.O. Number', po || (v.reference && !/^[A-Z0-9]{1,4}-[0-9-]+-\d{8}$/.test(v.reference) ? v.reference : '')],
+        (v.reportNo || v.workOrder) && ['Work order', '#' + (v.workOrder || v.reportNo)], code && ['Code', code],
+        ['Invoice Date', longDate(v.date)], ['Payment Due', v.dueDate ? longDate(v.dueDate) : 'Upon receipt'], ['Amount Due (USD)', usd(due), true]],
+      payments: v.payments || [], dueLabel: 'Amount Due (USD)', due, notes });
   };
 
-  /* QUOTE for a parts request: the same layout as the invoice, titled QUOTE (the technician shows / sends it to the customer). */
+  /* QUOTE for a parts request: the same layout, titled QUOTE (the technician shows / sends it to the customer). */
   const fmt = d => { const x = new Date(String(d).slice(0, 10) + 'T12:00'); return isNaN(x) ? '' : x.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); };
-  if (buildInvoice) window.buildQuotePdf = async q => {
+  window.buildQuotePdf = async q => {
     const today = new Date(), valid = new Date(Date.now() + 15 * 864e5), isoD = d => new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
     const lines = (q.lines || []).map(l => Object.assign({}, l, { taxable: true }));
-    const v = { invoiceNo: q.no, customer: q.customerInfo || { name: q.customer || '' }, date: isoD(today), dueDate: isoD(valid), lines, taxRate: q.taxRate || 0,
-      subtotal: q.total || 0, tax: q.tax || 0, total: q.grandTotal || 0, status: 'unpaid', paidAmount: 0, reportNo: q.reportNo || '',
-      notes: 'This is a QUOTE, not an invoice. Prices are valid for 15 days. Parts are reserved for you once you accept and the office confirms.' + (q.equipment ? '\nEquipment: ' + q.equipment : '') };
-    const doc = await buildInvoice(v);
-    doc.setPage(1);
-    doc.setFillColor(255, 255, 255); doc.rect(468, 24, 118, 27, 'F'); doc.rect(500, 54, 86, 16, 'F');   // cover "INVOICE" and "No. …" (not the company lines)
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(24); doc.setTextColor(208, 2, 27); doc.text('QUOTE', 582, 46, { align: 'right' });
-    doc.setFontSize(13); doc.setTextColor(22, 32, 46); doc.text(q.no || '', 582, 66, { align: 'right' });
-    // details box: quote date, valid until, request, report
-    const L = 30, y = 112, W = 552;
-    doc.setDrawColor(221, 227, 238); doc.setLineWidth(0.8); doc.setFillColor(247, 249, 253); doc.roundedRect(L + 312, y, W - 312, 104, 6, 6, 'FD');
-    [['Quote date', fmt(v.date)], ['Valid until', fmt(v.dueDate)], ['Parts request', q.no], q.reportNo && ['Service report', '#' + q.reportNo]].filter(Boolean).forEach(([k, val], i) => {
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(110, 120, 138); doc.text(k, L + 324, y + 22 + i * 17);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(22, 32, 46); doc.text(String(val), 570, y + 22 + i * 17, { align: 'right' });
-    });
-    doc.setProperties({ title: `Cher Services — Quote ${q.no}`, author: 'Cher Services LLC' });
-    doc.setPage(doc.getNumberOfPages());
-    return doc;
+    const v = { invoiceNo: q.no, customer: q.customerInfo || { name: q.customer || '' }, lines, taxRate: q.taxRate || 0, subtotal: q.total || 0, tax: q.tax || 0, total: q.grandTotal || 0 };
+    return waveDoc(v, { title: 'QUOTE',
+      details: [['Quote Number', q.no], q.reportNo && ['Service report', '#' + q.reportNo], ['Quote Date', longDate(isoD(today))], ['Valid Until', longDate(isoD(valid))], ['Total (USD)', usd(v.total), true]],
+      dueLabel: 'Total (USD)', due: v.total,
+      notes: 'This is a QUOTE, not an invoice. Prices are valid for 15 days. Parts are reserved for you once you accept and the office confirms.' + (q.equipment ? '\nEquipment: ' + q.equipment : '') });
   };
   window.quotePdfName = q => `CherServices_Quote_${safe(q.no || 'draft')}${q.customer ? '_' + safe(q.customer).slice(0, 30) : ''}.pdf`;
 })();

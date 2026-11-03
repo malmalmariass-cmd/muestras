@@ -305,6 +305,19 @@ no puede entrar, pero su nombre sigue en esos documentos; su ID queda libre. Sus
 - Al abrir un reporte que ya no existe en la oficina, la tablet avisa y lo quita.
 - Clientes, inventario y checklist de servicios también se actualizan cada 2 minutos, no solo al iniciar sesión. Trabajos y solicitudes de partes ya se actualizaban así.
 
+## Diseño de facturas y cotizaciones (como las de Wave, sin su marca)
+
+- Factura y cotización (QUOTE) usan el mismo diseño (`pdf-codes.js`, `waveDoc`):
+  - logo a la izquierda; INVOICE/QUOTE y los datos de la empresa a la derecha;
+  - BILL TO y la tabla de datos: Invoice Number, P.O./S.O. Number, Work order, Code, Invoice Date, Payment Due y **Amount Due (USD)** resaltado;
+  - barra amarilla Items / Quantity / Price / Amount;
+  - totales con impuesto y pagos recibidos, y Amount Due;
+  - **Notes / Terms** (forma de pago, notas e instrucciones de pago) y el texto de pie en cada página.
+  - Cuando la factura está pagada sale "PAID"; anulada, "VOID".
+- **Settings → Invoice and quote details:** nombre, dirección, teléfono, email, **instrucciones de pago (datos del banco)** y texto del pie.
+  - Se guardan en el servidor (tabla `settings_text`, esquema v15; acciones `doc_profile` y `doc_profile_save`), **no en el código**: el repositorio es público y los datos bancarios no deben estar ahí.
+  - Las tablets los reciben en menos de 2 minutos. "Preview a sample invoice" descarga un ejemplo con lo escrito, sin guardar.
+
 ## Equipo propio de Cher Services (★ In-house)
 
 - **Cher Services LLC existe como cliente** (esquema v14, con la dirección de la empresa). Los reportes de máquinas de la empresa se hacen a nombre de ese cliente.
